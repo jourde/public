@@ -7,9 +7,13 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background: #e8e8e8; padding: 20px; min-height: 100vh; }
-    .container { max-width: 700px; margin: 0 auto; }
+    .container { max-width: 1100px; margin: 0 auto; }
     h1 { font-size: 22px; color: #222; margin-bottom: 12px; }
     .intro { font-size: 15px; color: #444; margin-bottom: 24px; }
+    
+    .main-content { display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap; }
+    .left-column { flex: 1; min-width: 400px; }
+    .right-column { width: 320px; }
     
     .dimension { border-radius: 10px; padding: 20px; margin-bottom: 14px; color: white; }
     .dim-dark { background: #5a3d4a; }
@@ -25,31 +29,30 @@
     .slider-cursor { position: absolute; top: 10px; width: 24px; height: 30px; background: #4a8a4a; border-radius: 4px; border: 2px solid #3a7a3a; }
     .slider-range { position: absolute; top: 10px; left: 0; width: 100%; height: 30px; opacity: 0; cursor: pointer; }
     
-    .alerts { margin-top: 20px; }
-    .alert { background: #fff3cd; border: 1px solid #ffc107; border-left: 4px solid #ffc107; border-radius: 6px; padding: 12px 16px; margin-bottom: 10px; font-size: 13px; color: #856404; display: flex; align-items: flex-start; gap: 10px; }
-    .alert-icon { font-size: 18px; }
-    .alert.hidden { display: none; }
+    .alerts { margin-top: 16px; }
+    .alert { background: #fff3cd; border: 1px solid #ffc107; border-left: 4px solid #ffc107; border-radius: 6px; padding: 12px 16px; margin-bottom: 10px; font-size: 12px; color: #856404; display: flex; align-items: flex-start; gap: 10px; }
+    .alert-icon { font-size: 16px; }
     
-    .panel { background: white; border-radius: 10px; padding: 24px; margin-top: 24px; border: 1px solid #ccc; }
-    .panel h2 { font-weight: bold; margin-bottom: 20px; color: #222; font-size: 17px; text-align: center; }
-    .charts { display: flex; justify-content: center; gap: 50px; flex-wrap: wrap; }
+    .panel { background: white; border-radius: 10px; padding: 20px; border: 1px solid #ccc; }
+    .panel h2 { font-weight: bold; margin-bottom: 16px; color: #222; font-size: 16px; text-align: center; }
+    .charts { display: flex; justify-content: center; }
     
-    .chart-selector { text-align: center; margin-bottom: 20px; }
-    .chart-selector label { margin: 0 15px; font-size: 14px; color: #444; cursor: pointer; }
-    .chart-selector input { margin-right: 5px; cursor: pointer; }
+    .chart-selector { text-align: center; margin-bottom: 16px; }
+    .chart-selector label { margin: 0 8px; font-size: 13px; color: #444; cursor: pointer; }
+    .chart-selector input { margin-right: 4px; cursor: pointer; }
     
     .chart-box { text-align: center; }
     .chart-box.hidden { display: none; }
     
-    .pie-legend { margin-top: 15px; font-size: 12px; color: #444; text-align: left; display: inline-block; }
-    .pie-legend div { margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
-    .pie-legend span { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+    .pie-legend { margin-top: 12px; font-size: 11px; color: #444; text-align: left; display: inline-block; }
+    .pie-legend div { margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .pie-legend span { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
     
-    .bars-box { width: 280px; text-align: left; }
-    .bar-row { margin-bottom: 14px; }
-    .bar-head { font-size: 13px; color: #444; margin-bottom: 6px; display: flex; justify-content: space-between; }
-    .bar-bg { height: 22px; background: #e0e0e0; border-radius: 11px; overflow: hidden; }
-    .bar-fg { height: 100%; border-radius: 11px; }
+    .bars-box { width: 260px; text-align: left; }
+    .bar-row { margin-bottom: 12px; }
+    .bar-head { font-size: 12px; color: #444; margin-bottom: 5px; display: flex; justify-content: space-between; }
+    .bar-bg { height: 18px; background: #e0e0e0; border-radius: 9px; overflow: hidden; }
+    .bar-fg { height: 100%; border-radius: 9px; }
     
     .btn-box { margin-top: 16px; }
     .btn-box button { padding: 12px 24px; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; background: #5a3d4a; }
@@ -59,6 +62,12 @@
     .source p { margin-bottom: 8px; }
     .source a { color: #5a3d4a; word-break: break-all; }
     .cc { display: inline-block; background: #a2a9a3; color: white; padding: 3px 8px; border-radius: 3px; font-weight: bold; font-size: 10px; margin-right: 10px; }
+    
+    @media (max-width: 800px) {
+      .main-content { flex-direction: column; }
+      .left-column { min-width: 100%; }
+      .right-column { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -66,103 +75,109 @@
     <h1>Quelle configuration pour votre enseignement à distance ?</h1>
     <p class="intro">Déplacez chaque curseur vert pour définir votre configuration.</p>
 
-    <div class="dimension dim-dark">
-      <div class="labels">
-        <div class="label-left"><h3>ASYNCHRONE</h3><p>Le dispositif offre la flexibilité d'activités réalisées en temps différé.</p></div>
-        <div class="label-right"><h3>SYNCHRONE</h3><p>Le dispositif s'appuie sur des rendez-vous virtuels pour des interactions en temps réel.</p></div>
-      </div>
-      <div class="slider-box">
-        <div class="slider-track"></div>
-        <div class="slider-cursor" id="cursor0"></div>
-        <input type="range" min="0" max="100" value="50" class="slider-range" id="slider0">
-      </div>
-    </div>
-
-    <div class="dimension dim-light">
-      <div class="labels">
-        <div class="label-left"><h3>INDIVIDUEL</h3><p>Le dispositif privilégie des activités et travaux individuels.</p></div>
-        <div class="label-right"><h3>COLLABORATIF</h3><p>Le dispositif stimule des activités et travaux de groupe.</p></div>
-      </div>
-      <div class="slider-box">
-        <div class="slider-track"></div>
-        <div class="slider-cursor" id="cursor1"></div>
-        <input type="range" min="0" max="100" value="50" class="slider-range" id="slider1">
-      </div>
-    </div>
-
-    <div class="dimension dim-dark">
-      <div class="labels">
-        <div class="label-left"><h3>APPROPRIATION</h3><p>L'enseignant·e propose les ressources d'apprentissage que les étudiant·es s'approprient.</p></div>
-        <div class="label-right"><h3>PRODUCTION</h3><p>Les étudiant·es cherchent ou produisent les ressources nécessaires à leurs apprentissages.</p></div>
-      </div>
-      <div class="slider-box">
-        <div class="slider-track"></div>
-        <div class="slider-cursor" id="cursor2"></div>
-        <input type="range" min="0" max="100" value="50" class="slider-range" id="slider2">
-      </div>
-    </div>
-
-    <div class="dimension dim-light">
-      <div class="labels">
-        <div class="label-left"><h3>AVEC ACCOMPAGNEMENT</h3><p>L'enseignant·e interagit avec les étudiant·es pour soutenir leurs apprentissages.</p></div>
-        <div class="label-right"><h3>SANS ACCOMPAGNEMENT</h3><p>Les étudiant·es gèrent leurs apprentissages en autonomie.</p></div>
-      </div>
-      <div class="slider-box">
-        <div class="slider-track"></div>
-        <div class="slider-cursor" id="cursor3"></div>
-        <input type="range" min="0" max="100" value="50" class="slider-range" id="slider3">
-      </div>
-    </div>
-
-    <div class="alerts" id="alertsContainer"></div>
-
-    <div class="panel">
-      <h2>Votre configuration</h2>
-      <div class="chart-selector">
-        <label><input type="radio" name="chartType" value="radar" id="radioRadar" checked> Radar</label>
-        <label><input type="radio" name="chartType" value="bars" id="radioBars"> Barres</label>
-        <label><input type="radio" name="chartType" value="pie" id="radioPie"> Camembert</label>
-      </div>
-      <div class="charts">
-        
-        <div class="chart-box" id="radarBox">
-          <svg id="radar" width="200" height="200"></svg>
-        </div>
-        
-        <div class="chart-box bars-box hidden" id="barsBox">
-          <div class="bar-row">
-            <div class="bar-head"><span>Temporalité</span><strong id="pct0">50%</strong></div>
-            <div class="bar-bg"><div class="bar-fg" id="bar0" style="width:50%; background:#0077BB;"></div></div>
+    <div class="main-content">
+      <div class="left-column">
+        <div class="dimension dim-dark">
+          <div class="labels">
+            <div class="label-left"><h3>ASYNCHRONE</h3><p>Le dispositif offre la flexibilité d'activités réalisées en temps différé.</p></div>
+            <div class="label-right"><h3>SYNCHRONE</h3><p>Le dispositif s'appuie sur des rendez-vous virtuels pour des interactions en temps réel.</p></div>
           </div>
-          <div class="bar-row">
-            <div class="bar-head"><span>Collaboration</span><strong id="pct1">50%</strong></div>
-            <div class="bar-bg"><div class="bar-fg" id="bar1" style="width:50%; background:#EE7733;"></div></div>
-          </div>
-          <div class="bar-row">
-            <div class="bar-head"><span>Ressources</span><strong id="pct2">50%</strong></div>
-            <div class="bar-bg"><div class="bar-fg" id="bar2" style="width:50%; background:#009988;"></div></div>
-          </div>
-          <div class="bar-row">
-            <div class="bar-head"><span>Accompagnement</span><strong id="pct3">50%</strong></div>
-            <div class="bar-bg"><div class="bar-fg" id="bar3" style="width:50%; background:#CC3311;"></div></div>
+          <div class="slider-box">
+            <div class="slider-track"></div>
+            <div class="slider-cursor" id="cursor0"></div>
+            <input type="range" min="0" max="100" value="50" class="slider-range" id="slider0">
           </div>
         </div>
-        
-        <div class="chart-box hidden" id="pieBox">
-          <svg id="pie" width="200" height="200"></svg>
-          <div class="pie-legend">
-            <div><span style="background:#0077BB;"></span> Temporalité</div>
-            <div><span style="background:#EE7733;"></span> Collaboration</div>
-            <div><span style="background:#009988;"></span> Ressources</div>
-            <div><span style="background:#CC3311;"></span> Accompagnement</div>
+
+        <div class="dimension dim-light">
+          <div class="labels">
+            <div class="label-left"><h3>INDIVIDUEL</h3><p>Le dispositif privilégie des activités et travaux individuels.</p></div>
+            <div class="label-right"><h3>COLLABORATIF</h3><p>Le dispositif stimule des activités et travaux de groupe.</p></div>
+          </div>
+          <div class="slider-box">
+            <div class="slider-track"></div>
+            <div class="slider-cursor" id="cursor1"></div>
+            <input type="range" min="0" max="100" value="50" class="slider-range" id="slider1">
           </div>
         </div>
-        
-      </div>
-    </div>
 
-    <div class="btn-box">
-      <button id="btnReset">Réinitialiser</button>
+        <div class="dimension dim-dark">
+          <div class="labels">
+            <div class="label-left"><h3>APPROPRIATION</h3><p>L'enseignant·e propose les ressources d'apprentissage que les étudiant·es s'approprient.</p></div>
+            <div class="label-right"><h3>PRODUCTION</h3><p>Les étudiant·es cherchent ou produisent les ressources nécessaires à leurs apprentissages.</p></div>
+          </div>
+          <div class="slider-box">
+            <div class="slider-track"></div>
+            <div class="slider-cursor" id="cursor2"></div>
+            <input type="range" min="0" max="100" value="50" class="slider-range" id="slider2">
+          </div>
+        </div>
+
+        <div class="dimension dim-light">
+          <div class="labels">
+            <div class="label-left"><h3>AVEC ACCOMPAGNEMENT</h3><p>L'enseignant·e interagit avec les étudiant·es pour soutenir leurs apprentissages.</p></div>
+            <div class="label-right"><h3>SANS ACCOMPAGNEMENT</h3><p>Les étudiant·es gèrent leurs apprentissages en autonomie.</p></div>
+          </div>
+          <div class="slider-box">
+            <div class="slider-track"></div>
+            <div class="slider-cursor" id="cursor3"></div>
+            <input type="range" min="0" max="100" value="50" class="slider-range" id="slider3">
+          </div>
+        </div>
+
+        <div class="btn-box">
+          <button id="btnReset">Réinitialiser</button>
+        </div>
+      </div>
+
+      <div class="right-column">
+        <div class="panel">
+          <h2>Votre configuration</h2>
+          <div class="chart-selector">
+            <label><input type="radio" name="chartType" value="radar" id="radioRadar" checked> Radar</label>
+            <label><input type="radio" name="chartType" value="bars" id="radioBars"> Barres</label>
+            <label><input type="radio" name="chartType" value="pie" id="radioPie"> Camembert</label>
+          </div>
+          <div class="charts">
+            
+            <div class="chart-box" id="radarBox">
+              <svg id="radar" width="200" height="200"></svg>
+            </div>
+            
+            <div class="chart-box bars-box hidden" id="barsBox">
+              <div class="bar-row">
+                <div class="bar-head"><span>Temporalité</span><strong id="pct0">50%</strong></div>
+                <div class="bar-bg"><div class="bar-fg" id="bar0" style="width:50%; background:#0077BB;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-head"><span>Collaboration</span><strong id="pct1">50%</strong></div>
+                <div class="bar-bg"><div class="bar-fg" id="bar1" style="width:50%; background:#EE7733;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-head"><span>Ressources</span><strong id="pct2">50%</strong></div>
+                <div class="bar-bg"><div class="bar-fg" id="bar2" style="width:50%; background:#009988;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-head"><span>Accompagnement</span><strong id="pct3">50%</strong></div>
+                <div class="bar-bg"><div class="bar-fg" id="bar3" style="width:50%; background:#CC3311;"></div></div>
+              </div>
+            </div>
+            
+            <div class="chart-box hidden" id="pieBox">
+              <svg id="pie" width="200" height="200"></svg>
+              <div class="pie-legend">
+                <div><span style="background:#0077BB;"></span> Temporalité</div>
+                <div><span style="background:#EE7733;"></span> Collaboration</div>
+                <div><span style="background:#009988;"></span> Ressources</div>
+                <div><span style="background:#CC3311;"></span> Accompagnement</div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+
+        <div class="alerts" id="alertsContainer"></div>
+      </div>
     </div>
 
     <div class="source">
@@ -281,27 +296,22 @@
       
       var alerts = [];
       
-      // Synchrone + Sans accompagnement
       if (tempo > 65 && accomp > 65) {
         alerts.push("Synchrone + Sans accompagnement : les sessions en temps réel sont difficiles à gérer sans présence de l'enseignant·e pour animer et réguler.");
       }
       
-      // Collaboratif + Asynchrone
       if (collab > 65 && tempo < 35) {
         alerts.push("Collaboratif + Asynchrone : la collaboration en temps différé nécessite des outils et consignes très structurés pour coordonner le travail de groupe.");
       }
       
-      // Production + Sans accompagnement
       if (ressources > 65 && accomp > 65) {
         alerts.push("Production + Sans accompagnement : les étudiant·es qui doivent produire leurs propres ressources ont souvent besoin de guidage et de feedback.");
       }
       
-      // Tout à droite
       if (tempo > 65 && collab > 65 && ressources > 65 && accomp > 65) {
         alerts.push("Configuration très exigeante : cette combinaison demande beaucoup d'autonomie et de compétences aux étudiant·es. Assurez-vous qu'ils y sont préparés.");
       }
       
-      // Synchrone + Production + Collaboratif
       if (tempo > 65 && ressources > 65 && collab > 65 && accomp <= 65) {
         alerts.push("Synchrone + Production + Collaboratif : cette combinaison demande une coordination importante en temps réel. Prévoyez des consignes claires.");
       }
