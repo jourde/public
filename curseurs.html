@@ -48,6 +48,11 @@
     .btn-box button { padding: 10px 16px; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; background: #5a3d4a; }
     .btn-box button:hover { background: #4a2d3a; }
     
+    .alerts-list-panel { margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 16px; }
+    .alerts-list-panel h3 { font-size: 14px; color: #333; margin-bottom: 12px; }
+    .alerts-list-panel ul { list-style: none; padding: 0; margin: 0; }
+    .alerts-list-panel li { font-size: 12px; color: #555; padding: 8px 10px; margin-bottom: 6px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #ffc107; }
+    
     .source { margin-top: 36px; padding-top: 18px; border-top: 1px solid #999; font-size: 12px; color: #444; line-height: 1.7; }
     .source p { margin-bottom: 8px; }
     .source a { color: #5a3d4a; word-break: break-all; }
@@ -70,6 +75,7 @@
         <div class="btn-box">
           <button class="order-btn" id="orderBtn">Modifier l'ordre</button>
           <button id="btnReset">Réinitialiser</button>
+          <button id="btnAlerts">Voir les alertes possibles</button>
         </div>
         
         <div class="order-selector">
@@ -84,6 +90,24 @@
               <li class="sortable-item" data-id="5" draggable="true"><span class="drag-handle">☰</span> Avec / Sans accompagnement</li>
             </ul>
             <button class="apply-order-btn" id="applyOrderBtn">Appliquer cet ordre</button>
+          </div>
+          
+          <div id="alertsListPanel" class="alerts-list-panel hidden">
+            <h3>Liste des alertes possibles :</h3>
+            <ul>
+              <li><strong>Synchrone + Sans accompagnement :</strong> les sessions en temps réel sont difficiles à gérer sans présence de l'enseignant·e pour animer et réguler.</li>
+              <li><strong>Collaboratif + Asynchrone :</strong> la collaboration en temps différé nécessite des outils et consignes très structurés pour coordonner le travail de groupe.</li>
+              <li><strong>Production + Sans accompagnement :</strong> les étudiant·es qui doivent produire leurs propres ressources ont souvent besoin de guidage et de feedback.</li>
+              <li><strong>Configuration très exigeante :</strong> cette combinaison demande beaucoup d'autonomie et de compétences aux étudiant·es.</li>
+              <li><strong>Synchrone + Production + Collaboratif :</strong> cette combinaison demande une coordination importante en temps réel.</li>
+              <li><strong>Grand groupe + Accompagnement fort :</strong> l'accompagnement individualisé devient difficile avec un grand nombre de participants.</li>
+              <li><strong>Distance + Synchrone :</strong> les sessions synchrones à distance nécessitent des outils fiables et une bonne connexion.</li>
+              <li><strong>Distance + Grand groupe + Sans accompagnement :</strong> les étudiant·es peuvent facilement se sentir isolés et perdus.</li>
+              <li><strong>Distance + Collaboratif :</strong> la collaboration à distance nécessite des outils spécifiques et une organisation rigoureuse.</li>
+              <li><strong>Grand groupe + Collaboratif :</strong> organiser du travail collaboratif avec un grand nombre de participants demande une structuration forte.</li>
+              <li><strong>Grand groupe + Production :</strong> accompagner la production de ressources par un grand groupe est exigeant.</li>
+              <li><strong>Présence + Asynchrone :</strong> cette combinaison est peu cohérente. Si les étudiant·es sont en présence, privilégiez les interactions synchrones.</li>
+            </ul>
           </div>
         </div>
         
@@ -288,6 +312,16 @@
       }
       updateAll();
     }
+    
+    // Bouton pour afficher/masquer la liste des alertes
+    document.getElementById("btnAlerts").onclick = function() {
+      var panel = document.getElementById("alertsListPanel");
+      if (panel.className.indexOf("hidden") > -1) {
+        panel.className = "alerts-list-panel";
+      } else {
+        panel.className = "alerts-list-panel hidden";
+      }
+    };
     
     // Bouton pour afficher/masquer le panneau d'ordre
     document.getElementById("orderBtn").onclick = function() {
