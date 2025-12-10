@@ -14,9 +14,7 @@
     .left-column { flex: 1; min-width: 400px; }
     .right-column { width: 320px; }
     
-    .order-selector { margin-bottom: 20px; }
-    .order-selector label { font-size: 14px; color: #444; display: block; margin-bottom: 8px; }
-    .order-selector select { padding: 8px 12px; font-size: 14px; border-radius: 6px; border: 1px solid #ccc; background: white; cursor: pointer; width: 100%; max-width: 300px; }
+    .order-selector { margin-bottom: 16px; }
     
     .manual-order { margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ccc; }
     .manual-order p { font-size: 13px; color: #666; margin-bottom: 10px; }
@@ -46,8 +44,8 @@
     .alert { background: #fff3cd; border: 1px solid #ffc107; border-left: 4px solid #ffc107; border-radius: 6px; padding: 12px 16px; margin-bottom: 10px; font-size: 12px; color: #856404; display: flex; align-items: flex-start; gap: 10px; }
     .alert-icon { font-size: 16px; }
     
-    .btn-box { margin-top: 16px; }
-    .btn-box button { padding: 12px 24px; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; background: #5a3d4a; }
+    .btn-box { margin-bottom: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-box button { padding: 10px 16px; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; background: #5a3d4a; }
     .btn-box button:hover { background: #4a2d3a; }
     
     .source { margin-top: 36px; padding-top: 18px; border-top: 1px solid #999; font-size: 12px; color: #444; line-height: 1.7; }
@@ -69,15 +67,12 @@
 
     <div class="main-content">
       <div class="left-column">
+        <div class="btn-box">
+          <button class="order-btn" id="orderBtn">Modifier l'ordre</button>
+          <button id="btnReset">Réinitialiser</button>
+        </div>
+        
         <div class="order-selector">
-          <label for="orderSelect">Ordre des dimensions :</label>
-          <select id="orderSelect">
-            <option value="0,1,2,3,4,5">Par défaut</option>
-            <option value="0,2,3,1,4,5">Contexte puis Pédagogie</option>
-            <option value="0,1,5,2,3,4">Accompagnement en priorité</option>
-            <option value="manual">Organisation manuelle...</option>
-          </select>
-          
           <div id="manualOrderPanel" class="manual-order hidden">
             <p>Glissez-déposez pour réorganiser :</p>
             <ul class="sortable-list" id="sortableList">
@@ -93,10 +88,6 @@
         </div>
         
         <div id="slidersContainer"></div>
-
-        <div class="btn-box">
-          <button id="btnReset">Réinitialiser</button>
-        </div>
       </div>
 
       <div class="right-column">
@@ -298,14 +289,13 @@
       updateAll();
     }
     
-    // Sélecteur d'ordre
-    document.getElementById("orderSelect").onchange = function() {
+    // Bouton pour afficher/masquer le panneau d'ordre
+    document.getElementById("orderBtn").onclick = function() {
       var panel = document.getElementById("manualOrderPanel");
-      if (this.value === "manual") {
+      if (panel.className.indexOf("hidden") > -1) {
         panel.className = "manual-order";
       } else {
         panel.className = "manual-order hidden";
-        renderSliders(this.value);
       }
     };
     
