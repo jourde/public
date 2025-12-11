@@ -103,9 +103,7 @@ Creative Commons Attribution - Partage dans les Mêmes Conditions
     
     .about-box { margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; border: 1px solid #ddd; font-size: 12px; color: #555; line-height: 1.6; }
     .about-box h3 { font-size: 14px; color: #333; margin-bottom: 10px; }
-    .about-box p { margin-bottom: 8px; }
-    .about-box a { color: #5a3d4a; word-break: break-all; }
-    .about-box .cc { display: inline-block; background: #a2a9a3; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; font-size: 10px; margin-right: 5px; }
+    .about-box p { margin-bottom: 6px; }
     
     .alerts { margin-top: 0; }
     .alert { background: #fff3cd; border: 1px solid #ffc107; border-left: 4px solid #ffc107; border-radius: 6px; padding: 12px 16px; margin-bottom: 10px; font-size: 12px; color: #856404; display: flex; align-items: flex-start; gap: 10px; }
@@ -187,7 +185,7 @@ Creative Commons Attribution - Partage dans les Mêmes Conditions
           <h3>À propos de cet outil</h3>
           <p>Cette interface interactive permet aux enseignant·es de configurer leur dispositif d'enseignement à distance en positionnant des curseurs sur 6 dimensions pédagogiques. L'outil détecte automatiquement les combinaisons potentiellement problématiques et affiche des alertes avec des conseils pédagogiques.</p>
           <p><strong>Inspiré de :</strong> Docq, F., Vellut, D., Verpoorten, I., Raucent, B., & Wouters, P. (2023). <em>Enseigner à distance: 5 balises pour vous lancer</em>. Presses universitaires de Louvain UCL. <a href="https://pul.uclouvain.be/book/?gcoi=29303100535600" target="_blank">https://pul.uclouvain.be/book/?gcoi=29303100535600</a></p>
-          <p><strong>Auteurs de cette adaptation :</strong> François Jourde et Jacques Dubois</p>
+          <p><strong>Auteurs :</strong> François Jourde et Jacques Dubois</p>
           <p><strong>Licence :</strong> <span class="cc">CC BY-SA</span> Creative Commons Attribution - Partage dans les Mêmes Conditions</p>
         </div>
       </div>
@@ -358,4 +356,20 @@ Creative Commons Attribution - Partage dans les Mêmes Conditions
       for (var i = 0; i < els.length; i++) {
         var box = els[i].getBoundingClientRect();
         var offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset
+        if (offset < 0 && offset > closest) { closest = offset; result = els[i]; }
+      }
+      return result;
+    }
+    
+    document.getElementById("applyOrderBtn").onclick = function() {
+      var items = sortableList.querySelectorAll(".sortable-item");
+      var order = [];
+      for (var i = 0; i < items.length; i++) order.push(items[i].getAttribute("data-id"));
+      renderSliders(order.join(","));
+    };
+    
+    document.getElementById("btnReset").onclick = resetAll;
+    renderSliders("0,1,2,3,4,5");
+  </script>
+</body>
+</html>
