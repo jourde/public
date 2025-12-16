@@ -10,4 +10,4 @@ Publication et partage d'essais (prompts, artefacts...). // Publication and shar
 ## Artefacts en ligne
 - https://jourde.github.io/artefacts/curseurs.html
 - ...
-- https://jourde.github.io/artefacts/persona-formation-hybride
+- https://jourde.github.io/artefacts/persona-formation-hybride.html
