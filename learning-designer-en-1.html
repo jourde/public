@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learning Designer</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Drag and Drop Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <!-- Charts Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -18,10 +25,22 @@
         }
 
         .step-card {
-            transition: all 0.2s ease;
+            transition: transform 0.1s ease;
         }
 
-        /* Learning Type Specific Card Borders */
+        /* Sortable ghost styles */
+        .sortable-ghost {
+            opacity: 0.3;
+            background-color: #f1f5f9 !important;
+            border: 2px dashed #94a3b8 !important;
+        }
+
+        .sortable-drag {
+            cursor: grabbing;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Pedagogical Color Codes */
         .type-acquisition { border-left: 8px solid #a1f5ed; } 
         .type-collaboration { border-left: 8px solid #ffd966; } 
         .type-discussion { border-left: 8px solid #7aaeea; } 
@@ -29,13 +48,35 @@
         .type-practice { border-left: 8px solid #bb98dc; } 
         .type-production { border-left: 8px solid #bdea75; } 
 
-        /* Dropdown Styling with provided colors and high contrast black text */
         .select-acquisition { background-color: #a1f5ed; color: #000; border-color: #7dded6; }
         .select-collaboration { background-color: #ffd966; color: #000; border-color: #f0c953; }
         .select-discussion { background-color: #7aaeea; color: #000; border-color: #6a9bd6; }
         .select-investigation { background-color: #f8807f; color: #000; border-color: #e06e6d; }
         .select-practice { background-color: #bb98dc; color: #000; border-color: #a582c6; }
         .select-production { background-color: #bdea75; color: #000; border-color: #a6d15e; }
+
+        .drag-handle {
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .nav-tab.active {
+            background-color: white;
+            color: #4f46e5;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Helper for Material Icons vertical alignment */
+        .material-icons-round {
+            display: inline-flex;
+            vertical-align: middle;
+            align-items: center;
+            justify-content: center;
+        }
 
         @media print {
             .no-print { display: none; }
@@ -51,55 +92,151 @@
 
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
-        <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <header class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-slate-900">Learning Designer</h1>
-                <p class="text-slate-500">Structure your training into Activities and Learning Steps</p>
+                <h1 class="text-3xl font-bold text-slate-900" data-i18n="app_title">Learning Designer</h1>
+                <p class="text-slate-500" data-i18n="app_subtitle">Pedagogical Design & Analytics</p>
             </div>
-            <div class="flex flex-wrap gap-2 no-print">
-                <button onclick="addActivity()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm flex items-center gap-2 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                    </svg>
-                    New Activity
+            <div class="flex flex-wrap gap-2 no-print items-center">
+                <button onclick="toggleLanguage()" class="bg-white border border-slate-200 text-slate-700 w-10 h-10 rounded-lg font-bold hover:bg-slate-50 transition-colors flex items-center justify-center mr-2">
+                    <span id="lang-btn-text">FR</span>
                 </button>
-                <button onclick="exportMarkdown()" class="bg-white border border-slate-200 text-slate-700 px-5 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Export Markdown
+                <div class="bg-slate-200 p-1 rounded-lg flex mr-4">
+                    <button onclick="switchTab('designer')" id="tab-designer" class="nav-tab active px-4 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_designer">Designer</button>
+                    <button onclick="switchTab('analysis')" id="tab-analysis" class="nav-tab px-4 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_analysis">Analysis</button>
+                </div>
+                <button onclick="addActivity()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm flex items-center gap-2 transition-colors">
+                    <span class="material-icons-round text-xl">add_circle</span>
+                    <span data-i18n="btn_new_activity">New Activity</span>
                 </button>
-                <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-700 px-5 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors">
-                    Print / PDF
+                <button onclick="exportMarkdown()" class="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2">
+                    <span class="material-icons-round text-xl">download</span>
+                    <span data-i18n="btn_export_md">Export the Learning Design in Markdown</span>
+                </button>
+                <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2">
+                    <span class="material-icons-round text-xl">print</span>
+                    <span data-i18n="btn_print">Print / PDF</span>
                 </button>
             </div>
         </header>
 
-        <!-- Global Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 no-print">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <span class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Est. Time</span>
-                <div id="total-duration" class="text-2xl font-bold text-indigo-600">0 mins</div>
+        <!-- Global Stats & Class Size -->
+        <div class="mb-8 no-print flex flex-col md:flex-row gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-1 flex justify-between items-center">
+                <div>
+                    <span class="text-slate-500 text-sm font-medium uppercase tracking-wider" data-i18n="label_total_time">Total Est. Time</span>
+                    <div id="total-duration" class="text-2xl font-bold text-indigo-600">0 mins</div>
+                </div>
+                <div class="text-right">
+                    <span class="text-slate-400 text-xs italic" id="stats-update-info" data-i18n="status_calculating">Auto-calculating...</span>
+                </div>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <span class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Steps</span>
-                <div id="total-steps" class="text-2xl font-bold text-slate-800">0</div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 w-full md:w-64 flex flex-col justify-center">
+                <label class="text-slate-500 text-sm font-medium uppercase tracking-wider mb-1" data-i18n="label_class_size">Class Size</label>
+                <input type="number" id="global-class-size" oninput="updateStats()" value="30" min="1" class="text-2xl font-bold text-slate-800 bg-transparent focus:outline-none focus:ring-0 w-full">
             </div>
         </div>
 
-        <!-- Main Workspace -->
-        <div id="activities-root" class="space-y-12">
-            <!-- Activities will be injected here -->
+        <!-- Tab: Designer -->
+        <div id="view-designer">
+            <div id="activities-root" class="space-y-12">
+                <!-- Activities will be injected here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-300">
+                <h3 class="mt-2 text-lg font-medium text-slate-900" data-i18n="empty_title">No activities designed yet</h3>
+                <p class="mt-1 text-sm text-slate-500" data-i18n="empty_subtitle">Start by creating your first Activity container.</p>
+                <button onclick="addActivity()" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                    <span class="material-icons-round mr-2">add</span> <span data-i18n="btn_create_activity">Create Activity</span>
+                </button>
+            </div>
         </div>
 
-        <!-- Empty State -->
-        <div id="empty-state" class="hidden text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-300">
-            <h3 class="mt-2 text-lg font-medium text-slate-900">No activities designed yet</h3>
-            <p class="mt-1 text-sm text-slate-500">Start by creating your first Activity container.</p>
-            <button onclick="addActivity()" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                Create Activity
-            </button>
+        <!-- Tab: Analysis -->
+        <div id="view-analysis" class="hidden">
+            <div id="analysis-dashboard" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Learning Type Distribution -->
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">pie_chart</span>
+                        <span data-i18n="analysis_balance">Pedagogical Balance</span>
+                    </h3>
+                    <div class="h-64 flex justify-center">
+                        <canvas id="chartLearningTypes"></canvas>
+                    </div>
+                </div>
+
+                <!-- Learning Context -->
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
+                    <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">donut_large</span>
+                        <span data-i18n="analysis_context">Learning Context</span>
+                    </h3>
+                    <div class="grid grid-cols-3 gap-6 h-64 items-start">
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-full aspect-square max-w-[120px]">
+                                <canvas id="chartTrainer"></canvas>
+                                <div id="valTrainer" class="absolute inset-0 flex items-center justify-center font-bold text-slate-800">0%</div>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-600 uppercase mt-4 text-center leading-tight" data-i18n="label_teacher_present">Teacher<br>Present</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-full aspect-square max-w-[120px]">
+                                <canvas id="chartLocation"></canvas>
+                                <div id="valLocation" class="absolute inset-0 flex items-center justify-center font-bold text-slate-800">0%</div>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-600 uppercase mt-4 text-center leading-tight" data-i18n="label_face_to_face">Face to face</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-full aspect-square max-w-[120px]">
+                                <canvas id="chartTime"></canvas>
+                                <div id="valTime" class="absolute inset-0 flex items-center justify-center font-bold text-slate-800">0%</div>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-600 uppercase mt-4 text-center leading-tight" data-i18n="label_synchronous">Synchronous</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Organization -->
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">groups</span>
+                        <span data-i18n="analysis_social">Social Organization</span>
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="chartSocial"></canvas>
+                    </div>
+                </div>
+
+                <!-- Activity Overview -->
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">view_timeline</span>
+                        <span data-i18n="analysis_overview">Activity Overview</span>
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="chartTimeline"></canvas>
+                    </div>
+                </div>
+
+                <!-- Pedagogical Timeline (Types) -->
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">timeline</span>
+                        <span data-i18n="analysis_timeline_types">Pedagogical Timeline (Learning Types)</span>
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="chartTypeTimeline"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- Footer -->
+        <footer class="mt-12 mb-6 text-center text-xs text-slate-400 no-print">
+            <p>François Jourde, CC BY SA, based on the <a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" class="underline hover:text-slate-500">Learning Designer</a> (UCL Knowledge Lab, UCL Institute of Education).</p>
+        </footer>
     </div>
 
     <!-- Activity Template -->
@@ -107,20 +244,19 @@
         <div class="activity-group relative">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 px-2 gap-4">
                 <div class="flex-1 flex items-center gap-4">
+                    <div class="drag-handle-activity drag-handle text-slate-300 hover:text-slate-500 no-print flex items-center justify-center w-8 h-8 cursor-grab">
+                        <span class="material-icons-round text-2xl">drag_indicator</span>
+                    </div>
                     <div class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 activity-index shrink-0">1</div>
-                    <input type="text" placeholder="Activity Title (e.g. Module 1: Introduction)" class="text-xl font-bold text-slate-800 bg-transparent border-b-2 border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-1 transition-colors">
+                    <input type="text" oninput="updateStats()" placeholder="Activity Title (e.g. Module 1: Introduction)" data-i18n-placeholder="ph_activity_title" class="activity-title text-xl font-bold text-slate-800 bg-transparent border-b-2 border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-1 transition-colors">
                 </div>
                 <div class="flex items-center gap-3 no-print">
-                    <button onclick="addStepToActivity(this)" class="text-base font-bold text-indigo-700 bg-indigo-100 hover:bg-indigo-200 px-5 py-2 rounded-lg shadow-sm transition-all flex items-center gap-2 border border-indigo-200 active:scale-95">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-                        </svg>
-                        Add Step
+                    <button onclick="addStepToActivity(this)" class="text-base font-bold text-indigo-700 bg-indigo-100 hover:bg-indigo-200 px-4 py-2 rounded-lg shadow-sm transition-all flex items-center gap-2 border border-indigo-200 active:scale-95">
+                        <span class="material-icons-round text-xl">add</span>
+                        <span data-i18n="btn_add_step">Add Step</span>
                     </button>
-                    <button onclick="deleteActivity(this)" class="text-slate-400 hover:text-red-500 p-2 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                    <button onclick="deleteActivity(this)" class="text-slate-400 hover:text-red-500 p-2 transition-colors" title="Delete Activity">
+                        <span class="material-icons-round text-2xl">delete_outline</span>
                     </button>
                 </div>
             </div>
@@ -128,94 +264,116 @@
             <div class="activity-steps-container activity-container ml-5 pl-8 space-y-4 min-h-[50px]">
                 <!-- Step cards go here -->
             </div>
+
+            <!-- Footer Add Step Button -->
+            <div class="mt-4 pt-2 flex justify-center no-print border-t border-slate-100">
+                <button onclick="addStepToActivity(this)" class="text-sm font-semibold text-slate-400 hover:text-indigo-600 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 hover:bg-slate-50">
+                    <span class="material-icons-round text-base">add</span>
+                    <span data-i18n="btn_add_step">Add Step</span>
+                </button>
+            </div>
         </div>
     </template>
 
     <!-- Step Card Template -->
     <template id="step-template">
-        <div class="step-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative group">
-            <div class="p-5">
+        <div class="step-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative group flex">
+            <div class="drag-handle-step drag-handle flex items-center justify-center w-8 bg-slate-50 hover:bg-slate-100 border-r border-slate-100 no-print transition-colors cursor-grab">
+                <span class="material-icons-round text-slate-300 text-lg">drag_indicator</span>
+            </div>
+
+            <div class="p-5 flex-1 relative">
                 <div class="flex flex-col lg:flex-row gap-6">
-                    <!-- Column 1: Config -->
                     <div class="lg:w-1/3 space-y-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Step Title</label>
-                            <input type="text" placeholder="Title for this card..." class="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1" data-i18n="label_step_title">Step Title</label>
+                            <input type="text" placeholder="Title for this card..." data-i18n-placeholder="ph_step_title" class="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                         </div>
 
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Learning Type</label>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1" data-i18n="label_learning_type">Learning Type</label>
                             <select onchange="updateStepType(this)" class="learning-type-select w-full px-3 py-1.5 text-sm font-bold border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all select-acquisition">
-                                <option value="acquisition">Acquisition</option>
-                                <option value="collaboration">Collaboration</option>
-                                <option value="discussion">Discussion</option>
-                                <option value="investigation">Investigation</option>
-                                <option value="practice">Practice</option>
-                                <option value="production">Production</option>
+                                <option value="acquisition" data-i18n="type_acquisition">Acquisition</option>
+                                <option value="collaboration" data-i18n="type_collaboration">Collaboration</option>
+                                <option value="discussion" data-i18n="type_discussion">Discussion</option>
+                                <option value="investigation" data-i18n="type_investigation">Investigation</option>
+                                <option value="practice" data-i18n="type_practice">Practice</option>
+                                <option value="production" data-i18n="type_production">Production</option>
                             </select>
                         </div>
 
                         <div class="grid grid-cols-1 gap-3">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase -mb-2">Duration</label>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase -mb-2" data-i18n="label_duration">Duration</label>
                             <div class="flex gap-2">
                                 <input type="number" oninput="updateStats()" placeholder="0" class="duration-input w-2/3 px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                                 <select onchange="updateStats()" class="duration-unit w-1/3 px-1 py-1.5 text-[11px] border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
-                                    <option value="60">Mins</option>
-                                    <option value="3600">Hours</option>
-                                    <option value="86400">Days</option>
-                                    <option value="604800">Weeks</option>
+                                    <option value="60" data-i18n="unit_mins">Mins</option>
+                                    <option value="3600" data-i18n="unit_hours">Hours</option>
+                                    <option value="86400" data-i18n="unit_days">Days</option>
+                                    <option value="604800" data-i18n="unit_weeks">Weeks</option>
                                 </select>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Group Size</label>
-                            <input type="text" placeholder="e.g. 10" class="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1" data-i18n="label_grouping">Grouping</label>
+                            <div class="space-y-1">
+                                <select onchange="toggleGroupMode(this)" class="step-group-mode w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 bg-white outline-none">
+                                    <option value="class" data-i18n="opt_whole_class">Whole Class</option>
+                                    <option value="groups" data-i18n="opt_groups">Groups</option>
+                                </select>
+                                <div class="step-group-details hidden flex gap-2">
+                                    <div class="relative flex-1">
+                                        <input type="number" min="1" oninput="updateGroupMath(this, 'count')" placeholder="Nb groups" data-i18n-placeholder="ph_nb_groups" class="step-group-count w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none" title="Number of groups">
+                                        <span class="absolute right-1 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 pointer-events-none pr-1" data-i18n="label_short_groups">Grps</span>
+                                    </div>
+                                    <div class="relative flex-1">
+                                        <input type="number" min="1" oninput="updateGroupMath(this, 'size')" placeholder="Per group" data-i18n-placeholder="ph_per_group" class="step-group-size w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none" title="Students per group">
+                                        <span class="absolute right-1 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 pointer-events-none pr-1" data-i18n="label_short_pers">Pers</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="space-y-2 pt-1 border-t border-slate-100">
                             <div class="flex items-center gap-2">
-                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase">Trainer</span>
-                                <select class="flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
-                                    <option value="present">Present</option>
-                                    <option value="absent">Absent</option>
+                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase" data-i18n="label_trainer">Trainer</span>
+                                <select onchange="updateStats()" class="trainer-select flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
+                                    <option value="present" data-i18n="opt_present">Present</option>
+                                    <option value="absent" data-i18n="opt_absent">Absent</option>
                                 </select>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase">Place</span>
-                                <select class="flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
-                                    <option value="situ">In Situ</option>
-                                    <option value="online">Online</option>
+                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase" data-i18n="label_place">Place</span>
+                                <select onchange="updateStats()" class="place-select flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
+                                    <option value="situ" data-i18n="opt_insitu">In Situ</option>
+                                    <option value="online" data-i18n="opt_online">Online</option>
                                 </select>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase">Time</span>
-                                <select class="flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
-                                    <option value="sync">Synchronous</option>
-                                    <option value="async">Asynchronous</option>
+                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase" data-i18n="label_time">Time</span>
+                                <select onchange="updateStats()" class="time-select flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
+                                    <option value="sync" data-i18n="opt_sync">Synchronous</option>
+                                    <option value="async" data-i18n="opt_async">Asynchronous</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Column 2: Content -->
                     <div class="lg:w-2/3 space-y-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">What learners must do</label>
-                            <textarea rows="6" placeholder="Describe the steps, instructions, and tasks..." class="w-full px-4 py-3 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none leading-relaxed"></textarea>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1" data-i18n="label_tasks">What learners must do</label>
+                            <textarea rows="6" placeholder="Describe the steps, instructions, and tasks..." data-i18n-placeholder="ph_tasks" class="w-full px-4 py-3 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none leading-relaxed"></textarea>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Notes</label>
-                            <textarea rows="3" placeholder="Trainer notes, resources, or links..." class="w-full px-4 py-3 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none bg-slate-50 text-slate-600 italic"></textarea>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1" data-i18n="label_notes">Notes</label>
+                            <textarea rows="3" placeholder="Trainer notes, resources, or links..." data-i18n-placeholder="ph_notes" class="w-full px-4 py-3 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none bg-slate-50 text-slate-600 italic"></textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step Delete -->
-                <button onclick="deleteStep(this)" class="no-print absolute top-2 right-2 text-slate-300 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
+                <button onclick="deleteStep(this)" class="no-print absolute top-2 right-2 text-slate-300 hover:text-red-400 p-1 transition-opacity" title="Delete Step">
+                    <span class="material-icons-round text-lg">close</span>
                 </button>
             </div>
         </div>
@@ -227,43 +385,324 @@
         const activityTemplate = document.getElementById('activity-template');
         const stepTemplate = document.getElementById('step-template');
 
+        let charts = { types: null, trainer: null, location: null, time: null, timeline: null, typeTimeline: null, contextTimeline: null, social: null };
+        let currentLang = 'en';
+
+        const translations = {
+            en: {
+                app_title: "Learning Designer",
+                app_subtitle: "Pedagogical Design & Analytics",
+                tab_designer: "Designer",
+                tab_analysis: "Analysis",
+                btn_new_activity: "New Activity",
+                btn_export_md: "Export the Learning Design in Markdown",
+                btn_print: "Print / PDF",
+                label_total_time: "Total Est. Time",
+                status_calculating: "Auto-calculating...",
+                label_class_size: "Class Size",
+                empty_title: "No activities designed yet",
+                empty_subtitle: "Start by creating your first Activity container.",
+                btn_create_activity: "Create Activity",
+                btn_add_step: "Add Step",
+                analysis_balance: "Pedagogical Balance",
+                analysis_context: "Learning Context",
+                label_teacher_present: "Teacher<br>Present",
+                label_face_to_face: "Face to face",
+                label_synchronous: "Synchronous",
+                analysis_social: "Social Organization",
+                analysis_overview: "Activity Overview",
+                analysis_timeline_types: "Pedagogical Timeline (Learning Types)",
+                ph_activity_title: "Activity Title (e.g. Module 1: Introduction)",
+                label_step_title: "Step Title",
+                ph_step_title: "Title for this card...",
+                label_learning_type: "Learning Type",
+                label_duration: "Duration",
+                label_grouping: "Grouping",
+                opt_whole_class: "Whole Class",
+                opt_groups: "Groups",
+                ph_nb_groups: "Nb groups",
+                label_short_groups: "Grps",
+                ph_per_group: "Per group",
+                label_short_pers: "Pers",
+                label_trainer: "Trainer",
+                opt_present: "Present",
+                opt_absent: "Absent",
+                label_place: "Place",
+                opt_insitu: "In Situ",
+                opt_online: "Online",
+                label_time: "Time",
+                opt_sync: "Synchronous",
+                opt_async: "Asynchronous",
+                label_tasks: "What learners must do",
+                ph_tasks: "Describe the steps, instructions, and tasks...",
+                label_notes: "Notes",
+                ph_notes: "Trainer notes, resources, or links...",
+                type_acquisition: "Acquisition",
+                type_collaboration: "Collaboration",
+                type_discussion: "Discussion",
+                type_investigation: "Investigation",
+                type_practice: "Practice",
+                type_production: "Production",
+                unit_mins: "Mins",
+                unit_hours: "Hours",
+                unit_days: "Days",
+                unit_weeks: "Weeks",
+                chart_time_allocation: "Time Allocation",
+                chart_social_individual: "Individual",
+                chart_social_small: "Small Group",
+                chart_social_whole: "Whole Class",
+                chart_present: "Present",
+                chart_not_present: "Not present",
+                chart_f2f: "Face to face",
+                chart_online: "Online",
+                chart_sync: "Synchronous",
+                chart_async: "Asynchronous",
+                md_title: "# Learning Experience Design",
+                md_class_size: "**Class Size:**",
+                md_total_duration: "**Total Duration:**",
+                md_untitled_activity: "Untitled Activity",
+                md_untitled_step: "Untitled Step",
+                md_format_whole: "Whole Class",
+                md_format_groups: "Groups of",
+                md_tasks: "**Tasks:**",
+                md_notes: "**Notes:**"
+            },
+            fr: {
+                app_title: "Concepteur Pédagogique",
+                app_subtitle: "Design Pédagogique & Analytique",
+                tab_designer: "Design",
+                tab_analysis: "Analyse",
+                btn_new_activity: "Nouvelle Activité",
+                btn_export_md: "Exporter le Design en Markdown",
+                btn_print: "Imprimer / PDF",
+                label_total_time: "Durée Totale Est.",
+                status_calculating: "Calcul auto...",
+                label_class_size: "Taille de la classe",
+                empty_title: "Aucune activité conçue",
+                empty_subtitle: "Commencez par créer votre première activité.",
+                btn_create_activity: "Créer une Activité",
+                btn_add_step: "Ajouter Étape",
+                analysis_balance: "Équilibre Pédagogique",
+                analysis_context: "Contexte d'Apprentissage",
+                label_teacher_present: "Enseignant<br>Présent",
+                label_face_to_face: "En présence",
+                label_synchronous: "Synchrone",
+                analysis_social: "Organisation Sociale",
+                analysis_overview: "Vue d'ensemble des Activités",
+                analysis_timeline_types: "Chronologie Pédagogique (Types)",
+                ph_activity_title: "Titre de l'activité (ex: Module 1 : Introduction)",
+                label_step_title: "Titre de l'étape",
+                ph_step_title: "Titre pour cette carte...",
+                label_learning_type: "Type d'apprentissage",
+                label_duration: "Durée",
+                label_grouping: "Regroupement",
+                opt_whole_class: "Classe entière",
+                opt_groups: "Groupes",
+                ph_nb_groups: "Nb groupes",
+                label_short_groups: "Grps",
+                ph_per_group: "Par groupe",
+                label_short_pers: "Pers",
+                label_trainer: "Formateur",
+                opt_present: "Présent",
+                opt_absent: "Absent",
+                label_place: "Lieu",
+                opt_insitu: "En présence",
+                opt_online: "En ligne",
+                label_time: "Temps",
+                opt_sync: "Synchrone",
+                opt_async: "Asynchrone",
+                label_tasks: "Ce que les apprenants doivent faire",
+                ph_tasks: "Décrivez les étapes, instructions et tâches...",
+                label_notes: "Notes",
+                ph_notes: "Notes formateur, ressources ou liens...",
+                type_acquisition: "Acquisition",
+                type_collaboration: "Collaboration",
+                type_discussion: "Discussion",
+                type_investigation: "Enquête",
+                type_practice: "Entraînement",
+                type_production: "Production",
+                unit_mins: "Mins",
+                unit_hours: "Heures",
+                unit_days: "Jours",
+                unit_weeks: "Semaines",
+                chart_time_allocation: "Répartition du temps",
+                chart_social_individual: "Individuel",
+                chart_social_small: "Petit Groupe",
+                chart_social_whole: "Classe Entière",
+                chart_present: "Présent",
+                chart_not_present: "Non présent",
+                chart_f2f: "En présence",
+                chart_online: "En ligne",
+                chart_sync: "Synchrone",
+                chart_async: "Asynchrone",
+                md_title: "# Design d'Expérience d'Apprentissage",
+                md_class_size: "**Taille de la classe :**",
+                md_total_duration: "**Durée Totale :**",
+                md_untitled_activity: "Activité sans titre",
+                md_untitled_step: "Étape sans titre",
+                md_format_whole: "Classe entière",
+                md_format_groups: "Groupes de",
+                md_tasks: "**Tâches :**",
+                md_notes: "**Notes :**"
+            }
+        };
+
+        const TYPE_COLORS = {
+            acquisition: '#a1f5ed',
+            collaboration: '#ffd966',
+            discussion: '#7aaeea',
+            investigation: '#f8807f',
+            practice: '#bb98dc',
+            production: '#bdea75'
+        };
+
+        // Init Drag & Drop for Activities
+        new Sortable(root, {
+            animation: 150,
+            handle: '.drag-handle-activity',
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag',
+            onEnd: () => { updateEmptyState(); }
+        });
+
+        // Init Drag & Drop for Analysis Dashboard
+        new Sortable(document.getElementById('analysis-dashboard'), {
+            animation: 150,
+            handle: '.drag-handle-analysis',
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag'
+        });
+
+        function initSortableSteps(container) {
+            new Sortable(container, {
+                group: 'shared-steps',
+                animation: 150,
+                handle: '.drag-handle-step',
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: () => { updateStats(); }
+            });
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'fr' : 'en';
+            document.getElementById('lang-btn-text').innerText = currentLang === 'en' ? 'FR' : 'EN'; // Switch button label to the *other* language
+            applyTranslations();
+            refreshCharts(); // Refresh charts to update legends
+        }
+
+        function applyTranslations() {
+            // Text content
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerHTML = translations[currentLang][key]; // Use innerHTML to handle <br>
+                }
+            });
+            // Placeholders
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[currentLang][key]) {
+                    el.placeholder = translations[currentLang][key];
+                }
+            });
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            if (tab === 'designer') {
+                document.getElementById('view-designer').classList.remove('hidden');
+                document.getElementById('view-analysis').classList.add('hidden');
+            } else {
+                document.getElementById('view-designer').classList.add('hidden');
+                document.getElementById('view-analysis').classList.remove('hidden');
+                refreshCharts();
+            }
+        }
+
+        function toggleGroupMode(select) {
+            const card = select.closest('.step-card');
+            const details = card.querySelector('.step-group-details');
+            if (select.value === 'groups') {
+                details.classList.remove('hidden');
+                // Auto calc initial logic if not set
+                const classSize = parseInt(document.getElementById('global-class-size').value) || 0;
+                const countInput = card.querySelector('.step-group-count');
+                const sizeInput = card.querySelector('.step-group-size');
+                if(!countInput.value && classSize > 0) {
+                    countInput.value = Math.ceil(classSize / 5); // default estimate
+                    sizeInput.value = Math.floor(classSize / countInput.value);
+                }
+            } else {
+                details.classList.add('hidden');
+            }
+            updateStats();
+        }
+
+        function updateGroupMath(input, type) {
+            const card = input.closest('.step-card');
+            const classSize = parseInt(document.getElementById('global-class-size').value) || 0;
+            
+            if (classSize === 0) return;
+
+            const countInput = card.querySelector('.step-group-count');
+            const sizeInput = card.querySelector('.step-group-size');
+            const val = parseInt(input.value) || 0;
+
+            if (val > 0) {
+                if (type === 'count') {
+                    // Changing count -> update size
+                    const size = Math.max(1, Math.round(classSize / val));
+                    sizeInput.value = size;
+                } else {
+                    // Changing size -> update count
+                    const count = Math.max(1, Math.round(classSize / val));
+                    countInput.value = count;
+                }
+            }
+            updateStats();
+        }
+
         function updateEmptyState() {
             const hasActivities = root.children.length > 0;
             emptyState.classList.toggle('hidden', hasActivities);
-            
-            // Re-index activity bubbles
-            document.querySelectorAll('.activity-index').forEach((el, i) => {
-                el.innerText = i + 1;
-            });
+            document.querySelectorAll('.activity-index').forEach((el, i) => { el.innerText = i + 1; });
             updateStats();
         }
 
         function addActivity() {
             const clone = activityTemplate.content.cloneNode(true);
             root.appendChild(clone);
-            
-            // Add one initial step to the new activity
             const lastActivity = root.lastElementChild;
-            const stepBtn = lastActivity.querySelector('button');
-            addStepToActivity(stepBtn);
+            const stepContainer = lastActivity.querySelector('.activity-steps-container');
+            initSortableSteps(stepContainer);
+            addStepToActivity(lastActivity.querySelector('button'));
             
+            // Apply current language to new elements
+            applyTranslations();
             updateEmptyState();
         }
 
         function addStepToActivity(btn) {
             const activityGroup = btn.closest('.activity-group');
             const container = activityGroup.querySelector('.activity-steps-container');
-            
             const clone = stepTemplate.content.cloneNode(true);
-            const card = clone.querySelector('.step-card');
-            card.classList.add('type-acquisition');
             
+            // Set default group values
+            const classSize = parseInt(document.getElementById('global-class-size').value) || 0;
+            clone.querySelector('.step-group-count').value = 1;
+            clone.querySelector('.step-group-size').value = classSize;
+
             container.appendChild(clone);
+            
+            // Apply translations to new step
+            applyTranslations();
             updateStats();
         }
 
         function deleteActivity(btn) {
-            if(confirm("Delete this entire activity and all its steps?")) {
+            if(confirm("Delete this entire activity?")) {
                 btn.closest('.activity-group').remove();
                 updateEmptyState();
             }
@@ -277,110 +716,250 @@
         function updateStepType(select) {
             const card = select.closest('.step-card');
             const type = select.value;
-            
-            // Update Card Border
-            const types = ['type-acquisition', 'type-collaboration', 'type-discussion', 'type-investigation', 'type-practice', 'type-production'];
+            const types = Object.keys(TYPE_COLORS).map(t => `type-${t}`);
             card.classList.remove(...types);
             card.classList.add(`type-${type}`);
-
-            // Update Select Background/Color
-            const selectStyles = ['select-acquisition', 'select-collaboration', 'select-discussion', 'select-investigation', 'select-practice', 'select-production'];
+            const selectStyles = Object.keys(TYPE_COLORS).map(t => `select-${t}`);
             select.classList.remove(...selectStyles);
             select.classList.add(`select-${type}`);
-
             updateStats();
         }
 
-        function updateStats() {
-            const steps = document.querySelectorAll('.step-card');
-            let totalSeconds = 0;
+        function getTotals() {
+            const activities = document.querySelectorAll('.activity-group');
+            const classSize = parseInt(document.getElementById('global-class-size').value) || 1;
+            const typeTime = { acquisition: 0, collaboration: 0, discussion: 0, investigation: 0, practice: 0, production: 0 };
+            const contextCounts = { 
+                trainer: { present: 0, absent: 0 }, 
+                place: { situ: 0, online: 0 }, 
+                time: { sync: 0, async: 0 } 
+            };
+            const socialAllocation = { individual: 0, smallGroup: 0, wholeClass: 0 };
+            const timelineData = [];
             
-            steps.forEach(step => {
-                const val = parseFloat(step.querySelector('.duration-input').value) || 0;
-                const unit = parseFloat(step.querySelector('.duration-unit').value) || 60;
-                totalSeconds += (val * unit);
+            // Timeline Data Containers
+            const typeTimelinePoints = [];
+            
+            let totalSecs = 0;
+            let currentTimelineSecs = 0;
+
+            activities.forEach((act, idx) => {
+                const title = act.querySelector('.activity-title').value || `${translations[currentLang].md_untitled_activity} ${idx+1}`;
+                let actSecs = 0;
+                const steps = act.querySelectorAll('.step-card');
+                
+                steps.forEach(step => {
+                    const dur = parseFloat(step.querySelector('.duration-input').value) || 0;
+                    const unit = parseFloat(step.querySelector('.duration-unit').value) || 60;
+                    const secs = dur * unit;
+                    const type = step.querySelector('.learning-type-select').value;
+                    
+                    const startMin = currentTimelineSecs / 60;
+                    const endMin = (currentTimelineSecs + secs) / 60;
+
+                    // Type Timeline Point - Translate type label for chart
+                    const typeLabel = translations[currentLang][`type_${type}`];
+                    
+                    typeTimelinePoints.push({
+                        x: [startMin, endMin],
+                        y: typeLabel,
+                        type: type
+                    });
+                    
+                    currentTimelineSecs += secs;
+
+                    const mode = step.querySelector('.step-group-mode').value;
+                    let stepGroupSize = classSize;
+                    if (mode === 'groups') {
+                        stepGroupSize = parseInt(step.querySelector('.step-group-size').value) || classSize;
+                    }
+
+                    typeTime[type] += secs;
+                    actSecs += secs;
+                    totalSecs += secs;
+
+                    if (stepGroupSize === 1) socialAllocation.individual += secs;
+                    else if (mode === 'class' || stepGroupSize >= classSize * 0.8) socialAllocation.wholeClass += secs;
+                    else socialAllocation.smallGroup += secs;
+
+                    contextCounts.trainer[step.querySelector('.trainer-select').value] += secs;
+                    contextCounts.place[step.querySelector('.place-select').value] += secs;
+                    contextCounts.time[step.querySelector('.time-select').value] += secs;
+                });
+                
+                timelineData.push({ title, duration: Math.round(actSecs / 60) });
+            });
+            return { totalSecs, typeTime, contextCounts, timelineData, socialAllocation, typeTimelinePoints };
+        }
+
+        function updateStats() {
+            const totals = getTotals();
+            let display = "0 mins";
+            if (totals.totalSecs >= 604800) display = `${(totals.totalSecs / 604800).toFixed(1)} ${translations[currentLang].unit_weeks}`;
+            else if (totals.totalSecs >= 86400) display = `${(totals.totalSecs / 86400).toFixed(1)} ${translations[currentLang].unit_days}`;
+            else if (totals.totalSecs >= 3600) {
+                const h = Math.floor(totals.totalSecs / 3600);
+                const m = Math.round((totals.totalSecs % 3600) / 60);
+                display = `${h}h ${m}m`;
+            } else if (totals.totalSecs > 0) display = `${Math.round(totals.totalSecs / 60)} ${translations[currentLang].unit_mins}`;
+            document.getElementById('total-duration').innerText = display;
+            if (!document.getElementById('view-analysis').classList.contains('hidden')) refreshCharts();
+        }
+
+        function createDonutChart(id, data, labels, valId) {
+            if (charts[id]) charts[id].destroy();
+            const total = data[0] + data[1];
+            const percent = total > 0 ? Math.round((data[0] / total) * 100) : 0;
+            document.getElementById(valId).innerText = percent + '%';
+
+            charts[id] = new Chart(document.getElementById('chart' + id.charAt(0).toUpperCase() + id.slice(1)), {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#4f46e5', '#f1f5f9'],
+                        borderWidth: 0,
+                        hoverOffset: 0
+                    }]
+                },
+                options: {
+                    cutout: '75%',
+                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function refreshCharts() {
+            const data = getTotals();
+            const t = translations[currentLang]; // shorthand
+
+            if (charts.types) charts.types.destroy();
+            charts.types = new Chart(document.getElementById('chartLearningTypes'), {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(data.typeTime).map(key => t[`type_${key}`]),
+                    datasets: [{
+                        label: t.chart_time_allocation,
+                        data: Object.values(data.typeTime),
+                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                        borderColor: '#4f46e5',
+                        pointBackgroundColor: Object.values(TYPE_COLORS),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: { r: { angleLines: { display: false }, suggestedMin: 0, ticks: { display: false } } },
+                    plugins: { legend: { display: false } }
+                }
             });
 
-            let displayTotal = "0 mins";
-            if (totalSeconds >= 604800) {
-                displayTotal = `${(totalSeconds / 604800).toFixed(1)} weeks`;
-            } else if (totalSeconds >= 86400) {
-                displayTotal = `${(totalSeconds / 86400).toFixed(1)} days`;
-            } else if (totalSeconds >= 3600) {
-                const h = Math.floor(totalSeconds / 3600);
-                const m = Math.round((totalSeconds % 3600) / 60);
-                displayTotal = `${h}h ${m}m`;
-            } else if (totalSeconds > 0) {
-                displayTotal = `${Math.round(totalSeconds / 60)} mins`;
-            }
+            createDonutChart('trainer', [data.contextCounts.trainer.present, data.contextCounts.trainer.absent], [t.chart_present, t.chart_not_present], 'valTrainer');
+            createDonutChart('location', [data.contextCounts.place.situ, data.contextCounts.place.online], [t.chart_f2f, t.chart_online], 'valLocation');
+            createDonutChart('time', [data.contextCounts.time.sync, data.contextCounts.time.async], [t.chart_sync, t.chart_async], 'valTime');
 
-            document.getElementById('total-duration').innerText = displayTotal;
-            document.getElementById('total-steps').innerText = steps.length;
+            if (charts.social) charts.social.destroy();
+            charts.social = new Chart(document.getElementById('chartSocial'), {
+                type: 'bar',
+                data: {
+                    labels: [t.chart_social_individual, t.chart_social_small, t.chart_social_whole],
+                    datasets: [{
+                        label: 'Minutes',
+                        data: [Math.round(data.socialAllocation.individual / 60), Math.round(data.socialAllocation.smallGroup / 60), Math.round(data.socialAllocation.wholeClass / 60)],
+                        backgroundColor: ['#cbd5e1', '#6366f1', '#1e293b'],
+                        borderRadius: 8
+                    }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            });
+
+            if (charts.timeline) charts.timeline.destroy();
+            charts.timeline = new Chart(document.getElementById('chartTimeline'), {
+                type: 'bar',
+                data: {
+                    labels: data.timelineData.map(d => d.title),
+                    datasets: [{ label: 'Minutes', data: data.timelineData.map(d => d.duration), backgroundColor: '#4f46e5', borderRadius: 6 }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Mins' } } } }
+            });
+
+            // Pedagogical Timeline (Gantt-like)
+            if (charts.typeTimeline) charts.typeTimeline.destroy();
+            // Order labels to match typical pedagogical flow or logic? Let's keep them fixed or translated
+            const typeLabels = ['acquisition', 'investigation', 'practice', 'discussion', 'collaboration', 'production'].map(k => t[`type_${k}`]);
+            
+            charts.typeTimeline = new Chart(document.getElementById('chartTypeTimeline'), {
+                type: 'bar',
+                data: {
+                    labels: typeLabels,
+                    datasets: [{
+                        label: 'Timeline',
+                        data: data.typeTimelinePoints,
+                        backgroundColor: data.typeTimelinePoints.map(p => TYPE_COLORS[p.type]),
+                        borderWidth: 0,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: function(context) { const d = context.raw; return `${d.y}: ${Math.round(d.x[0])}m - ${Math.round(d.x[1])}m`; } } }
+                    },
+                    scales: {
+                        x: { position: 'bottom', title: { display: true, text: 'Time (minutes)' }, min: 0, grid: { color: '#f3f4f6' } },
+                        y: { grid: { color: '#f3f4f6' } }
+                    }
+                }
+            });
         }
 
         function exportMarkdown() {
-            let md = "# Learning Design Export\n\n";
-            const activities = document.querySelectorAll('.activity-group');
+            const data = getTotals();
+            const t = translations[currentLang];
+            let md = `${t.md_title}\n\n${t.md_class_size} ${document.getElementById('global-class-size').value}\n${t.md_total_duration} ${document.getElementById('total-duration').innerText}\n\n`;
             
-            if (activities.length === 0) {
-                alert("Nothing to export.");
-                return;
-            }
+            document.querySelectorAll('.activity-group').forEach((activity, aIdx) => {
+                const title = activity.querySelector('.activity-title').value || t.md_untitled_activity;
+                md += `## ${title}\n\n`;
+                activity.querySelectorAll('.step-card').forEach((step, sIdx) => {
+                    const stepTitle = step.querySelector('input[placeholder="Title for this card..."]').value || t.md_untitled_step;
+                    
+                    // Get Group Info
+                    const groupMode = step.querySelector('.step-group-mode').value;
+                    let groupInfo = groupMode === 'class' ? t.md_format_whole : `${t.md_format_groups} ${step.querySelector('.step-group-size').value}`;
+                    
+                    // Content fields
+                    const tasks = step.querySelectorAll('textarea')[0].value || "N/A";
+                    const notes = step.querySelectorAll('textarea')[1].value || "";
+                    
+                    // Translated Type Label
+                    const typeKey = step.querySelector('.learning-type-select').value;
+                    const typeLabel = t[`type_${typeKey}`].toUpperCase();
 
-            activities.forEach((activity, aIdx) => {
-                const titleInput = activity.querySelector('input[type="text"]');
-                const title = titleInput ? titleInput.value || "Untitled Activity" : "Untitled Activity";
-                md += `## Activity ${aIdx + 1}: ${title}\n\n`;
-                
-                const steps = activity.querySelectorAll('.step-card');
-                steps.forEach((step, sIdx) => {
-                    const stepTitleInput = step.querySelector('input[placeholder="Title for this card..."]');
-                    const stepTitle = stepTitleInput ? stepTitleInput.value || "Untitled Step" : "Untitled Step";
-                    
-                    const typeSelect = step.querySelector('.learning-type-select');
-                    const type = typeSelect ? typeSelect.value : "acquisition";
-                    
-                    const durInput = step.querySelector('.duration-input');
-                    const dur = durInput ? durInput.value || 0 : 0;
-                    
-                    const unitSelect = step.querySelector('.duration-unit');
-                    const unitText = unitSelect ? unitSelect.options[unitSelect.selectedIndex].text : "Mins";
-                    
-                    const groupInput = step.querySelector('input[placeholder="e.g. 10"]');
-                    const group = groupInput ? groupInput.value || "-" : "-";
-                    
-                    const selects = step.querySelectorAll('select:not(.learning-type-select):not(.duration-unit)');
-                    const trainer = selects[0] ? selects[0].options[selects[0].selectedIndex].text : "-";
-                    const place = selects[1] ? selects[1].options[selects[1].selectedIndex].text : "-";
-                    const time = selects[2] ? selects[2].options[selects[2].selectedIndex].text : "-";
-                    
-                    const textareas = step.querySelectorAll('textarea');
-                    const tasks = textareas[0] ? textareas[0].value : "";
-                    const notes = textareas[1] ? textareas[1].value : "";
+                    // Translated Context
+                    const trainerText = step.querySelector('.trainer-select').selectedOptions[0].innerText; // Use innerText as it's already translated in DOM
+                    const placeText = step.querySelector('.place-select').selectedOptions[0].innerText;
+                    const timeText = step.querySelector('.time-select').selectedOptions[0].innerText;
 
-                    md += `### Step ${sIdx + 1}: ${stepTitle}\n`;
-                    md += `- **Type:** ${type.charAt(0).toUpperCase() + type.slice(1)}\n`;
-                    md += `- **Duration:** ${dur} ${unitText}\n`;
-                    md += `- **Group Size:** ${group}\n`;
-                    md += `- **Settings:** Trainer ${trainer}, ${place}, ${time}\n\n`;
-                    md += `**What learners must do:** \n${tasks || "*No description provided*"}\n\n`;
-                    if (notes) md += `**Notes:** \n${notes}\n\n`;
-                    md += "---\n\n";
+                    md += `### ${sIdx + 1}. ${stepTitle} (${typeLabel})\n`;
+                    md += `- **${t.label_duration}:** ${step.querySelector('.duration-input').value} ${step.querySelector('.duration-unit').selectedOptions[0].innerText}\n`;
+                    md += `- **${t.label_grouping}:** ${groupInfo}\n`;
+                    md += `- **Context:** ${trainerText}, ${placeText}, ${timeText}\n`;
+                    md += `\n${t.md_tasks}\n${tasks}\n`;
+                    if(notes) md += `\n${t.md_notes}\n${notes}\n`;
+                    md += `\n---\n`;
                 });
             });
-
             const blob = new Blob([md], { type: 'text/markdown' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'learning-design.md';
-            a.click();
-            URL.revokeObjectURL(url);
+            const a = document.createElement('a'); a.href = url; a.download = 'learning-design.md'; a.click(); URL.revokeObjectURL(url);
         }
 
-        window.onload = () => {
-            addActivity();
-        };
+        window.onload = () => { addActivity(); };
     </script>
 </body>
 </html>
