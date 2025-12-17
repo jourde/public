@@ -21,12 +21,21 @@
             transition: all 0.2s ease;
         }
 
-        .type-acquisition { border-left: 8px solid #3b82f6; } 
-        .type-investigation { border-left: 8px solid #eab308; } 
-        .type-practice { border-left: 8px solid #22c55e; } 
-        .type-discussion { border-left: 8px solid #f97316; } 
-        .type-collaboration { border-left: 8px solid #a855f7; } 
-        .type-production { border-left: 8px solid #ef4444; } 
+        /* Learning Type Specific Card Borders */
+        .type-acquisition { border-left: 8px solid #a1f5ed; } 
+        .type-collaboration { border-left: 8px solid #ffd966; } 
+        .type-discussion { border-left: 8px solid #7aaeea; } 
+        .type-investigation { border-left: 8px solid #f8807f; } 
+        .type-practice { border-left: 8px solid #bb98dc; } 
+        .type-production { border-left: 8px solid #bdea75; } 
+
+        /* Dropdown Styling with provided colors and high contrast black text */
+        .select-acquisition { background-color: #a1f5ed; color: #000; border-color: #7dded6; }
+        .select-collaboration { background-color: #ffd966; color: #000; border-color: #f0c953; }
+        .select-discussion { background-color: #7aaeea; color: #000; border-color: #6a9bd6; }
+        .select-investigation { background-color: #f8807f; color: #000; border-color: #e06e6d; }
+        .select-practice { background-color: #bb98dc; color: #000; border-color: #a582c6; }
+        .select-production { background-color: #bdea75; color: #000; border-color: #a6d15e; }
 
         @media print {
             .no-print { display: none; }
@@ -47,12 +56,18 @@
                 <h1 class="text-3xl font-bold text-slate-900">Learning Designer</h1>
                 <p class="text-slate-500">Structure your training into Activities and Learning Steps</p>
             </div>
-            <div class="flex gap-2 no-print">
+            <div class="flex flex-wrap gap-2 no-print">
                 <button onclick="addActivity()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm flex items-center gap-2 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                     </svg>
                     New Activity
+                </button>
+                <button onclick="exportMarkdown()" class="bg-white border border-slate-200 text-slate-700 px-5 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Export Markdown
                 </button>
                 <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-700 px-5 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors">
                     Print / PDF
@@ -61,7 +76,7 @@
         </header>
 
         <!-- Global Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 no-print">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 no-print">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <span class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Est. Time</span>
                 <div id="total-duration" class="text-2xl font-bold text-indigo-600">0 mins</div>
@@ -69,10 +84,6 @@
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <span class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Steps</span>
                 <div id="total-steps" class="text-2xl font-bold text-slate-800">0</div>
-            </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <span class="text-slate-500 text-sm font-medium uppercase tracking-wider">Primary Method</span>
-                <div id="primary-mode" class="text-2xl font-bold text-slate-800">-</div>
             </div>
         </div>
 
@@ -94,20 +105,20 @@
     <!-- Activity Template -->
     <template id="activity-template">
         <div class="activity-group relative">
-            <div class="flex items-center justify-between mb-4 px-2">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 px-2 gap-4">
                 <div class="flex-1 flex items-center gap-4">
-                    <div class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 activity-index">1</div>
+                    <div class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 activity-index shrink-0">1</div>
                     <input type="text" placeholder="Activity Title (e.g. Module 1: Introduction)" class="text-xl font-bold text-slate-800 bg-transparent border-b-2 border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-1 transition-colors">
                 </div>
-                <div class="flex gap-2 no-print">
-                    <button onclick="addStepToActivity(this)" class="text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <div class="flex items-center gap-3 no-print">
+                    <button onclick="addStepToActivity(this)" class="text-base font-bold text-indigo-700 bg-indigo-100 hover:bg-indigo-200 px-5 py-2 rounded-lg shadow-sm transition-all flex items-center gap-2 border border-indigo-200 active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
                         </svg>
                         Add Step
                     </button>
-                    <button onclick="deleteActivity(this)" class="text-slate-400 hover:text-red-500 p-1.5">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <button onclick="deleteActivity(this)" class="text-slate-400 hover:text-red-500 p-2 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                     </button>
@@ -134,12 +145,12 @@
 
                         <div>
                             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Learning Type</label>
-                            <select onchange="updateStepType(this)" class="learning-type-select w-full px-3 py-1.5 text-sm font-medium border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <select onchange="updateStepType(this)" class="learning-type-select w-full px-3 py-1.5 text-sm font-bold border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all select-acquisition">
                                 <option value="acquisition">Acquisition</option>
+                                <option value="collaboration">Collaboration</option>
+                                <option value="discussion">Discussion</option>
                                 <option value="investigation">Investigation</option>
                                 <option value="practice">Practice</option>
-                                <option value="discussion">Discussion</option>
-                                <option value="collaboration">Collaboration</option>
                                 <option value="production">Production</option>
                             </select>
                         </div>
@@ -267,9 +278,16 @@
             const card = select.closest('.step-card');
             const type = select.value;
             
-            const types = ['type-acquisition', 'type-investigation', 'type-practice', 'type-discussion', 'type-collaboration', 'type-production'];
+            // Update Card Border
+            const types = ['type-acquisition', 'type-collaboration', 'type-discussion', 'type-investigation', 'type-practice', 'type-production'];
             card.classList.remove(...types);
             card.classList.add(`type-${type}`);
+
+            // Update Select Background/Color
+            const selectStyles = ['select-acquisition', 'select-collaboration', 'select-discussion', 'select-investigation', 'select-practice', 'select-production'];
+            select.classList.remove(...selectStyles);
+            select.classList.add(`select-${type}`);
+
             updateStats();
         }
 
@@ -298,19 +316,68 @@
 
             document.getElementById('total-duration').innerText = displayTotal;
             document.getElementById('total-steps').innerText = steps.length;
-
-            const types = Array.from(document.querySelectorAll('.learning-type-select')).map(s => s.value);
-            if (types.length > 0) {
-                const mode = types.sort((a,b) =>
-                    types.filter(v => v===a).length - types.filter(v => v===b).length
-                ).pop();
-                document.getElementById('primary-mode').innerText = mode.charAt(0).toUpperCase() + mode.slice(1);
-            } else {
-                document.getElementById('primary-mode').innerText = '-';
-            }
         }
 
-        // Initialize with one activity
+        function exportMarkdown() {
+            let md = "# Learning Design Export\n\n";
+            const activities = document.querySelectorAll('.activity-group');
+            
+            if (activities.length === 0) {
+                alert("Nothing to export.");
+                return;
+            }
+
+            activities.forEach((activity, aIdx) => {
+                const titleInput = activity.querySelector('input[type="text"]');
+                const title = titleInput ? titleInput.value || "Untitled Activity" : "Untitled Activity";
+                md += `## Activity ${aIdx + 1}: ${title}\n\n`;
+                
+                const steps = activity.querySelectorAll('.step-card');
+                steps.forEach((step, sIdx) => {
+                    const stepTitleInput = step.querySelector('input[placeholder="Title for this card..."]');
+                    const stepTitle = stepTitleInput ? stepTitleInput.value || "Untitled Step" : "Untitled Step";
+                    
+                    const typeSelect = step.querySelector('.learning-type-select');
+                    const type = typeSelect ? typeSelect.value : "acquisition";
+                    
+                    const durInput = step.querySelector('.duration-input');
+                    const dur = durInput ? durInput.value || 0 : 0;
+                    
+                    const unitSelect = step.querySelector('.duration-unit');
+                    const unitText = unitSelect ? unitSelect.options[unitSelect.selectedIndex].text : "Mins";
+                    
+                    const groupInput = step.querySelector('input[placeholder="e.g. 10"]');
+                    const group = groupInput ? groupInput.value || "-" : "-";
+                    
+                    const selects = step.querySelectorAll('select:not(.learning-type-select):not(.duration-unit)');
+                    const trainer = selects[0] ? selects[0].options[selects[0].selectedIndex].text : "-";
+                    const place = selects[1] ? selects[1].options[selects[1].selectedIndex].text : "-";
+                    const time = selects[2] ? selects[2].options[selects[2].selectedIndex].text : "-";
+                    
+                    const textareas = step.querySelectorAll('textarea');
+                    const tasks = textareas[0] ? textareas[0].value : "";
+                    const notes = textareas[1] ? textareas[1].value : "";
+
+                    md += `### Step ${sIdx + 1}: ${stepTitle}\n`;
+                    md += `- **Type:** ${type.charAt(0).toUpperCase() + type.slice(1)}\n`;
+                    md += `- **Duration:** ${dur} ${unitText}\n`;
+                    md += `- **Group Size:** ${group}\n`;
+                    md += `- **Settings:** Trainer ${trainer}, ${place}, ${time}\n\n`;
+                    md += `**What learners must do:** \n${tasks || "*No description provided*"}\n\n`;
+                    if (notes) md += `**Notes:** \n${notes}\n\n`;
+                    md += "---\n\n";
+                });
+            });
+
+            const blob = new Blob([md], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'learning-design.md';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
         window.onload = () => {
             addActivity();
         };
