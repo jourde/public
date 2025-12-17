@@ -233,6 +233,11 @@
                 </div>
             </div>
         </div>
+
+        <!-- Footer -->
+        <footer class="mt-12 mb-6 text-center text-xs text-slate-400 no-print">
+            <p>François Jourde, CC BY SA, based on the <a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" class="underline hover:text-slate-500">Learning Designer</a> (UCL Knowledge Lab, UCL Institute of Education).</p>
+        </footer>
     </div>
 
     <!-- Activity Template -->
@@ -581,7 +586,7 @@
                     }]
                 },
                 options: {
-                    scales: { r: { angleLines: { display: false }, suggestMin: 0, ticks: { display: false } } },
+                    scales: { r: { angleLines: { display: false }, suggestedMin: 0, ticks: { display: false } } },
                     plugins: { legend: { display: false } }
                 }
             });
@@ -624,9 +629,23 @@
                 md += `## Activity ${aIdx + 1}: ${title}\n\n`;
                 activity.querySelectorAll('.step-card').forEach((step, sIdx) => {
                     const stepTitle = step.querySelector('input[placeholder="Title for this card..."]').value || "Untitled Step";
-                    md += `### ${sIdx + 1}. ${stepTitle} (${step.querySelector('.learning-type-select').value.toUpperCase()})\n- Duration: ${step.querySelector('.duration-input').value} ${step.querySelector('.duration-unit').selectedOptions[0].text}\n- Context: ${step.querySelector('.trainer-select').selectedOptions[0].text}, ${step.querySelector('.place-select').selectedOptions[0].text}\n**Tasks:**\n${step.querySelectorAll('textarea')[0].value || "N/A"}\n\n`;
+                    
+                    // Get Group Info
+                    const groupMode = step.querySelector('.step-group-mode').value;
+                    let groupInfo = groupMode === 'class' ? "Whole Class" : `Groups of ${step.querySelector('.step-group-size').value}`;
+                    
+                    // Content fields
+                    const tasks = step.querySelectorAll('textarea')[0].value || "N/A";
+                    const notes = step.querySelectorAll('textarea')[1].value || "";
+
+                    md += `### ${sIdx + 1}. ${stepTitle} (${step.querySelector('.learning-type-select').value.toUpperCase()})\n`;
+                    md += `- **Duration:** ${step.querySelector('.duration-input').value} ${step.querySelector('.duration-unit').selectedOptions[0].text}\n`;
+                    md += `- **Format:** ${groupInfo}\n`;
+                    md += `- **Context:** ${step.querySelector('.trainer-select').selectedOptions[0].text}, ${step.querySelector('.place-select').selectedOptions[0].text}, ${step.querySelector('.time-select').selectedOptions[0].text}\n`;
+                    md += `\n**Tasks:**\n${tasks}\n`;
+                    if(notes) md += `\n**Notes:**\n${notes}\n`;
+                    md += `\n---\n`;
                 });
-                md += "---\n";
             });
             const blob = new Blob([md], { type: 'text/markdown' });
             const url = URL.createObjectURL(blob);
