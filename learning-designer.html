@@ -150,7 +150,7 @@
                 <!-- Project Group -->
                 <div class="flex flex-col gap-1">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_project">Project</span>
-                    <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-1 shadow-sm h-[46px]">
+                    <div class="flex bg-white border border-slate-200 rounded-lg p-1 gap-1 shadow-sm h-[46px]">
                         <button onclick="saveProject()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" data-i18n-title="title_save_project">
                             <span class="material-icons-round text-xl">save</span>
                             <span class="text-sm font-medium hidden md:inline" data-i18n="btn_save">Save</span>
@@ -159,10 +159,13 @@
                             <span class="material-icons-round text-xl">file_upload</span>
                             <span class="text-sm font-medium hidden md:inline" data-i18n="btn_load">Load</span>
                         </button>
-                        <div class="w-px h-6 bg-slate-200 my-1 mx-1"></div>
+                        <div class="w-px bg-slate-200 my-1 mx-1"></div>
                         <button onclick="exportMarkdown()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" data-i18n-title="info_export_genai">
                             <span class="material-icons-round text-xl">download</span>
                             <span class="text-sm font-medium hidden md:inline" data-i18n="btn_export">Export for GenAI</span>
+                        </button>
+                        <button onclick="exportTerminology()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" data-i18n-title="title_export_term">
+                            <span class="material-icons-round text-xl">translate</span>
                         </button>
                         <input type="file" id="load-file-input" class="hidden" accept=".json" onchange="loadProject(event)">
                     </div>
@@ -693,6 +696,7 @@
                 grp_actions: "Actions",
                 grp_help: "Help",
                 btn_export: "Export for GenAI",
+                title_export_term: "Export translation table (EN/FR)",
                 info_export_genai: "The export format is the learning design in Markdown for easy processing by a generative AI chatbot.",
                 label_total_time: "Total Calculated Time and Distribution of Learning Types",
                 status_calculating: "Auto-calculating...",
@@ -832,6 +836,7 @@
                 grp_actions: "Actions",
                 grp_help: "Aide",
                 btn_export: "Exporter pour GenAI",
+                title_export_term: "Exporter le tableau de traduction (EN/FR)",
                 info_export_genai: "Le format d'exportation est le design pédagogique au format Markdown pour un traitement facilité par un chatbot d'IA générative.",
                 label_total_time: "Durée Totale Calculée et Répartition des Types d'Apprentissage",
                 status_calculating: "Calcul auto...",
@@ -916,8 +921,8 @@
                 label_minutes: "m",
                 label_description: "Description",
                 ph_description: "Description détaillée...",
-                label_mode: "Mode de livraison",
-                opt_mode_placeholder: "Sélectionnez un mode...",
+                label_mode: "Modalité",
+                opt_mode_placeholder: "Sélectionnez une modalité...",
                 opt_mode_online: "Entièrement en ligne",
                 opt_mode_blended: "Hybride",
                 opt_mode_classroom: "En classe",
@@ -1021,76 +1026,6 @@
             }
         }
 
-        function toggleAllActivities() {
-            const bodies = document.querySelectorAll('.activity-body');
-            const icons = document.querySelectorAll('.activity-group .rotate-icon');
-            const mainBtnIcon = document.getElementById('icon-toggle-all-main');
-            const mainBtnText = document.getElementById('text-toggle-all-main');
-            const headerBtnIcon = document.getElementById('icon-toggle-all');
-            
-            let anyOpen = false;
-            bodies.forEach(b => {
-                if (!b.classList.contains('collapsed')) anyOpen = true;
-            });
-
-            bodies.forEach(b => {
-                if (anyOpen) {
-                    b.classList.add('collapsed');
-                } else {
-                    b.classList.remove('collapsed');
-                }
-            });
-
-            icons.forEach(icon => {
-                if (anyOpen) {
-                    icon.style.transform = 'rotate(0deg)';
-                } else {
-                    icon.style.transform = 'rotate(180deg)';
-                }
-            });
-
-            // Update main button state
-            const iconText = anyOpen ? 'unfold_more' : 'unfold_less';
-            const labelKey = anyOpen ? 'btn_expand_all' : 'btn_collapse_all';
-            
-            if(mainBtnIcon) mainBtnIcon.innerText = iconText;
-            if(mainBtnText) {
-                mainBtnText.innerText = translations[currentLang][labelKey];
-                mainBtnText.setAttribute('data-i18n', labelKey);
-            }
-            if(headerBtnIcon) headerBtnIcon.innerText = iconText;
-        }
-
-        // Foldable Activity
-        function toggleActivity(btn) {
-            const activityGroup = btn.closest('.activity-group');
-            const body = activityGroup.querySelector('.activity-body');
-            const icon = btn.querySelector('.rotate-icon');
-
-            if (body.classList.contains('collapsed')) {
-                body.classList.remove('collapsed');
-                icon.style.transform = 'rotate(180deg)';
-            } else {
-                body.classList.add('collapsed');
-                icon.style.transform = 'rotate(0deg)';
-            }
-        }
-
-        // Foldable Step
-        function toggleStep(btn) {
-            const stepCard = btn.closest('.step-card');
-            const body = stepCard.querySelector('.step-body');
-            const icon = btn.querySelector('.rotate-icon');
-
-            if (body.classList.contains('collapsed')) {
-                body.classList.remove('collapsed');
-                icon.style.transform = 'rotate(180deg)';
-            } else {
-                body.classList.add('collapsed');
-                icon.style.transform = 'rotate(0deg)';
-            }
-        }
-
         // --- Outcome List Logic ---
         function addOutcome(text = null) {
             const input = document.getElementById('new-outcome-input');
@@ -1127,6 +1062,28 @@
 
         function handleOutcomeEnter(e) {
             if (e.key === 'Enter') addOutcome();
+        }
+
+        function exportTerminology() {
+            let md = `# Learning Designer Terminology (EN/FR)\n\n`;
+            md += `| Key | English | French |\n`;
+            md += `|---|---|---|\n`;
+            
+            const keys = Object.keys(translations.en).sort();
+            
+            keys.forEach(key => {
+                const en = translations.en[key] || "";
+                const fr = translations.fr[key] || "";
+                md += `| ${key} | ${en.replace(/\|/g, '\\|')} | ${fr.replace(/\|/g, '\\|')} |\n`;
+            });
+
+            const blob = new Blob([md], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'learning-designer-terminology.md';
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         // --- Save / Load Feature Logic ---
