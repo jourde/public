@@ -86,7 +86,7 @@
             overflow: hidden;
         }
         .panel-content.open {
-            max-height: 1500px; /* Increased height to accommodate new fields */
+            max-height: 2000px; 
             opacity: 1;
         }
         .rotate-icon {
@@ -104,57 +104,118 @@
             select { appearance: none; border: none; padding: 0; background: none; }
             textarea { border: none; padding: 0; }
             #key-params-panel { max-height: none !important; opacity: 1 !important; display: block !important; }
+            #help-panel { display: none; }
         }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <header class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-            <div>
+        <header class="flex flex-col xl:flex-row xl:items-end justify-between mb-8 gap-6">
+            <div class="mb-2 xl:mb-0">
                 <h1 class="text-3xl font-bold text-slate-900" data-i18n="app_title">Learning Designer</h1>
                 <p class="text-slate-500" data-i18n="app_subtitle">Pedagogical Design & Analytics</p>
             </div>
-            <div class="flex flex-wrap gap-2 no-print items-center">
-                <!-- Save/Load Section -->
-                <div class="flex gap-1 mr-2 bg-slate-100 p-1 rounded-lg">
-                    <button onclick="saveProject()" class="bg-white text-slate-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-50 hover:text-indigo-600 transition-colors flex items-center gap-1.5 shadow-sm" title="Save Project (.json)">
-                        <span class="material-icons-round text-lg">save</span>
-                        <span data-i18n="btn_save">Save</span>
-                    </button>
-                    <button onclick="triggerFileLoad()" class="bg-white text-slate-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-50 hover:text-indigo-600 transition-colors flex items-center gap-1.5 shadow-sm" title="Load Project (.json)">
-                        <span class="material-icons-round text-lg">file_upload</span>
-                        <span data-i18n="btn_load">Load</span>
-                    </button>
-                    <input type="file" id="load-file-input" class="hidden" accept=".json" onchange="loadProject(event)">
-                </div>
-
-                <button onclick="toggleLanguage()" class="bg-white border border-slate-200 text-slate-700 px-3 h-10 rounded-lg font-bold hover:bg-slate-50 transition-colors flex items-center justify-center mr-2 gap-1">
-                    <span class="material-icons-round text-lg">language</span>
-                    <span id="lang-btn-text">FR</span>
-                </button>
-
-                <div class="bg-slate-200 p-1 rounded-lg flex mr-4">
-                    <button onclick="switchTab('designer')" id="tab-designer" class="nav-tab active px-4 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_designer">Designer</button>
-                    <button onclick="switchTab('analysis')" id="tab-analysis" class="nav-tab px-4 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_analysis">Analysis</button>
-                </div>
+            
+            <div class="flex flex-wrap gap-6 no-print items-end">
                 
-                <button onclick="addActivity()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm flex items-center gap-2 transition-colors">
-                    <span class="material-icons-round text-xl">add_circle</span>
-                    <span data-i18n="btn_new_activity">New Activity/Module</span>
-                </button>
+                <!-- Project Group -->
+                <div class="flex flex-col gap-1">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_project">Project</span>
+                    <div class="flex bg-white border border-slate-200 rounded-lg p-1 gap-1 shadow-sm">
+                        <button onclick="saveProject()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" data-i18n-title="title_save_project">
+                            <span class="material-icons-round text-xl">save</span>
+                            <span class="text-sm font-medium hidden md:inline" data-i18n="btn_save">Save</span>
+                        </button>
+                        <button onclick="triggerFileLoad()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" data-i18n-title="title_load_project">
+                            <span class="material-icons-round text-xl">file_upload</span>
+                            <span class="text-sm font-medium hidden md:inline" data-i18n="btn_load">Load</span>
+                        </button>
+                        <div class="w-px bg-slate-200 my-1 mx-1"></div>
+                        <button onclick="exportMarkdown()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" data-i18n-title="info_export_genai">
+                            <span class="material-icons-round text-xl">download</span>
+                            <span class="text-sm font-medium hidden md:inline" data-i18n="btn_export">Export for GenAI</span>
+                        </button>
+                        <input type="file" id="load-file-input" class="hidden" accept=".json" onchange="loadProject(event)">
+                    </div>
+                </div>
 
-                <button onclick="exportMarkdown()" class="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2">
-                    <span class="material-icons-round text-xl">download</span>
-                    <span data-i18n="btn_export_md">Export Markdown</span>
-                </button>
+                <!-- View Group -->
+                <div class="flex flex-col gap-1">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_view">View</span>
+                    <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-2 shadow-sm h-[46px]">
+                        <button onclick="togglePanel('help-panel')" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-md transition-colors flex items-center justify-center ml-1" data-i18n-title="title_help">
+                            <span class="material-icons-round text-2xl">help_outline</span>
+                        </button>
+                        <div class="w-px h-6 bg-slate-200"></div>
+                        <button onclick="toggleLanguage()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-md transition-colors flex items-center gap-1" data-i18n-title="title_switch_language">
+                            <span class="material-icons-round text-lg">language</span>
+                            <span id="lang-btn-text" class="text-sm font-bold">FR</span>
+                        </button>
+                        <div class="w-px h-6 bg-slate-200"></div>
+                        <div class="flex bg-slate-100 p-0.5 rounded-md">
+                            <button onclick="switchTab('designer')" id="tab-designer" class="nav-tab active px-3 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_designer" data-i18n-title="title_tab_designer">Designer</button>
+                            <button onclick="switchTab('analysis')" id="tab-analysis" class="nav-tab px-3 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_analysis" data-i18n-title="title_tab_analysis">Analysis</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions Group -->
+                <div class="flex flex-col gap-1">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_actions">Actions</span>
+                    <button onclick="addActivity()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm flex items-center gap-2 transition-colors h-[46px]" data-i18n-title="title_new_activity">
+                        <span class="material-icons-round text-xl">add_circle</span>
+                        <span data-i18n="btn_new_activity">New Activity/Module</span>
+                    </button>
+                </div>
+
             </div>
         </header>
 
+        <!-- Foldable Help Panel -->
+        <div id="help-panel" class="mb-6 bg-blue-50 rounded-xl shadow-sm border border-blue-100 overflow-hidden panel-content no-print">
+            <div class="p-6 text-slate-700">
+                <div class="flex justify-between items-start mb-4">
+                    <h2 class="text-xl font-bold text-indigo-800 flex items-center gap-2">
+                        <span class="material-icons-round">info</span>
+                        <span data-i18n="help_title">How to use Learning Designer</span>
+                    </h2>
+                    <button onclick="togglePanel('help-panel')" class="text-slate-400 hover:text-slate-600"><span class="material-icons-round">close</span></button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+                    <div>
+                        <h3 class="font-bold text-indigo-700 mb-2 uppercase text-xs tracking-wider" data-i18n="help_structure_title">1. Design Structure</h3>
+                        <p class="mb-2" data-i18n="help_structure_text">Build your course by adding <strong>Activities</strong> (modules/topics) and filling them with <strong>Steps</strong> (specific tasks). Reorder items using the drag handles <span class="inline-block align-middle"><span class="material-icons-round text-base text-slate-400">drag_indicator</span></span>.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-indigo-700 mb-2 uppercase text-xs tracking-wider" data-i18n="help_types_title">2. Learning Types</h3>
+                        <p class="mb-2" data-i18n="help_types_intro">Select a pedagogical type for each step:</p>
+                        <ul class="space-y-1">
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#a1f5ed]"></span> <span data-i18n="type_acquisition">Acquisition</span></li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#ffd966]"></span> <span data-i18n="type_collaboration">Collaboration</span></li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#7aaeea]"></span> <span data-i18n="type_discussion">Discussion</span></li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#f8807f]"></span> <span data-i18n="type_investigation">Investigation</span></li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#bb98dc]"></span> <span data-i18n="type_practice">Practice</span></li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#bdea75]"></span> <span data-i18n="type_production">Production</span></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-indigo-700 mb-2 uppercase text-xs tracking-wider" data-i18n="help_analysis_title">3. Analysis Dashboard</h3>
+                        <p data-i18n="help_analysis_text">Switch to the <strong>Analysis</strong> tab to visualize the balance of your design. Check the "Pedagogical Balance" radar chart and the "Context" pie charts to ensure your course meets its goals.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-indigo-700 mb-2 uppercase text-xs tracking-wider" data-i18n="help_export_title">4. Save & Export</h3>
+                        <p class="mb-2" data-i18n="help_export_text"><strong>Save/Load:</strong> Keep your work in a .json file.<br><strong>Export:</strong> Generate a structured Markdown file optimized for Generative AI (RAG) or documentation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Foldable Key Parameters Panel -->
         <div class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <button onclick="togglePanel('key-params-panel')" class="w-full px-5 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print">
+            <button onclick="togglePanel('key-params-panel')" class="w-full px-5 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print" data-i18n-title="title_toggle_panel">
                 <div class="flex items-center gap-2">
                     <span class="material-icons-round text-slate-500">tune</span>
                     <span class="font-bold text-slate-700 uppercase text-sm tracking-wide" data-i18n="panel_key_parameters">Key Parameters</span>
@@ -222,18 +283,18 @@
                         </div>
                     </div>
 
-                    <!-- 7. Aims (New) -->
+                    <!-- 7. Aims -->
                     <div class="md:col-span-2 lg:col-span-3">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_aims">Aims</label>
                         <textarea id="param-aims" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="..." data-i18n-placeholder="ph_aims"></textarea>
                     </div>
 
-                    <!-- 8. Outcomes (New - Dynamic List) -->
+                    <!-- 8. Outcomes (Dynamic List) -->
                     <div class="md:col-span-2 lg:col-span-3">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_outcomes">Outcomes</label>
                         <div class="flex gap-2 mb-2 no-print">
                             <input type="text" id="new-outcome-input" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Add an outcome..." data-i18n-placeholder="ph_add_outcome" onkeypress="handleOutcomeEnter(event)">
-                            <button onclick="addOutcome()" class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg font-bold hover:bg-indigo-200 transition-colors flex items-center justify-center">
+                            <button onclick="addOutcome()" class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg font-bold hover:bg-indigo-200 transition-colors flex items-center justify-center" data-i18n-title="title_add_outcome">
                                 <span class="material-icons-round">add</span>
                             </button>
                         </div>
@@ -282,7 +343,7 @@
             <div id="empty-state" class="hidden text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-300">
                 <h3 class="mt-2 text-lg font-medium text-slate-900" data-i18n="empty_title">No activities designed yet</h3>
                 <p class="mt-1 text-sm text-slate-500" data-i18n="empty_subtitle">Start by creating your first Activity container.</p>
-                <button onclick="addActivity()" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                <button onclick="addActivity()" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" data-i18n-title="title_create_activity">
                     <span class="material-icons-round mr-2">add</span> <span data-i18n="btn_create_activity">Create Activity</span>
                 </button>
             </div>
@@ -370,7 +431,7 @@
 
         <!-- Footer -->
         <footer class="mt-12 mb-6 text-center text-xs text-slate-400 no-print">
-            <p>François Jourde, CC BY SA, based on the <a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" class="underline hover:text-slate-500">Learning Designer</a> (UCL Knowledge Lab, UCL Institute of Education).</p>
+            <p>François Jourde (2026) - CC BY SA, inspired by the <a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" class="underline hover:text-slate-500">Learning Designer</a> (UCL Knowledge Lab, UCL Institute of Education).</p>
         </footer>
     </div>
 
@@ -386,23 +447,23 @@
                     <input type="text" oninput="updateStats()" placeholder="Activity Title" data-i18n-placeholder="ph_activity_title" class="activity-title text-xl font-bold text-slate-800 bg-transparent border-b-2 border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-1 transition-colors">
                 </div>
                 <div class="flex items-center gap-3 no-print">
-                    <button onclick="addStepToActivity(this)" class="text-base font-bold text-indigo-700 bg-indigo-100 hover:bg-indigo-200 px-4 py-2 rounded-lg shadow-sm transition-all flex items-center gap-2 border border-indigo-200 active:scale-95">
+                    <button onclick="addStepToActivity(this)" class="text-base font-bold text-indigo-700 bg-indigo-100 hover:bg-indigo-200 px-4 py-2 rounded-lg shadow-sm transition-all flex items-center gap-2 border border-indigo-200 active:scale-95" data-i18n-title="title_add_step">
                         <span class="material-icons-round text-xl">add</span>
                         <span data-i18n="btn_add_step">Add Step</span>
                     </button>
                     <!-- Duplicate Button -->
-                    <button onclick="duplicateActivity(this)" class="text-slate-400 hover:text-indigo-500 p-2 transition-colors" title="Duplicate Activity" data-i18n-title="title_duplicate">
+                    <button onclick="duplicateActivity(this)" class="text-slate-400 hover:text-indigo-500 p-2 transition-colors" title="Duplicate Activity" data-i18n-title="title_duplicate_activity">
                         <span class="material-icons-round text-2xl">content_copy</span>
                     </button>
                     <!-- Delete Button -->
-                    <button onclick="deleteActivity(this)" class="text-slate-400 hover:text-red-500 p-2 transition-colors" title="Delete Activity">
+                    <button onclick="deleteActivity(this)" class="text-slate-400 hover:text-red-500 p-2 transition-colors" title="Delete Activity" data-i18n-title="title_delete_activity">
                         <span class="material-icons-round text-2xl">delete_outline</span>
                     </button>
                 </div>
             </div>
             <div class="activity-steps-container activity-container ml-5 pl-8 space-y-4 min-h-[50px]"></div>
             <div class="mt-4 pt-2 flex justify-center no-print border-t border-slate-100">
-                <button onclick="addStepToActivity(this)" class="text-sm font-semibold text-slate-400 hover:text-indigo-600 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 hover:bg-slate-50">
+                <button onclick="addStepToActivity(this)" class="text-sm font-semibold text-slate-400 hover:text-indigo-600 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 hover:bg-slate-50" data-i18n-title="title_add_step">
                     <span class="material-icons-round text-base">add</span>
                     <span data-i18n="btn_add_step">Add Step</span>
                 </button>
@@ -535,11 +596,11 @@
 
                 <div class="absolute top-2 right-2 flex flex-col gap-1 no-print opacity-0 group-hover:opacity-100 transition-opacity">
                     <!-- Duplicate Step Button -->
-                    <button onclick="duplicateStep(this)" class="text-slate-300 hover:text-indigo-500 p-1" title="Duplicate Step" data-i18n-title="title_duplicate">
+                    <button onclick="duplicateStep(this)" class="text-slate-300 hover:text-indigo-500 p-1" title="Duplicate Step" data-i18n-title="title_duplicate_step">
                         <span class="material-icons-round text-lg">content_copy</span>
                     </button>
                     <!-- Delete Step Button -->
-                    <button onclick="deleteStep(this)" class="text-slate-300 hover:text-red-400 p-1" title="Delete Step">
+                    <button onclick="deleteStep(this)" class="text-slate-300 hover:text-red-400 p-1" title="Delete Step" data-i18n-title="title_delete_step">
                         <span class="material-icons-round text-lg">close</span>
                     </button>
                 </div>
@@ -567,6 +628,11 @@
                 btn_print: "Print / PDF",
                 btn_save: "Save",
                 btn_load: "Load",
+                grp_project: "Project",
+                grp_view: "View",
+                grp_actions: "Actions",
+                btn_export: "Export for GenAI",
+                info_export_genai: "The export format is the learning design in Markdown for easy processing by a generative AI chatbot.",
                 label_total_time: "Total Calculated Time and Distribution of Learning Types",
                 status_calculating: "Auto-calculating...",
                 label_class_size: "Cohort Size",
@@ -636,7 +702,31 @@
                 md_format_groups: "Groups of",
                 md_tasks: "Student Tasks & Instructions",
                 md_notes: "Pedagogical Notes",
-                title_duplicate: "Duplicate",
+                title_duplicate_activity: "Duplicate this activity",
+                title_delete_activity: "Delete this activity",
+                title_duplicate_step: "Duplicate this step",
+                title_delete_step: "Delete this step",
+                title_save_project: "Save current project to file",
+                title_load_project: "Load project from file",
+                title_switch_language: "Switch language / Changer la langue",
+                title_tab_designer: "Edit learning design",
+                title_tab_analysis: "View analytics and dashboard",
+                title_new_activity: "Add a new activity module",
+                title_toggle_panel: "Show/Hide parameters",
+                title_add_outcome: "Add learning outcome",
+                title_remove_outcome: "Remove outcome",
+                title_add_step: "Add a new learning step",
+                title_create_activity: "Create your first activity",
+                title_help: "Help & Information",
+                help_title: "How to use Learning Designer",
+                help_structure_title: "1. Design Structure",
+                help_structure_text: "Build your course by adding <strong>Activities</strong> (modules/topics) and filling them with <strong>Steps</strong> (specific tasks). Reorder items using the drag handles <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
+                help_types_title: "2. Learning Types",
+                help_types_intro: "Select a pedagogical type for each step:",
+                help_analysis_title: "3. Analysis Dashboard",
+                help_analysis_text: "Switch to the <strong>Analysis</strong> tab to visualize the balance of your design. Check the \"Pedagogical Balance\" radar chart and the \"Context\" pie charts to ensure your course meets its goals.",
+                help_export_title: "4. Save & Export",
+                help_export_text: "<strong>Save/Load:</strong> Keep your work in a .json file.<br><strong>Export:</strong> Generate a structured Markdown file optimized for Generative AI (RAG) or documentation.",
                 panel_key_parameters: "Key Parameters",
                 label_course_name: "Course Name",
                 ph_course_name: "Enter course name...",
@@ -671,6 +761,11 @@
                 btn_print: "Imprimer / PDF",
                 btn_save: "Enregistrer",
                 btn_load: "Charger",
+                grp_project: "Projet",
+                grp_view: "Vue",
+                grp_actions: "Actions",
+                btn_export: "Exporter pour GenAI",
+                info_export_genai: "Le format d'exportation est le design pédagogique au format Markdown pour un traitement facilité par un chatbot d'IA générative.",
                 label_total_time: "Durée Totale Calculée et Répartition des Types d'Apprentissage",
                 status_calculating: "Calcul auto...",
                 label_class_size: "Taille de la cohorte",
@@ -740,7 +835,31 @@
                 md_format_groups: "Groupes de",
                 md_tasks: "Tâches et instructions des apprenants",
                 md_notes: "Notes pédagogiques",
-                title_duplicate: "Dupliquer",
+                title_duplicate_activity: "Dupliquer cette activité",
+                title_delete_activity: "Supprimer cette activité",
+                title_duplicate_step: "Dupliquer cette étape",
+                title_delete_step: "Supprimer cette étape",
+                title_save_project: "Enregistrer le projet dans un fichier",
+                title_load_project: "Charger un projet depuis un fichier",
+                title_switch_language: "Changer la langue / Switch language",
+                title_tab_designer: "Éditer le design pédagogique",
+                title_tab_analysis: "Voir les analyses et le tableau de bord",
+                title_new_activity: "Ajouter un nouveau module d'activité",
+                title_toggle_panel: "Afficher/Masquer les paramètres",
+                title_add_outcome: "Ajouter un résultat d'apprentissage",
+                title_remove_outcome: "Supprimer le résultat",
+                title_add_step: "Ajouter une nouvelle étape d'apprentissage",
+                title_create_activity: "Créer votre première activité",
+                title_help: "Aide & Information",
+                help_title: "Comment utiliser le Concepteur Pédagogique",
+                help_structure_title: "1. Structure du Design",
+                help_structure_text: "Construisez votre cours en ajoutant des <strong>Activités</strong> (modules/sujets) et en les remplissant d'<strong>Étapes</strong> (tâches spécifiques). Réorganisez les éléments à l'aide des poignées <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
+                help_types_title: "2. Types d'Apprentissage",
+                help_types_intro: "Sélectionnez un type pédagogique pour chaque étape :",
+                help_analysis_title: "3. Tableau de Bord d'Analyse",
+                help_analysis_text: "Passez à l'onglet <strong>Analyse</strong> pour visualiser l'équilibre de votre conception. Vérifiez le diagramme radar \"Équilibre Pédagogique\" et les diagrammes circulaires \"Contexte\" pour vous assurer que votre cours atteint ses objectifs.",
+                help_export_title: "4. Enregistrer & Exporter",
+                help_export_text: "<strong>Enregistrer/Charger :</strong> Conservez votre travail dans un fichier .json.<br><strong>Exporter :</strong> Générez un fichier Markdown structuré optimisé pour l'IA générative (RAG) ou la documentation.",
                 panel_key_parameters: "Paramètres Clés",
                 label_course_name: "Nom du Cours",
                 ph_course_name: "Entrez le nom...",
@@ -807,6 +926,20 @@
         function togglePanel(panelId) {
             const content = document.getElementById(panelId);
             const icon = document.getElementById(panelId + '-icon');
+            
+            // Check if it's the help panel (which doesn't have an icon ID like key-params)
+            if(panelId === 'help-panel') {
+                if (content.classList.contains('open')) {
+                    content.classList.remove('open');
+                    setTimeout(() => content.style.display = 'none', 300); // Hide after transition
+                } else {
+                    content.style.display = 'block';
+                    // Small delay to allow display:block to apply before adding class for transition
+                    setTimeout(() => content.classList.add('open'), 10);
+                }
+                return;
+            }
+
             if (content.classList.contains('open')) {
                 content.classList.remove('open');
                 icon.classList.remove('open');
@@ -826,6 +959,8 @@
             
             const li = document.createElement('li');
             li.className = "flex items-center justify-between bg-slate-50 px-3 py-2 rounded-md border border-slate-100 group";
+            li.setAttribute("data-i18n-title", "title_remove_outcome");
+            li.title = translations[currentLang].title_remove_outcome;
             li.innerHTML = `
                 <span class="text-sm text-slate-700 outcome-text">${value}</span>
                 <button onclick="this.parentElement.remove(); checkOutcomesEmpty();" class="text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
@@ -962,7 +1097,6 @@
                     event.target.value = '';
                 } catch (err) {
                     alert("Failed to load project file.");
-                    console.error(err);
                 }
             };
             reader.readAsText(file);
@@ -1279,26 +1413,21 @@
                 // Populate Ruler
                 const totalMins = totals.totalSecs / 60;
                 let interval = 0;
-                
-                const roughStep = totalMins / 8; // aim for ~8 ticks
+                const roughStep = totalMins / 8;
                 const magnitudes = [1, 5, 10, 15, 30, 60, 120, 240, 480, 720, 1440, 2880, 10080];
                 interval = magnitudes.reduce((prev, curr) => Math.abs(curr - roughStep) < Math.abs(prev - roughStep) ? curr : prev);
-
                 if (totalMins / interval > 15) interval *= 2;
 
                 for (let t = 0; t <= totalMins; t += interval) {
                     const leftPct = (t / totalMins) * 100;
                     if (leftPct > 100.1) break; 
-
                     const tick = document.createElement('div');
                     tick.className = 'absolute top-0 w-px h-1.5 bg-slate-300';
                     tick.style.left = `${leftPct}%`;
                     rulerContainer.appendChild(tick);
-
                     const label = document.createElement('div');
                     label.className = 'absolute top-2 text-[9px] text-slate-400 font-mono transform -translate-x-1/2 whitespace-nowrap';
                     label.style.left = `${leftPct}%`;
-                    
                     let text = '';
                     if (t === 0) text = '0';
                     else {
@@ -1313,19 +1442,12 @@
                             text = `${t}m`;
                         }
                     }
-                    
-                    if (leftPct > 95) {
-                        label.classList.remove('-translate-x-1/2');
-                        label.classList.add('-translate-x-full');
-                    } else if (leftPct < 5) {
-                        label.classList.remove('-translate-x-1/2');
-                    }
-
+                    if (leftPct > 95) { label.classList.remove('-translate-x-1/2'); label.classList.add('-translate-x-full'); }
+                    else if (leftPct < 5) { label.classList.remove('-translate-x-1/2'); }
                     label.innerText = text;
                     rulerContainer.appendChild(label);
                 }
             }
-
             if (!document.getElementById('view-analysis').classList.contains('hidden')) refreshCharts();
         }
 
