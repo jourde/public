@@ -172,29 +172,19 @@
                 <div class="flex flex-col gap-1">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_view">View</span>
                     <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-2 shadow-sm h-[46px]">
-                        <!-- Help Button -->
                         <button onclick="togglePanel('help-panel')" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-md transition-colors flex items-center justify-center ml-1" data-i18n-title="title_help">
                             <span class="material-icons-round text-2xl">help_outline</span>
                         </button>
-                        
                         <div class="w-px h-6 bg-slate-200"></div>
-
-                        <!-- Fold/Unfold All Button -->
-                        <button onclick="toggleAllActivities()" id="btn-toggle-all" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-md transition-colors flex items-center justify-center" data-i18n-title="title_fold_all">
+                        <button onclick="toggleAllActivities()" id="btn-toggle-all-header" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-md transition-colors flex items-center justify-center" data-i18n-title="title_fold_all">
                             <span id="icon-toggle-all" class="material-icons-round text-2xl">unfold_less</span>
                         </button>
-
                         <div class="w-px h-6 bg-slate-200"></div>
-
-                        <!-- Language Toggle -->
                         <button onclick="toggleLanguage()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-md transition-colors flex items-center gap-1" data-i18n-title="title_switch_language">
                             <span class="material-icons-round text-lg">language</span>
                             <span id="lang-btn-text" class="text-sm font-bold">FR</span>
                         </button>
-                        
                         <div class="w-px h-6 bg-slate-200"></div>
-                        
-                        <!-- Tabs -->
                         <div class="flex bg-slate-100 p-0.5 rounded-md">
                             <button onclick="switchTab('designer')" id="tab-designer" class="nav-tab active px-3 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_designer" data-i18n-title="title_tab_designer">Designer</button>
                             <button onclick="switchTab('analysis')" id="tab-analysis" class="nav-tab px-3 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_analysis" data-i18n-title="title_tab_analysis">Analysis</button>
@@ -381,6 +371,14 @@
 
         <!-- Tab: Designer -->
         <div id="view-designer">
+            <!-- Added Toolbar -->
+            <div class="flex justify-end mb-4 no-print">
+                <button onclick="toggleAllActivities()" class="text-slate-500 hover:text-indigo-600 text-sm font-medium flex items-center gap-1 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100" id="btn-toggle-all-main">
+                    <span id="icon-toggle-all-main" class="material-icons-round text-xl">unfold_less</span>
+                    <span id="text-toggle-all-main" data-i18n="btn_collapse_all">Collapse All</span>
+                </button>
+            </div>
+            
             <div id="activities-root" class="space-y-12">
                 <!-- Activities will be injected here -->
             </div>
@@ -908,7 +906,10 @@
                 ph_aims: "Entrez les objectifs...",
                 label_outcomes: "Résultats",
                 ph_add_outcome: "Ajouter un résultat...",
-                text_no_outcomes: "Aucun résultat défini"
+                text_no_outcomes: "Aucun résultat défini",
+                title_fold_all: "Tout replier / Tout déplier",
+                btn_collapse_all: "Tout replier",
+                btn_expand_all: "Tout déplier"
             }
         };
 
@@ -977,8 +978,8 @@
         function toggleAllActivities() {
             const bodies = document.querySelectorAll('.activity-body');
             const icons = document.querySelectorAll('.activity-group .rotate-icon');
-            const mainBtnIcon = document.getElementById('icon-toggle-all');
-            const mainBtnText = document.getElementById('text-toggle-all');
+            const mainBtnIcon = document.getElementById('icon-toggle-all-main');
+            const mainBtnText = document.getElementById('text-toggle-all-main');
             
             let anyOpen = false;
             bodies.forEach(b => {
@@ -1003,13 +1004,17 @@
 
             // Update main button state
             if (anyOpen) {
-                mainBtnIcon.innerText = 'unfold_more';
-                // mainBtnText.innerText = translations[currentLang].btn_expand_all;
-                // mainBtnText.setAttribute('data-i18n', 'btn_expand_all');
+                if(mainBtnIcon) mainBtnIcon.innerText = 'unfold_more';
+                if(mainBtnText) {
+                    mainBtnText.innerText = translations[currentLang].btn_expand_all;
+                    mainBtnText.setAttribute('data-i18n', 'btn_expand_all');
+                }
             } else {
-                mainBtnIcon.innerText = 'unfold_less';
-                // mainBtnText.innerText = translations[currentLang].btn_collapse_all;
-                // mainBtnText.setAttribute('data-i18n', 'btn_collapse_all');
+                if(mainBtnIcon) mainBtnIcon.innerText = 'unfold_less';
+                if(mainBtnText) {
+                    mainBtnText.innerText = translations[currentLang].btn_collapse_all;
+                    mainBtnText.setAttribute('data-i18n', 'btn_collapse_all');
+                }
             }
         }
 
