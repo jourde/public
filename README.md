@@ -5,10 +5,10 @@
 
 --
 
-## Artefacts en ligne
-- https://jourde.github.io/artefacts/curseurs.html
-- ...
-- Persona
+## Artefacts pour la formation
+### Curseurs
+  - https://jourde.github.io/artefacts/curseurs.html
+### Persona
   - https://jourde.github.io/artefacts/persona-formation-hybride-gemini-1.html
-- Learning Designer
+### Learning Designer
   - https://jourde.github.io/artefacts/learning-designer.html
