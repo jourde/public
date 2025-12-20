@@ -25,7 +25,7 @@
         
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 20px; /* Reduced thumb size slightly for compactness */
+            height: 20px;
             width: 20px;
             border-radius: 50%;
             background: #4f46e5;
@@ -43,9 +43,9 @@
 
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
-            height: 4px; /* Thinner track */
+            height: 4px;
             cursor: pointer;
-            background: transparent; /* Handled by custom divs */
+            background: transparent;
             border-radius: 9999px;
         }
 
@@ -69,6 +69,11 @@
         .panel-content.open {
             max-height: 2000px;
             opacity: 1;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -95,6 +100,14 @@
                             <span class="material-icons-round text-xl">sort</span>
                             <span class="text-sm font-semibold hidden md:inline">Ordre</span>
                         </button>
+                        
+                        <!-- Experimental Alert Button -->
+                        <button id="btnAlerts" onclick="toggleAlerts()" class="text-slate-400 hover:text-amber-600 hover:bg-amber-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-2" title="Activer l'analyse (Expérimental)">
+                            <span class="material-icons-round text-xl">science</span>
+                            <span class="text-sm font-semibold hidden md:inline">Analyse</span>
+                            <span id="betaBadge" class="hidden md:inline-flex items-center justify-center bg-slate-100 text-slate-500 text-[9px] font-bold px-1.5 py-0.5 rounded border border-slate-200 uppercase tracking-wide">Beta</span>
+                        </button>
+
                         <div class="w-px bg-slate-200 h-6 mx-1"></div>
                         <button onclick="showResetModal()" class="text-slate-600 hover:text-rose-600 hover:bg-rose-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-2" title="Réinitialiser">
                             <span class="material-icons-round text-xl">restart_alt</span>
@@ -175,15 +188,27 @@
             </div>
         </div>
 
-        <!-- Main Content Area: Sliders -->
-        <div class="space-y-4" id="slidersContainer">
-            <!-- Sliders dynamically injected here -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <!-- Main Content Area: Sliders -->
+            <div class="lg:col-span-2 space-y-4" id="slidersContainer">
+                <!-- Sliders dynamically injected here -->
+            </div>
+
+            <!-- Sidebar: Alerts -->
+            <div class="space-y-6 lg:sticky lg:top-8">
+                 <div id="alertsContainer" class="hidden">
+                     <!-- Alerts injected here by JS -->
+                 </div>
+            </div>
         </div>
 
     </div>
 
     <script>
         // --- State Management ---
+        let alertsEnabled = false; // Default off (Experimental)
+        
         const dimensions = [
             { id: 0, leftTitle: "PRÉSENCE", rightTitle: "DISTANCE", leftDesc: "Unité de lieu et de temps.", rightDesc: "Flexibilité géographique.", value: 50 },
             { id: 1, leftTitle: "PETIT GROUPE", rightTitle: "GRAND GROUPE", leftDesc: "Suivi individuel.", rightDesc: "Massification.", value: 50 },
@@ -211,6 +236,28 @@
                 panel.classList.add('open');
             } else {
                 panel.classList.remove('open');
+            }
+        }
+
+        function toggleAlerts() {
+            alertsEnabled = !alertsEnabled;
+            const btn = document.getElementById('btnAlerts');
+            const badge = document.getElementById('betaBadge');
+            
+            if (alertsEnabled) {
+                btn.classList.remove('text-slate-400');
+                btn.classList.add('text-amber-600', 'bg-amber-50');
+                // Active badge style
+                badge.classList.remove('bg-slate-100', 'text-slate-500', 'border-slate-200');
+                badge.classList.add('bg-amber-100', 'text-amber-700', 'border-amber-200');
+                checkAlerts(); // Run check immediately
+            } else {
+                btn.classList.add('text-slate-400');
+                btn.classList.remove('text-amber-600', 'bg-amber-50');
+                // Inactive badge style
+                badge.classList.add('bg-slate-100', 'text-slate-500', 'border-slate-200');
+                badge.classList.remove('bg-amber-100', 'text-amber-700', 'border-amber-200');
+                document.getElementById('alertsContainer').classList.add('hidden');
             }
         }
 
@@ -271,6 +318,7 @@
             const dim = dimensions.find(d => d.id === id);
             if (dim) {
                 dim.value = parseInt(val);
+                checkAlerts();
             }
         }
 
@@ -281,6 +329,64 @@
                 const input = document.getElementById(`range-${id}`);
                 if(input) input.value = 50;
                 updateVal(id, 50);
+            }
+        }
+        
+        function checkAlerts() {
+            const container = document.getElementById('alertsContainer');
+            if (!container) return;
+
+            // If feature disabled, ensure hidden and exit
+            if (!alertsEnabled) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            const d = dimensions.map(dim => dim.value);
+            const alerts = [];
+
+            // Helpers: Left < 50, Right > 50
+            const isL = (idx) => d[idx] < 50;
+            const isR = (idx) => d[idx] > 50;
+
+            // Mappings:
+            // 0: PRESENCE (L) / DISTANCE (R)
+            // 1: PETIT (L) / GRAND (R)
+            // 2: ASYNC (L) / SYNC (R)
+            // 3: INDIV (L) / COLLAB (R)
+            // 4: APPRO (L) / PROD (R)
+            // 5: ACCOMP (L) / SANS ACCOMP (R)
+
+            // Alert Rules
+            if (isR(2) && isR(5)) alerts.push("<strong>Synchrone + Sans accompagnement :</strong> les sessions en temps réel sont difficiles à gérer sans présence de l'enseignant·e pour animer et réguler.");
+            if (isR(3) && isL(2)) alerts.push("<strong>Collaboratif + Asynchrone :</strong> la collaboration en temps différé nécessite des outils et consignes très structurés pour coordonner le travail de groupe.");
+            if (isR(4) && isR(5)) alerts.push("<strong>Production + Sans accompagnement :</strong> les étudiant·es qui doivent produire leurs propres ressources ont souvent besoin de guidage et de feedback.");
+            if (isR(2) && isR(4) && isR(3) && isR(5)) alerts.push("<strong>Synchrone + Production + Collaboratif + Sans accompagnement :</strong> configuration très exigeante qui demande beaucoup d'autonomie et de compétences aux étudiant·es.");
+            if (isR(2) && isR(4) && isR(3) && isL(5)) alerts.push("<strong>Synchrone + Production + Collaboratif (avec accompagnement) :</strong> cette combinaison demande une coordination importante en temps réel.");
+            if (isR(1) && isL(5)) alerts.push("<strong>Grand groupe + Accompagnement fort :</strong> l'accompagnement individualisé devient difficile avec un grand nombre de participants.");
+            if (isR(0) && isR(2)) alerts.push("<strong>Distance + Synchrone :</strong> les sessions synchrones à distance nécessitent des outils fiables et une bonne connexion.");
+            if (isR(0) && isR(1) && isR(5)) alerts.push("<strong>Distance + Grand groupe + Sans accompagnement :</strong> les étudiant·es peuvent facilement se sentir isolés et perdus.");
+            if (isR(0) && isR(3)) alerts.push("<strong>Distance + Collaboratif :</strong> la collaboration à distance nécessite des outils spécifiques et une organisation rigoureuse.");
+            if (isR(1) && isR(3)) alerts.push("<strong>Grand groupe + Collaboratif :</strong> organiser du travail collaboratif avec un grand nombre de participants demande une structuration forte.");
+            if (isR(1) && isR(4)) alerts.push("<strong>Grand groupe + Production :</strong> accompagner la production de ressources par un grand groupe est exigeant.");
+            if (isL(0) && isL(2)) alerts.push("<strong>Présence + Asynchrone :</strong> cette combinaison est peu cohérente. Si les étudiant·es sont en présence, privilégiez les interactions synchrones.");
+
+            if (alerts.length > 0) {
+                container.innerHTML = `
+                    <div class="bg-amber-50 rounded-2xl p-5 border border-amber-100 shadow-sm animate-[slideIn_0.3s_ease-out]">
+                        <h3 class="text-sm font-bold text-amber-800 mb-3 flex items-center gap-2">
+                            <span class="material-icons-round text-amber-500">warning_amber</span>
+                            Points de vigilance (${alerts.length})
+                        </h3>
+                        <div class="space-y-3">
+                            ${alerts.map(a => `<div class="text-xs text-amber-900 bg-white/60 p-2 rounded border border-amber-100/50">${a}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+                container.classList.remove('hidden');
+            } else {
+                container.innerHTML = '';
+                container.classList.add('hidden');
             }
         }
 
@@ -332,12 +438,14 @@
                 d.value = 50;
             });
             renderSliders();
+            checkAlerts();
             hideResetModal();
         }
 
         // --- Initial Load ---
         window.onload = function() {
             renderSliders();
+            checkAlerts();
         };
     </script>
 </body>
