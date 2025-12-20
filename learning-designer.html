@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Designer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Drag and Drop Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <!-- Charts Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .activity-container {
+            border-left: 4px solid #cbd5e1;
+        }
+
+        .step-card {
+            transition: transform 0.1s ease;
+        }
+
+        /* Sortable ghost styles */
+        .sortable-ghost {
+            opacity: 0.3;
+            background-color: #f1f5f9 !important;
+            border: 2px dashed #94a3b8 !important;
+        }
+
+        .sortable-drag {
+            cursor: grabbing;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Pedagogical Color Codes */
+        .type-acquisition { border-left: 8px solid #a1f5ed; } 
+        .type-collaboration { border-left: 8px solid #ffd966; } 
+        .type-discussion { border-left: 8px solid #7aaeea; } 
+        .type-investigation { border-left: 8px solid #f8807f; } 
+        .type-practice { border-left: 8px solid #bb98dc; } 
+        .type-production { border-left: 8px solid #bdea75; } 
+
+        .select-acquisition { background-color: #a1f5ed; color: #000; border-color: #7dded6; }
+        .select-collaboration { background-color: #ffd966; color: #000; border-color: #f0c953; }
+        .select-discussion { background-color: #7aaeea; color: #000; border-color: #6a9bd6; }
+        .select-investigation { background-color: #f8807f; color: #000; border-color: #e06e6d; }
+        .select-practice { background-color: #bb98dc; color: #000; border-color: #a582c6; }
+        .select-production { background-color: #bdea75; color: #000; border-color: #a6d15e; }
+
+        .drag-handle {
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .nav-tab.active {
+            background-color: white;
+            color: #4f46e5;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Helper for Material Icons vertical alignment */
+        .material-icons-round {
+            display: inline-flex;
+            vertical-align: middle;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Foldable Panel Transition */
+        .panel-content {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .panel-content.open {
+            max-height: 2000px; 
+            opacity: 1;
+        }
+        .rotate-icon {
+            transition: transform 0.3s ease;
+        }
+        .rotate-icon.open {
+            transform: rotate(180deg);
+        }
+
+        /* Step Body Foldable */
+        .step-body {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin 0.3s;
+            max-height: 2000px;
+            opacity: 1;
+            overflow: hidden;
+        }
+        .step-body.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        /* Activity Body Foldable */
+        .activity-body {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 5000px; 
+            opacity: 1;
+            overflow: hidden;
+        }
+        .activity-body.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        @media print {
+            .no-print { display: none; }
+            body { background: white; padding: 0; }
+            .activity-group { break-inside: avoid; margin-bottom: 2rem; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; }
+            .step-card { border: 1px solid #e2e8f0; break-inside: avoid; margin-bottom: 1rem; }
+            select { appearance: none; border: none; padding: 0; background: none; }
+            textarea { border: none; padding: 0; }
+            #key-params-panel { max-height: none !important; opacity: 1 !important; display: block !important; }
+            #help-panel { display: none; }
+            .step-body.collapsed, .activity-body.collapsed { max-height: none !important; opacity: 1 !important; display: block !important; }
+            #designer-toolbar { display: none; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col xl:flex-row xl:items-end justify-between mb-8 gap-6">
+            <div class="mb-2 xl:mb-0">
+                <h1 class="text-3xl font-bold text-slate-900" data-i18n="app_title">Learning Designer</h1>
+                <p class="text-slate-500" data-i18n="app_subtitle">Pedagogical Design & Analytics</p>
+            </div>
+            
+            <div class="flex flex-wrap gap-6 no-print items-end">
+                
+                <!-- Project Group -->
+                <div class="flex flex-col gap-1">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_project">Project</span>
+                    <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-1 shadow-sm h-[46px]">
+                        <button onclick="saveProject()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" data-i18n-title="title_save_project">
+                            <span class="material-icons-round text-xl">save</span>
+                            <span class="text-sm font-medium hidden md:inline" data-i18n="btn_save">Save</span>
+                        </button>
+                        <button onclick="triggerFileLoad()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" data-i18n-title="title_load_project">
+                            <span class="material-icons-round text-xl">file_upload</span>
+                            <span class="text-sm font-medium hidden md:inline" data-i18n="btn_load">Load</span>
+                        </button>
+                        <div class="w-px bg-slate-200 my-1 mx-1"></div>
+                        <button onclick="exportMarkdown()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" data-i18n-title="info_export_genai">
+                            <span class="material-icons-round text-xl">download</span>
+                            <span class="text-sm font-medium hidden md:inline" data-i18n="btn_export">Export for GenAI</span>
+                        </button>
+                        <button onclick="exportTerminology()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" data-i18n-title="title_export_term">
+                            <span class="material-icons-round text-xl">translate</span>
+                        </button>
+                        <input type="file" id="load-file-input" class="hidden" accept=".json" onchange="loadProject(event)">
+                    </div>
+                </div>
+
+                <!-- View Group -->
+                <div class="flex flex-col gap-1">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_view">View</span>
+                    <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-2 shadow-sm h-[46px]">
+                        <button onclick="toggleAllActivities()" id="btn-toggle-all-header" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-md transition-colors flex items-center justify-center ml-1" data-i18n-title="title_fold_all">
+                            <span id="icon-toggle-all" class="material-icons-round text-2xl">unfold_less</span>
+                        </button>
+                        <div class="w-px h-6 bg-slate-200"></div>
+                        <button onclick="toggleLanguage()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-md transition-colors flex items-center gap-1" data-i18n-title="title_switch_language">
+                            <span class="material-icons-round text-lg">language</span>
+                            <span id="lang-btn-text" class="text-sm font-bold">FR</span>
+                        </button>
+                        <div class="w-px h-6 bg-slate-200"></div>
+                        <div class="flex bg-slate-100 p-0.5 rounded-md">
+                            <button onclick="switchTab('designer')" id="tab-designer" class="nav-tab active px-3 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_designer" data-i18n-title="title_tab_designer">Designer</button>
+                            <button onclick="switchTab('analysis')" id="tab-analysis" class="nav-tab px-3 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_analysis" data-i18n-title="title_tab_analysis">Analysis</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Group (Isolated) -->
+                <div class="flex flex-col gap-1">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_help">Help</span>
+                    <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-2 shadow-sm h-[46px]">
+                        <button onclick="togglePanel('help-panel')" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1 rounded-md transition-colors flex items-center justify-center" data-i18n-title="title_help">
+                            <span class="material-icons-round text-2xl">help_outline</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- Foldable Help Panel -->
+        <div id="help-panel" class="mb-6 bg-blue-50 rounded-xl shadow-sm border border-blue-100 overflow-hidden panel-content no-print">
+            <div class="p-6 text-slate-700">
+                <div class="flex justify-between items-start mb-4">
+                    <h2 class="text-xl font-bold text-indigo-800 flex items-center gap-2">
+                        <span class="material-icons-round">info</span>
+                        <span data-i18n="help_title">How to use Learning Designer</span>
+                    </h2>
+                    <button onclick="togglePanel('help-panel')" class="text-slate-400 hover:text-slate-600"><span class="material-icons-round">close</span></button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+                    <div>
+                        <h3 class="font-bold text-indigo-700 mb-2 uppercase text-xs tracking-wider" data-i18n="help_structure_title">1. Design Structure</h3>
+                        <p class="mb-2" data-i18n="help_structure_text">Build your course by adding <strong>Activities</strong> (modules/topics) and filling them with <strong>Steps</strong> (specific tasks). Reorder items using the drag handles <span class="inline-block align-middle"><span class="material-icons-round text-base text-slate-400">drag_indicator</span></span>.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-indigo-700 mb-2 uppercase text-xs tracking-wider" data-i18n="help_types_title">2. Learning Types</h3>
+                        <p class="mb-2" data-i18n="help_types_intro">Select a pedagogical type for each step:</p>
+                        <ul class="space-y-1">
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#a1f5ed]"></span> <span data-i18n="type_acquisition">Acquisition</span></li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#ffd966]"></span> <span data-i18n="type_collaboration">Collaboration</span></li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#7aaeea]"></span> <span data-i18n="type_discussion">Discussion</span></li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#f8807f]"></span> <span data-i18n="type_investigation">Investigation</span></li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#bb98dc]"></span> <span data-i18n="type_practice">Practice</span></li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#bdea75]"></span> <span data-i18n="type_production">Production</span></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-indigo-700 mb-2 uppercase text-xs tracking-wider" data-i18n="help_analysis_title">3. Analysis Dashboard</h3>
+                        <p data-i18n="help_analysis_text">Switch to the <strong>Analysis</strong> tab to visualize the balance of your design. Check the "Pedagogical Balance" radar chart and the "Context" pie charts to ensure your course meets its goals.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-indigo-700 mb-2 uppercase text-xs tracking-wider" data-i18n="help_export_title">4. Save & Export</h3>
+                        <p class="mb-2" data-i18n="help_export_text"><strong>Save/Load:</strong> Keep your work in a .json file.<br><strong>Export:</strong> Generate a structured Markdown file optimized for Generative AI (RAG) or documentation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Foldable Key Parameters Panel -->
+        <div class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <button onclick="togglePanel('key-params-panel')" class="w-full px-5 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print" data-i18n-title="title_toggle_panel">
+                <div class="flex items-center gap-2">
+                    <span class="material-icons-round text-slate-500">tune</span>
+                    <span class="font-bold text-slate-700 uppercase text-sm tracking-wide" data-i18n="panel_key_parameters">Key Parameters</span>
+                </div>
+                <span id="key-params-panel-icon" class="material-icons-round text-slate-400 rotate-icon">expand_more</span>
+            </button>
+            <div id="key-params-panel" class="panel-content">
+                <div class="p-5 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- 1. Name -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_course_name">Course Name</label>
+                        <input type="text" id="param-name" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Enter course name..." data-i18n-placeholder="ph_course_name">
+                    </div>
+                    
+                    <!-- 2. Topic -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_topic">Topic</label>
+                        <input type="text" id="param-topic" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Enter topic..." data-i18n-placeholder="ph_topic">
+                    </div>
+
+                    <!-- 3. Author(s) -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_authors">Author(s)</label>
+                        <input type="text" id="param-authors" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Enter author name(s)..." data-i18n-placeholder="ph_authors">
+                    </div>
+
+                    <!-- 4. Mode of Delivery -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_mode">Mode of delivery</label>
+                        <select id="param-mode" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                            <option value="" disabled selected data-i18n="opt_mode_placeholder">Select a mode…</option>
+                            <option value="online" data-i18n="opt_mode_online">Wholly online</option>
+                            <option value="blended" data-i18n="opt_mode_blended">Blended</option>
+                            <option value="classroom" data-i18n="opt_mode_classroom">Classroom-based</option>
+                            <option value="location" data-i18n="opt_mode_location">Location-based</option>
+                            <option value="other" data-i18n="opt_mode_other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- 5. Size of class (Cohort Size) -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_class_size">Cohort Size</label>
+                        <input type="number" id="global-class-size" oninput="updateStats()" value="30" min="1" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-800">
+                    </div>
+
+                    <!-- 6. Learning Time -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_learning_time">Learning Time (Target)</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="param-learning-val" placeholder="0" min="0" class="w-2/3 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <select id="param-learning-unit" class="w-1/3 px-1 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <option value="mins" data-i18n="unit_mins">Mins</option>
+                                <option value="hours" data-i18n="unit_hours">Hours</option>
+                                <option value="days" data-i18n="unit_days">Days</option>
+                                <option value="weeks" data-i18n="unit_weeks">Weeks</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 7. Designed Time -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_designed_time">Designed Time (Planned)</label>
+                         <div class="flex gap-2">
+                            <input type="number" id="param-designed-val" placeholder="0" min="0" class="w-2/3 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <select id="param-designed-unit" class="w-1/3 px-1 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <option value="mins" data-i18n="unit_mins">Mins</option>
+                                <option value="hours" data-i18n="unit_hours">Hours</option>
+                                <option value="days" data-i18n="unit_days">Days</option>
+                                <option value="weeks" data-i18n="unit_weeks">Weeks</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 8. Aims -->
+                    <div class="md:col-span-2 lg:col-span-3">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_aims">Aims</label>
+                        <textarea id="param-aims" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="..." data-i18n-placeholder="ph_aims"></textarea>
+                    </div>
+
+                    <!-- 9. Outcomes (Dynamic List) -->
+                    <div class="md:col-span-2 lg:col-span-3">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_outcomes">Outcomes</label>
+                        <div class="flex gap-2 mb-2 no-print">
+                            <input type="text" id="new-outcome-input" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Add an outcome..." data-i18n-placeholder="ph_add_outcome" onkeypress="handleOutcomeEnter(event)">
+                            <button onclick="addOutcome()" class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg font-bold hover:bg-indigo-200 transition-colors flex items-center justify-center" data-i18n-title="title_add_outcome">
+                                <span class="material-icons-round">add</span>
+                            </button>
+                        </div>
+                        <ul id="outcomes-list" class="space-y-1">
+                            <!-- Outcomes go here -->
+                        </ul>
+                        <p id="no-outcomes-text" class="text-sm text-slate-400 italic mt-2" data-i18n="text_no_outcomes">No outcomes are set</p>
+                    </div>
+
+                    <!-- 10. Description -->
+                    <div class="md:col-span-2 lg:col-span-3">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_description">Description</label>
+                        <textarea id="param-description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Detailed description..." data-i18n-placeholder="ph_description"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Stats Display -->
+        <div class="mb-4 no-print flex flex-col md:flex-row gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col justify-center">
+                <div class="flex justify-between items-center w-full mb-3">
+                    <div>
+                        <span class="text-slate-500 text-sm font-medium uppercase tracking-wider" data-i18n="label_total_time">Total Calculated Time and Distribution of Learning Types</span>
+                        <span id="total-duration" class="ml-2 text-2xl font-bold text-indigo-600">0 mins</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-400 text-xs italic" id="stats-update-info" data-i18n="status_calculating">Auto-calculating...</span>
+                    </div>
+                </div>
+                <div class="w-full flex flex-col gap-1">
+                    <div id="modules-visual-bar" class="w-full h-8 flex rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                    <div id="modules-visual-labels" class="w-full flex text-[10px] text-slate-500 font-medium"></div>
+                    <div id="modules-visual-ruler" class="w-full h-5 relative mt-1 select-none pointer-events-none"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Actions Row (Moved below stats) -->
+        <div class="mb-8 no-print flex justify-start">
+            <button onclick="addActivity()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-bold shadow-md hover:shadow-lg flex items-center gap-2 transition-all transform hover:-translate-y-0.5" data-i18n-title="title_new_activity">
+                <span class="material-icons-round text-2xl">add_circle</span>
+                <span data-i18n="btn_new_activity">New Activity/Module</span>
+            </button>
+        </div>
+
+        <!-- Tab: Designer -->
+        <div id="view-designer">
+            <!-- Added Toolbar -->
+            <div class="flex justify-end mb-4 no-print">
+                <button onclick="toggleAllActivities()" class="text-slate-500 hover:text-indigo-600 text-sm font-medium flex items-center gap-1 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100" id="btn-toggle-all-main">
+                    <span id="icon-toggle-all-main" class="material-icons-round text-xl">unfold_less</span>
+                    <span id="text-toggle-all-main" data-i18n="btn_collapse_all">Collapse All</span>
+                </button>
+            </div>
+            
+            <div id="activities-root" class="space-y-12">
+                <!-- Activities will be injected here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-300">
+                <h3 class="mt-2 text-lg font-medium text-slate-900" data-i18n="empty_title">No activities designed yet</h3>
+                <p class="mt-1 text-sm text-slate-500" data-i18n="empty_subtitle">Start by creating your first Activity container.</p>
+                <button onclick="addActivity()" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" data-i18n-title="title_create_activity">
+                    <span class="material-icons-round mr-2">add</span> <span data-i18n="btn_create_activity">Create Activity</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab: Analysis -->
+        <div id="view-analysis" class="hidden">
+            <div id="analysis-dashboard" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Pedagogical Balance -->
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">pie_chart</span>
+                        <span data-i18n="analysis_balance">Pedagogical Balance</span>
+                    </h3>
+                    <div class="h-64 flex justify-center">
+                        <canvas id="chartLearningTypes"></canvas>
+                    </div>
+                </div>
+
+                <!-- Learning Context -->
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
+                    <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">donut_large</span>
+                        <span data-i18n="analysis_context">Learning Context</span>
+                    </h3>
+                    <div class="grid grid-cols-3 gap-6 h-64 items-start">
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-full aspect-square max-w-[120px]">
+                                <canvas id="chartTrainer"></canvas>
+                                <div id="valTrainer" class="absolute inset-0 flex items-center justify-center font-bold text-slate-800">0%</div>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-600 uppercase mt-4 text-center leading-tight" data-i18n="label_teacher_present">Teacher<br>Present</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-full aspect-square max-w-[120px]">
+                                <canvas id="chartLocation"></canvas>
+                                <div id="valLocation" class="absolute inset-0 flex items-center justify-center font-bold text-slate-800">0%</div>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-600 uppercase mt-4 text-center leading-tight" data-i18n="label_face_to_face">Face to face</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-full aspect-square max-w-[120px]">
+                                <canvas id="chartTime"></canvas>
+                                <div id="valTime" class="absolute inset-0 flex items-center justify-center font-bold text-slate-800">0%</div>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-600 uppercase mt-4 text-center leading-tight" data-i18n="label_synchronous">Synchronous</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Organization -->
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">groups</span>
+                        <span data-i18n="analysis_social">Social Organization</span>
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="chartSocial"></canvas>
+                    </div>
+                </div>
+
+                <!-- Activity Overview -->
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">view_timeline</span>
+                        <span data-i18n="analysis_overview">Activity Overview</span>
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="chartTimeline"></canvas>
+                    </div>
+                </div>
+
+                <!-- Pedagogical Timeline -->
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">timeline</span>
+                        <span data-i18n="analysis_timeline_types">Pedagogical Timeline (Learning Types)</span>
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="chartTypeTimeline"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-12 mb-6 text-center text-xs text-slate-400 no-print">
+            <p>François Jourde (2026) - CC BY SA, inspired by the <a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" class="underline hover:text-slate-500">Learning Designer</a> (UCL Knowledge Lab, UCL Institute of Education).</p>
+            <p class="mt-2" data-i18n="footer_disclaimer">This site does not use tracking or session cookies. No personal data is processed online.</p>
+            <p class="mt-1 italic opacity-75" data-i18n="footer_ai_disclaimer">This application was created mainly using generative AI coding; the code may contain flaws.</p>
+        </footer>
+    </div>
+
+    <!-- Templates -->
+    <template id="activity-template">
+        <div class="activity-group relative">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 px-2 gap-4">
+                <div class="flex-1 flex items-center gap-4">
+                    <div class="drag-handle-activity drag-handle text-slate-300 hover:text-slate-500 no-print flex items-center justify-center w-8 h-8 cursor-grab">
+                        <span class="material-icons-round text-2xl">drag_indicator</span>
+                    </div>
+                    <div class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 activity-index shrink-0">1</div>
+                    <input type="text" oninput="updateStats()" placeholder="Activity Title" data-i18n-placeholder="ph_activity_title" class="activity-title text-xl font-bold text-slate-800 bg-transparent border-b-2 border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-1 transition-colors">
+                </div>
+                <div class="flex items-center gap-3 no-print">
+                    <button onclick="toggleActivity(this)" class="text-slate-400 hover:text-indigo-500 p-2 transition-colors" title="Toggle Activity" data-i18n-title="title_toggle_panel">
+                        <span class="material-icons-round text-2xl rotate-icon">expand_more</span>
+                    </button>
+                    <!-- Duplicate Button -->
+                    <button onclick="duplicateActivity(this)" class="text-slate-400 hover:text-indigo-500 p-2 transition-colors" title="Duplicate Activity" data-i18n-title="title_duplicate_activity">
+                        <span class="material-icons-round text-2xl">content_copy</span>
+                    </button>
+                    <!-- Delete Button -->
+                    <button onclick="deleteActivity(this)" class="text-slate-400 hover:text-red-500 p-2 transition-colors" title="Delete Activity" data-i18n-title="title_delete_activity">
+                        <span class="material-icons-round text-2xl">delete_outline</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="activity-body panel-content open">
+                <div class="activity-steps-container activity-container ml-5 pl-8 space-y-4 min-h-[50px]"></div>
+                <div class="mt-4 pt-2 flex justify-center no-print border-t border-slate-100">
+                    <button onclick="addStepToActivity(this)" class="text-sm font-semibold text-slate-400 hover:text-indigo-600 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 hover:bg-slate-50" data-i18n-title="title_add_step">
+                        <span class="material-icons-round text-base">add</span>
+                        <span data-i18n="btn_add_step">Add Step</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="step-template">
+        <div class="step-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative group flex flex-col">
+            <!-- Header Row -->
+            <div class="flex items-center gap-3 p-3 border-b border-transparent hover:border-slate-100 transition-colors">
+                <div class="drag-handle-step drag-handle flex items-center justify-center text-slate-300 hover:text-slate-500 cursor-grab">
+                    <span class="material-icons-round text-xl">drag_indicator</span>
+                </div>
+                
+                <div class="flex-1">
+                     <input type="text" placeholder="Title..." data-i18n-placeholder="ph_step_title" class="step-input-title w-full px-2 py-1 text-sm font-bold text-slate-700 border-none bg-transparent focus:ring-0 outline-none">
+                </div>
+
+                <div class="w-32">
+                     <select onchange="updateStepType(this)" class="learning-type-select w-full px-2 py-1 text-xs font-bold border rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none transition-all select-acquisition">
+                        <option value="acquisition" data-i18n="type_acquisition">Acquisition</option>
+                        <option value="collaboration" data-i18n="type_collaboration">Collaboration</option>
+                        <option value="discussion" data-i18n="type_discussion">Discussion</option>
+                        <option value="investigation" data-i18n="type_investigation">Investigation</option>
+                        <option value="practice" data-i18n="type_practice">Practice</option>
+                        <option value="production" data-i18n="type_production">Production</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-1 no-print">
+                    <button onclick="toggleStep(this)" class="text-slate-400 hover:text-indigo-500 p-1" title="Toggle Details" data-i18n-title="title_toggle_panel">
+                        <span class="material-icons-round text-lg rotate-icon">expand_more</span>
+                    </button>
+                    <button onclick="duplicateStep(this)" class="text-slate-300 hover:text-indigo-500 p-1" title="Duplicate Step" data-i18n-title="title_duplicate_step">
+                        <span class="material-icons-round text-lg">content_copy</span>
+                    </button>
+                    <button onclick="deleteStep(this)" class="text-slate-300 hover:text-red-400 p-1" title="Delete Step" data-i18n-title="title_delete_step">
+                        <span class="material-icons-round text-lg">close</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Body Row -->
+            <div class="step-body panel-content open p-5 pt-0">
+                <div class="flex flex-col lg:flex-row gap-6 mt-4">
+                    <div class="lg:w-1/3 space-y-4">
+                        <div class="grid grid-cols-1 gap-3">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase -mb-2 flex items-center gap-1">
+                                <span class="material-icons-round text-sm text-slate-400">schedule</span>
+                                <span data-i18n="label_duration">Duration</span>
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="number" oninput="updateStats()" placeholder="0" min="0" class="duration-input w-2/3 px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <select onchange="updateStats()" class="duration-unit w-1/3 px-1 py-1.5 text-[11px] border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <option value="60" data-i18n="unit_mins">Mins</option>
+                                    <option value="3600" data-i18n="unit_hours">Hours</option>
+                                    <option value="86400" data-i18n="unit_days">Days</option>
+                                    <option value="604800" data-i18n="unit_weeks">Weeks</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-1">
+                                <span class="material-icons-round text-sm text-slate-400">groups</span>
+                                <span data-i18n="label_grouping">Grouping</span>
+                            </label>
+                            <div class="space-y-1">
+                                <select onchange="toggleGroupMode(this)" class="step-group-mode w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 bg-white outline-none">
+                                    <option value="class" data-i18n="opt_whole_class">Whole Class</option>
+                                    <option value="groups" data-i18n="opt_groups">Groups</option>
+                                </select>
+                                <div class="step-group-details hidden flex gap-2">
+                                    <div class="relative flex-1">
+                                        <input type="number" min="1" oninput="updateGroupMath(this, 'count')" placeholder="Nb groups" data-i18n-placeholder="ph_nb_groups" class="step-group-count w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none">
+                                        <span class="absolute right-1 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 pointer-events-none pr-1" data-i18n="label_short_groups">Grps</span>
+                                    </div>
+                                    <div class="relative flex-1">
+                                        <input type="number" min="1" oninput="updateGroupMath(this, 'size')" placeholder="Per group" data-i18n-placeholder="ph_per_group" class="step-group-size w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none">
+                                        <span class="absolute right-1 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 pointer-events-none pr-1" data-i18n="label_short_pers">Pers</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 pt-1 border-t border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] w-14 text-slate-400 font-bold uppercase flex items-center gap-1">
+                                    <span class="material-icons-round text-[10px]">face</span>
+                                    <span data-i18n="label_trainer">Trainer</span>
+                                </span>
+                                <select onchange="updateStats()" class="trainer-select flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
+                                    <option value="present" data-i18n="opt_present">Present</option>
+                                    <option value="absent" data-i18n="opt_absent">Absent</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] w-14 text-slate-400 font-bold uppercase flex items-center gap-1">
+                                    <span class="material-icons-round text-[10px]">place</span>
+                                    <span data-i18n="label_place">Place</span>
+                                </span>
+                                <select onchange="updateStats()" class="place-select flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
+                                    <option value="situ" data-i18n="opt_insitu">In Situ</option>
+                                    <option value="online" data-i18n="opt_online">Online</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] w-14 text-slate-400 font-bold uppercase flex items-center gap-1">
+                                    <span class="material-icons-round text-[10px]">event</span>
+                                    <span data-i18n="label_time">Time</span>
+                                </span>
+                                <select onchange="updateStats()" class="time-select flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
+                                    <option value="sync" data-i18n="opt_sync">Synchronous</option>
+                                    <option value="async" data-i18n="opt_async">Asynchronous</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:w-2/3 space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-1">
+                                <span class="material-icons-round text-sm text-slate-400">assignment</span>
+                                <span data-i18n="label_tasks">What learners must do</span>
+                            </label>
+                            <textarea rows="6" placeholder="Instructions..." data-i18n-placeholder="ph_tasks" class="step-input-tasks w-full px-4 py-3 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none leading-relaxed"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-1">
+                                <span class="material-icons-round text-sm text-slate-400">comment</span>
+                                <span data-i18n="label_notes">Notes</span>
+                            </label>
+                            <textarea rows="3" placeholder="Trainer notes..." data-i18n-placeholder="ph_notes" class="step-input-notes w-full px-4 py-3 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none bg-slate-50 text-slate-600 italic"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute top-2 right-2 flex flex-col gap-1 no-print opacity-0 group-hover:opacity-100 transition-opacity">
+                    <!-- Duplicate Step Button -->
+                    <button onclick="duplicateStep(this)" class="text-slate-300 hover:text-indigo-500 p-1" title="Duplicate Step" data-i18n-title="title_duplicate_step">
+                        <span class="material-icons-round text-lg">content_copy</span>
+                    </button>
+                    <!-- Delete Step Button -->
+                    <button onclick="deleteStep(this)" class="text-slate-300 hover:text-red-400 p-1" title="Delete Step" data-i18n-title="title_delete_step">
+                        <span class="material-icons-round text-lg">close</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        const root = document.getElementById('activities-root');
+        const emptyState = document.getElementById('empty-state');
+        const activityTemplate = document.getElementById('activity-template');
+        const stepTemplate = document.getElementById('step-template');
+
+        let charts = { types: null, trainer: null, location: null, time: null, timeline: null, typeTimeline: null, social: null };
+        let currentLang = 'en';
+
+        const translations = {
+            en: {
+                app_title: "Learning Designer",
+                app_subtitle: "Pedagogical Design & Analytics",
+                tab_designer: "Designer",
+                tab_analysis: "Analysis",
+                btn_new_activity: "New Activity/Module",
+                btn_export_md: "Export for AI/RAG",
+                btn_print: "Print / PDF",
+                btn_save: "Save",
+                btn_load: "Load",
+                grp_project: "Project",
+                grp_view: "View",
+                grp_actions: "Actions",
+                grp_help: "Help",
+                btn_export: "Export for GenAI",
+                title_export_term: "Export translation table (EN/FR)",
+                info_export_genai: "The export format is the learning design in Markdown for easy processing by a generative AI chatbot.",
+                label_total_time: "Total Calculated Time and Distribution of Learning Types",
+                status_calculating: "Auto-calculating...",
+                label_class_size: "Cohort Size",
+                empty_title: "No activities designed yet",
+                empty_subtitle: "Start by creating your first Activity container.",
+                btn_create_activity: "Create Activity",
+                btn_add_step: "Add Step",
+                analysis_balance: "Pedagogical Balance",
+                analysis_context: "Learning Context",
+                label_teacher_present: "Teacher<br>Present",
+                label_face_to_face: "Face to face",
+                label_synchronous: "Synchronous",
+                analysis_social: "Social Organization",
+                analysis_overview: "Activity Overview",
+                analysis_timeline_types: "Pedagogical Timeline (Learning Types)",
+                ph_activity_title: "Activity Title (e.g. Module 1: Introduction)",
+                label_step_title: "Step Title",
+                ph_step_title: "Title for this card...",
+                label_learning_type: "Learning Type",
+                label_duration: "Duration",
+                label_grouping: "Grouping",
+                opt_whole_class: "Whole Class",
+                opt_groups: "Groups",
+                ph_nb_groups: "Nb groups",
+                label_short_groups: "Grps",
+                ph_per_group: "Per group",
+                label_short_pers: "Pers",
+                label_trainer: "Trainer",
+                opt_present: "Present",
+                opt_absent: "Absent",
+                label_place: "Place",
+                opt_insitu: "In Situ",
+                opt_online: "Online",
+                label_time: "Time",
+                opt_sync: "Synchronous",
+                opt_async: "Asynchronous",
+                label_tasks: "What learners must do",
+                ph_tasks: "Describe the steps, instructions, and tasks...",
+                label_notes: "Notes",
+                ph_notes: "Trainer notes, resources, or links...",
+                type_acquisition: "Acquisition",
+                type_collaboration: "Collaboration",
+                type_discussion: "Discussion",
+                type_investigation: "Investigation",
+                type_practice: "Practice",
+                type_production: "Production",
+                unit_mins: "Mins",
+                unit_hours: "Hours",
+                unit_days: "Days",
+                unit_weeks: "Weeks",
+                chart_time_allocation: "Time Allocation",
+                chart_social_individual: "Individual",
+                chart_social_small: "Small Group",
+                chart_social_whole: "Whole Class",
+                chart_present: "Present",
+                chart_not_present: "Not present",
+                chart_f2f: "Face to face",
+                chart_online: "Online",
+                chart_sync: "Synchronous",
+                chart_async: "Asynchronous",
+                md_title: "# Learning Experience Design Profile",
+                md_class_size: "Cohort Size",
+                md_total_duration: "Total Estimated Duration",
+                md_untitled_activity: "Untitled Activity",
+                md_untitled_step: "Untitled Step",
+                md_format_whole: "Whole Class",
+                md_format_groups: "Groups of",
+                md_tasks: "Student Tasks & Instructions",
+                md_notes: "Pedagogical Notes",
+                title_duplicate_activity: "Duplicate this activity",
+                title_delete_activity: "Delete this activity",
+                title_duplicate_step: "Duplicate this step",
+                title_delete_step: "Delete this step",
+                title_save_project: "Save current project to file",
+                title_load_project: "Load project from file",
+                title_switch_language: "Switch language / Changer la langue",
+                title_tab_designer: "Edit learning design",
+                title_tab_analysis: "View analytics and dashboard",
+                title_new_activity: "Add a new activity module",
+                title_toggle_panel: "Show/Hide parameters",
+                title_fold_all: "Fold/Unfold all activities",
+                btn_collapse_all: "Collapse All",
+                btn_expand_all: "Expand All",
+                title_add_outcome: "Add learning outcome",
+                title_remove_outcome: "Remove outcome",
+                title_add_step: "Add a new learning step",
+                title_create_activity: "Create your first activity",
+                title_help: "Help & Information",
+                help_title: "How to use Learning Designer",
+                help_structure_title: "1. Design Structure",
+                help_structure_text: "Build your course by adding <strong>Activities</strong> (modules/topics) and filling them with <strong>Steps</strong> (specific tasks). Reorder items using the drag handles <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
+                help_types_title: "2. Learning Types",
+                help_types_intro: "Select a pedagogical type for each step:",
+                help_analysis_title: "3. Analysis Dashboard",
+                help_analysis_text: "Switch to the <strong>Analysis</strong> tab to visualize the balance of your design. Check the \"Pedagogical Balance\" radar chart and the \"Context\" pie charts to ensure your course meets its goals.",
+                help_export_title: "4. Save & Export",
+                help_export_text: "<strong>Save/Load:</strong> Keep your work in a .json file.<br><strong>Export:</strong> Generate a structured Markdown file optimized for Generative AI (RAG) or documentation.",
+                panel_key_parameters: "Key Parameters",
+                label_course_name: "Course Name",
+                ph_course_name: "Enter course name...",
+                label_topic: "Topic",
+                ph_topic: "Enter topic...",
+                label_authors: "Author(s)",
+                ph_authors: "Enter author name(s)...",
+                label_learning_time: "Learning Time (Target)",
+                label_designed_time: "Designed Time (Planned)",
+                label_hours: "h",
+                label_minutes: "m",
+                label_description: "Description",
+                ph_description: "Detailed description...",
+                label_mode: "Mode of delivery",
+                opt_mode_placeholder: "Select a mode…",
+                opt_mode_online: "Wholly online",
+                opt_mode_blended: "Blended",
+                opt_mode_classroom: "Classroom-based",
+                opt_mode_location: "Location-based",
+                opt_mode_other: "Other",
+                label_aims: "Aims",
+                ph_aims: "Enter session aims...",
+                label_outcomes: "Outcomes",
+                ph_add_outcome: "Add an outcome...",
+                text_no_outcomes: "No outcomes are set",
+                footer_disclaimer: "This site does not use tracking or session cookies. No personal data is processed online.",
+                footer_ai_disclaimer: "This application was created mainly using generative AI coding; the code may contain flaws."
+            },
+            fr: {
+                app_title: "Concepteur Pédagogique",
+                app_subtitle: "Design Pédagogique & Analytique",
+                tab_designer: "Design",
+                tab_analysis: "Analyse",
+                btn_new_activity: "Nouvelle Activité/Module",
+                btn_export_md: "Exporter pour IA/RAG",
+                btn_print: "Imprimer / PDF",
+                btn_save: "Enregistrer",
+                btn_load: "Charger",
+                grp_project: "Projet",
+                grp_view: "Vue",
+                grp_actions: "Actions",
+                grp_help: "Aide",
+                btn_export: "Exporter pour GenAI",
+                title_export_term: "Exporter le tableau de traduction (EN/FR)",
+                info_export_genai: "Le format d'exportation est le design pédagogique au format Markdown pour un traitement facilité par un chatbot d'IA générative.",
+                label_total_time: "Durée Totale Calculée et Répartition des Types d'Apprentissage",
+                status_calculating: "Calcul auto...",
+                label_class_size: "Taille de la cohorte",
+                empty_title: "Aucune activité conçue",
+                empty_subtitle: "Commencez par créer votre première activité.",
+                btn_create_activity: "Créer une Activité",
+                btn_add_step: "Ajouter Étape",
+                analysis_balance: "Équilibre Pédagogique",
+                analysis_context: "Contexte d'Apprentissage",
+                label_teacher_present: "Enseignant<br>Présent",
+                label_face_to_face: "En présence",
+                label_synchronous: "Synchrone",
+                analysis_social: "Organisation Sociale",
+                analysis_overview: "Vue d'ensemble des Activités",
+                analysis_timeline_types: "Chronologie Pédagogique (Types)",
+                ph_activity_title: "Titre de l'activité (ex: Module 1 : Introduction)",
+                label_step_title: "Titre de l'étape",
+                ph_step_title: "Titre pour cette carte...",
+                label_learning_type: "Type d'apprentissage",
+                label_duration: "Durée",
+                label_grouping: "Regroupement",
+                opt_whole_class: "Classe entière",
+                opt_groups: "Groupes",
+                ph_nb_groups: "Nb groupes",
+                label_short_groups: "Grps",
+                ph_per_group: "Par groupe",
+                label_short_pers: "Pers",
+                label_trainer: "Formateur",
+                opt_present: "Présent",
+                opt_absent: "Absent",
+                label_place: "Lieu",
+                opt_insitu: "Présentiel",
+                opt_online: "En ligne",
+                label_time: "Temps",
+                opt_sync: "Synchrone",
+                opt_async: "Asynchrone",
+                label_tasks: "Ce que les apprenants doivent faire",
+                ph_tasks: "Décrivez les étapes, instructions et tâches...",
+                label_notes: "Notes",
+                ph_notes: "Notes formateur, ressources ou liens...",
+                type_acquisition: "Acquisition",
+                type_collaboration: "Collaboration",
+                type_discussion: "Discussion",
+                type_investigation: "Enquête",
+                type_practice: "Entraînement",
+                type_production: "Production",
+                unit_mins: "Mins",
+                unit_hours: "Heures",
+                unit_days: "Jours",
+                unit_weeks: "Semaines",
+                chart_time_allocation: "Répartition du temps",
+                chart_social_individual: "Individuel",
+                chart_social_small: "Petit Groupe",
+                chart_social_whole: "Classe Entière",
+                chart_present: "Présent",
+                chart_not_present: "Non présent",
+                chart_f2f: "En présence",
+                chart_online: "En ligne",
+                chart_sync: "Synchrone",
+                chart_async: "Asynchrone",
+                md_title: "# Profil de Design d'Expérience d'Apprentissage",
+                md_class_size: "Taille de la cohorte",
+                md_total_duration: "Durée totale estimée",
+                md_untitled_activity: "Activité sans titre",
+                md_untitled_step: "Étape sans titre",
+                md_format_whole: "Classe entière",
+                md_format_groups: "Groupes de",
+                md_tasks: "Tâches et instructions des apprenants",
+                md_notes: "Notes pédagogiques",
+                title_duplicate: "Dupliquer",
+                panel_key_parameters: "Paramètres Clés",
+                label_course_name: "Nom du Cours",
+                ph_course_name: "Entrez le nom...",
+                label_topic: "Sujet",
+                ph_topic: "Entrez le sujet...",
+                label_learning_time: "Temps d'Apprentissage (Cible)",
+                label_designed_time: "Temps Conçu (Planifié)",
+                label_hours: "h",
+                label_minutes: "m",
+                label_description: "Description",
+                ph_description: "Description détaillée...",
+                label_mode: "Modalité",
+                opt_mode_placeholder: "Sélectionnez une modalité...",
+                opt_mode_online: "Entièrement en ligne",
+                opt_mode_blended: "Hybride",
+                opt_mode_classroom: "En classe",
+                opt_mode_location: "Basé sur le lieu",
+                opt_mode_other: "Autre",
+                label_aims: "Objectifs",
+                ph_aims: "Entrez les objectifs...",
+                label_outcomes: "Résultats",
+                ph_add_outcome: "Ajouter un résultat...",
+                text_no_outcomes: "Aucun résultat défini",
+                title_fold_all: "Tout replier / Tout déplier",
+                btn_collapse_all: "Tout replier",
+                btn_expand_all: "Tout déplier",
+                title_duplicate_activity: "Dupliquer cette activité",
+                title_delete_activity: "Supprimer cette activité",
+                title_duplicate_step: "Dupliquer cette étape",
+                title_delete_step: "Supprimer cette étape",
+                title_save_project: "Enregistrer le projet dans un fichier",
+                title_load_project: "Charger un projet depuis un fichier",
+                title_switch_language: "Changer la langue / Switch language",
+                title_tab_designer: "Éditer le design pédagogique",
+                title_tab_analysis: "Voir les analyses et le tableau de bord",
+                title_new_activity: "Ajouter un nouveau module d'activité",
+                title_toggle_panel: "Afficher/Masquer les paramètres",
+                title_add_outcome: "Ajouter un résultat d'apprentissage",
+                title_remove_outcome: "Supprimer le résultat",
+                title_add_step: "Ajouter une nouvelle étape d'apprentissage",
+                title_create_activity: "Créer votre première activité",
+                title_help: "Aide & Information",
+                help_title: "Comment utiliser le Concepteur Pédagogique",
+                help_structure_title: "1. Structure du Design",
+                help_structure_text: "Construisez votre cours en ajoutant des <strong>Activités</strong> (modules/sujets) et en les remplissant d'<strong>Étapes</strong> (tâches spécifiques). Réorganisez les éléments à l'aide des poignées <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
+                help_types_title: "2. Types d'Apprentissage",
+                help_types_intro: "Sélectionnez un type pédagogique pour chaque étape :",
+                help_analysis_title: "3. Tableau de Bord d'Analyse",
+                help_analysis_text: "Passez à l'onglet <strong>Analyse</strong> pour visualiser l'équilibre de votre conception. Vérifiez le diagramme radar \"Équilibre Pédagogique\" et les diagrammes circulaires \"Contexte\" pour vous assurer que votre cours atteint ses objectifs.",
+                help_export_title: "4. Enregistrer & Exporter",
+                help_export_text: "<strong>Enregistrer/Charger :</strong> Conservez votre travail dans un fichier .json.<br><strong>Exporter :</strong> Générez un fichier Markdown structuré optimisé pour l'IA générative (RAG) ou la documentation.",
+                footer_disclaimer: "Ce site n'utilise pas de cookies de suivi ou de session. Aucune donnée personnelle n'est traitée en ligne.",
+                footer_ai_disclaimer: "Cette application a été créée principalement à l'aide d'une IA générative ; le code peut contenir des erreurs."
+            }
+        };
+
+        const TYPE_COLORS = {
+            acquisition: '#a1f5ed',
+            collaboration: '#ffd966',
+            discussion: '#7aaeea',
+            investigation: '#f8807f',
+            practice: '#bb98dc',
+            production: '#bdea75'
+        };
+
+        // Initialize Sortables
+        new Sortable(root, {
+            animation: 150,
+            handle: '.drag-handle-activity',
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag',
+            onEnd: () => { updateEmptyState(); }
+        });
+
+        new Sortable(document.getElementById('analysis-dashboard'), {
+            animation: 150,
+            handle: '.drag-handle-analysis',
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag'
+        });
+
+        function initSortableSteps(container) {
+            new Sortable(container, {
+                group: 'shared-steps',
+                animation: 150,
+                handle: '.drag-handle-step',
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: () => { updateStats(); }
+            });
+        }
+
+        // --- Foldable Panel Logic ---
+        function togglePanel(panelId) {
+            const content = document.getElementById(panelId);
+            const icon = document.getElementById(panelId + '-icon');
+            
+            // Check if it's the help panel (which doesn't have an icon ID like key-params)
+            if(panelId === 'help-panel') {
+                if (content.classList.contains('open')) {
+                    content.classList.remove('open');
+                    setTimeout(() => content.style.display = 'none', 300); 
+                } else {
+                    content.style.display = 'block';
+                    setTimeout(() => content.classList.add('open'), 10);
+                }
+                return;
+            }
+
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                icon.classList.remove('open');
+            } else {
+                content.classList.add('open');
+                icon.classList.add('open');
+            }
+        }
+
+        function toggleAllActivities() {
+            const bodies = document.querySelectorAll('.activity-body');
+            const icons = document.querySelectorAll('.activity-group .rotate-icon');
+            const mainBtnIcon = document.getElementById('icon-toggle-all-main');
+            const mainBtnText = document.getElementById('text-toggle-all-main');
+            const headerBtnIcon = document.getElementById('icon-toggle-all');
+            
+            let anyOpen = false;
+            bodies.forEach(b => {
+                if (!b.classList.contains('collapsed')) anyOpen = true;
+            });
+
+            bodies.forEach(b => {
+                if (anyOpen) {
+                    b.classList.add('collapsed');
+                } else {
+                    b.classList.remove('collapsed');
+                }
+            });
+
+            icons.forEach(icon => {
+                if (anyOpen) {
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            });
+
+            // Update main button state
+            const iconText = anyOpen ? 'unfold_more' : 'unfold_less';
+            const labelKey = anyOpen ? 'btn_expand_all' : 'btn_collapse_all';
+            
+            if(mainBtnIcon) mainBtnIcon.innerText = iconText;
+            if(mainBtnText) {
+                mainBtnText.innerText = translations[currentLang][labelKey];
+                mainBtnText.setAttribute('data-i18n', labelKey);
+            }
+            if(headerBtnIcon) headerBtnIcon.innerText = iconText;
+        }
+
+        // Foldable Activity
+        function toggleActivity(btn) {
+            const activityGroup = btn.closest('.activity-group');
+            const body = activityGroup.querySelector('.activity-body');
+            const icon = btn.querySelector('.rotate-icon');
+
+            if (body.classList.contains('collapsed')) {
+                body.classList.remove('collapsed');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                body.classList.add('collapsed');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Foldable Step
+        function toggleStep(btn) {
+            const stepCard = btn.closest('.step-card');
+            const body = stepCard.querySelector('.step-body');
+            const icon = btn.querySelector('.rotate-icon');
+
+            if (body.classList.contains('collapsed')) {
+                body.classList.remove('collapsed');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                body.classList.add('collapsed');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // --- Outcome List Logic ---
+        function addOutcome(text = null) {
+            const input = document.getElementById('new-outcome-input');
+            const value = text || input.value.trim();
+            if (!value) return;
+
+            const list = document.getElementById('outcomes-list');
+            
+            const li = document.createElement('li');
+            li.className = "flex items-center justify-between bg-slate-50 px-3 py-2 rounded-md border border-slate-100 group";
+            li.setAttribute("data-i18n-title", "title_remove_outcome");
+            li.title = translations[currentLang].title_remove_outcome;
+            li.innerHTML = `
+                <span class="text-sm text-slate-700 outcome-text">${value}</span>
+                <button onclick="this.parentElement.remove(); checkOutcomesEmpty();" class="text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                    <span class="material-icons-round text-base">close</span>
+                </button>
+            `;
+            list.appendChild(li);
+
+            if (!text) input.value = ''; 
+            checkOutcomesEmpty();
+        }
+
+        function checkOutcomesEmpty() {
+            const list = document.getElementById('outcomes-list');
+            const emptyText = document.getElementById('no-outcomes-text');
+            if (list.children.length === 0) {
+                emptyText.classList.remove('hidden');
+            } else {
+                emptyText.classList.add('hidden');
+            }
+        }
+
+        function handleOutcomeEnter(e) {
+            if (e.key === 'Enter') addOutcome();
+        }
+
+        function exportTerminology() {
+            let md = `# Learning Designer Terminology (EN/FR)\n\n`;
+            md += `| Key | English | French |\n`;
+            md += `|---|---|---|\n`;
+            
+            const keys = Object.keys(translations.en).sort();
+            
+            keys.forEach(key => {
+                const en = translations.en[key] || "";
+                const fr = translations.fr[key] || "";
+                md += `| ${key} | ${en.replace(/\|/g, '\\|')} | ${fr.replace(/\|/g, '\\|')} |\n`;
+            });
+
+            const blob = new Blob([md], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'learning-designer-terminology.md';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // --- Save / Load Feature Logic ---
+
+        function saveProject() {
+            // Collect outcomes
+            const outcomes = [];
+            document.querySelectorAll('#outcomes-list .outcome-text').forEach(el => outcomes.push(el.innerText));
+
+            const project = {
+                version: "1.5",
+                language: currentLang,
+                keyParams: {
+                    name: document.getElementById('param-name').value,
+                    topic: document.getElementById('param-topic').value,
+                    authors: document.getElementById('param-authors').value,
+                    mode: document.getElementById('param-mode').value,
+                    cohortSize: document.getElementById('global-class-size').value,
+                    learningTimeVal: document.getElementById('param-learning-val').value,
+                    learningTimeUnit: document.getElementById('param-learning-unit').value,
+                    designedTimeVal: document.getElementById('param-designed-val').value,
+                    designedTimeUnit: document.getElementById('param-designed-unit').value,
+                    aims: document.getElementById('param-aims').value,
+                    outcomes: outcomes,
+                    description: document.getElementById('param-description').value
+                },
+                activities: []
+            };
+
+            document.querySelectorAll('.activity-group').forEach(actEl => {
+                const actData = {
+                    title: actEl.querySelector('.activity-title').value,
+                    steps: []
+                };
+                actEl.querySelectorAll('.step-card').forEach(stepEl => {
+                    actData.steps.push({
+                        title: stepEl.querySelector('.step-input-title').value,
+                        type: stepEl.querySelector('.learning-type-select').value,
+                        duration: stepEl.querySelector('.duration-input').value,
+                        unit: stepEl.querySelector('.duration-unit').value,
+                        groupMode: stepEl.querySelector('.step-group-mode').value,
+                        groupCount: stepEl.querySelector('.step-group-count').value,
+                        groupSize: stepEl.querySelector('.step-group-size').value,
+                        trainer: stepEl.querySelector('.trainer-select').value,
+                        place: stepEl.querySelector('.place-select').value,
+                        time: stepEl.querySelector('.time-select').value,
+                        tasks: stepEl.querySelector('.step-input-tasks').value,
+                        notes: stepEl.querySelector('.step-input-notes').value
+                    });
+                });
+                project.activities.push(actData);
+            });
+
+            const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `learning-design-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function triggerFileLoad() {
+            document.getElementById('load-file-input').click();
+        }
+
+        function loadProject(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const project = JSON.parse(e.target.result);
+                    root.innerHTML = '';
+                    currentLang = project.language || 'en';
+                    document.getElementById('lang-btn-text').innerText = currentLang === 'en' ? 'FR' : 'EN';
+                    
+                    // Restore Key Params
+                    if (project.keyParams) {
+                        document.getElementById('param-name').value = project.keyParams.name || "";
+                        document.getElementById('param-topic').value = project.keyParams.topic || "";
+                        document.getElementById('param-authors').value = project.keyParams.authors || "";
+                        document.getElementById('param-mode').value = project.keyParams.mode || "";
+                        document.getElementById('global-class-size').value = project.keyParams.cohortSize || 30;
+                        document.getElementById('param-learning-val').value = project.keyParams.learningTimeVal || "";
+                        document.getElementById('param-learning-unit').value = project.keyParams.learningTimeUnit || "mins";
+                        document.getElementById('param-designed-val').value = project.keyParams.designedTimeVal || "";
+                        document.getElementById('param-designed-unit').value = project.keyParams.designedTimeUnit || "mins";
+                        document.getElementById('param-aims').value = project.keyParams.aims || "";
+                        document.getElementById('param-description').value = project.keyParams.description || "";
+                        
+                        // Restore Outcomes
+                        document.getElementById('outcomes-list').innerHTML = '';
+                        if (project.keyParams.outcomes && Array.isArray(project.keyParams.outcomes)) {
+                            project.keyParams.outcomes.forEach(out => addOutcome(out));
+                        }
+                        checkOutcomesEmpty();
+
+                    } else if (project.cohortSize) {
+                        document.getElementById('global-class-size').value = project.cohortSize;
+                    }
+
+                    applyTranslations();
+
+                    project.activities.forEach(actData => {
+                        addActivityFromData(actData);
+                    });
+
+                    updateEmptyState();
+                    updateStats();
+                    event.target.value = '';
+                } catch (err) {
+                    alert("Failed to load project file.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function addActivityFromData(data) {
+            const clone = activityTemplate.content.cloneNode(true);
+            root.appendChild(clone);
+            const actEl = root.lastElementChild;
+            const stepContainer = actEl.querySelector('.activity-steps-container');
+            initSortableSteps(stepContainer);
+            actEl.querySelector('.activity-title').value = data.title || "";
+            data.steps.forEach(stepData => {
+                addStepToActivityFromData(actEl.querySelector('button'), stepData);
+            });
+            return actEl;
+        }
+
+        function addStepToActivityFromData(btn, data) {
+            const activityGroup = btn.closest('.activity-group');
+            const container = activityGroup.querySelector('.activity-steps-container');
+            const clone = stepTemplate.content.cloneNode(true);
+            const stepEl = clone.querySelector('.step-card');
+            stepEl.querySelector('.step-input-title').value = data.title || "";
+            stepEl.querySelector('.learning-type-select').value = data.type || "acquisition";
+            stepEl.querySelector('.duration-input').value = data.duration || 0;
+            stepEl.querySelector('.duration-unit').value = data.unit || "60";
+            stepEl.querySelector('.step-group-mode').value = data.groupMode || "class";
+            stepEl.querySelector('.step-group-count').value = data.groupCount || 1;
+            stepEl.querySelector('.step-group-size').value = data.groupSize || 30;
+            stepEl.querySelector('.trainer-select').value = data.trainer || "present";
+            stepEl.querySelector('.place-select').value = data.place || "situ";
+            stepEl.querySelector('.time-select').value = data.time || "sync";
+            stepEl.querySelector('.step-input-tasks').value = data.tasks || "";
+            stepEl.querySelector('.step-input-notes').value = data.notes || "";
+            if (data.groupMode === 'groups') stepEl.querySelector('.step-group-details').classList.remove('hidden');
+            container.appendChild(clone);
+            updateStepType(stepEl.querySelector('.learning-type-select'));
+            applyTranslations();
+        }
+
+        // --- Core Application Logic ---
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'fr' : 'en';
+            document.getElementById('lang-btn-text').innerText = currentLang === 'en' ? 'FR' : 'EN';
+            applyTranslations();
+            refreshCharts();
+            updateStats();
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) el.innerHTML = translations[currentLang][key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[currentLang][key]) el.placeholder = translations[currentLang][key];
+            });
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (translations[currentLang][key]) el.title = translations[currentLang][key];
+            });
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            if (tab === 'designer') {
+                document.getElementById('view-designer').classList.remove('hidden');
+                document.getElementById('view-analysis').classList.add('hidden');
+            } else {
+                document.getElementById('view-designer').classList.add('hidden');
+                document.getElementById('view-analysis').classList.remove('hidden');
+                refreshCharts();
+            }
+        }
+
+        function toggleGroupMode(select) {
+            const card = select.closest('.step-card');
+            const details = card.querySelector('.step-group-details');
+            if (select.value === 'groups') {
+                details.classList.remove('hidden');
+                const classSize = parseInt(document.getElementById('global-class-size').value) || 0;
+                const countInput = card.querySelector('.step-group-count');
+                const sizeInput = card.querySelector('.step-group-size');
+                if(!countInput.value && classSize > 0) {
+                    countInput.value = Math.ceil(classSize / 5);
+                    sizeInput.value = Math.floor(classSize / countInput.value);
+                }
+            } else {
+                details.classList.add('hidden');
+            }
+            updateStats();
+        }
+
+        function updateGroupMath(input, type) {
+            const card = input.closest('.step-card');
+            const classSize = parseInt(document.getElementById('global-class-size').value) || 0;
+            if (classSize === 0) return;
+            const countInput = card.querySelector('.step-group-count');
+            const sizeInput = card.querySelector('.step-group-size');
+            const val = parseInt(input.value) || 0;
+            if (val > 0) {
+                if (type === 'count') sizeInput.value = Math.max(1, Math.round(classSize / val));
+                else countInput.value = Math.max(1, Math.round(classSize / val));
+            }
+            updateStats();
+        }
+
+        function updateEmptyState() {
+            const hasActivities = root.children.length > 0;
+            emptyState.classList.toggle('hidden', hasActivities);
+            document.querySelectorAll('.activity-index').forEach((el, i) => { el.innerText = i + 1; });
+            updateStats();
+        }
+
+        function addActivity() {
+            const clone = activityTemplate.content.cloneNode(true);
+            root.appendChild(clone);
+            const lastActivity = root.lastElementChild;
+            const stepContainer = lastActivity.querySelector('.activity-steps-container');
+            initSortableSteps(stepContainer);
+            addStepToActivity(lastActivity.querySelector('button'));
+            applyTranslations();
+            updateEmptyState();
+        }
+
+        function addStepToActivity(btn) {
+            const activityGroup = btn.closest('.activity-group');
+            const container = activityGroup.querySelector('.activity-steps-container');
+            const clone = stepTemplate.content.cloneNode(true);
+            const currentClassSize = document.getElementById('global-class-size').value;
+            clone.querySelector('.step-group-size').value = currentClassSize;
+            container.appendChild(clone);
+            applyTranslations();
+            updateStats();
+        }
+
+        function copyFormValues(source, dest) {
+            const srcInputs = source.querySelectorAll('input');
+            const destInputs = dest.querySelectorAll('input');
+            srcInputs.forEach((inp, i) => destInputs[i].value = inp.value);
+            const srcText = source.querySelectorAll('textarea');
+            const destText = dest.querySelectorAll('textarea');
+            srcText.forEach((txt, i) => destText[i].value = txt.value);
+            const srcSelects = source.querySelectorAll('select');
+            const destSelects = dest.querySelectorAll('select');
+            srcSelects.forEach((sel, i) => destSelects[i].value = sel.value);
+        }
+
+        function duplicateActivity(btn) {
+            const original = btn.closest('.activity-group');
+            const clone = original.cloneNode(true);
+            original.after(clone);
+            copyFormValues(original, clone);
+            const stepContainer = clone.querySelector('.activity-steps-container');
+            initSortableSteps(stepContainer);
+            updateEmptyState();
+            updateStats();
+        }
+
+        function duplicateStep(btn) {
+            const original = btn.closest('.step-card');
+            const clone = original.cloneNode(true);
+            original.after(clone);
+            copyFormValues(original, clone);
+            const select = clone.querySelector('.learning-type-select');
+            updateStepType(select);
+            updateStats();
+        }
+
+        function deleteActivity(btn) {
+            if(confirm("Delete this entire activity?")) {
+                btn.closest('.activity-group').remove();
+                updateEmptyState();
+            }
+        }
+
+        function deleteStep(btn) {
+            btn.closest('.step-card').remove();
+            updateStats();
+        }
+
+        function updateStepType(select) {
+            const card = select.closest('.step-card');
+            const type = select.value;
+            const types = Object.keys(TYPE_COLORS).map(t => `type-${t}`);
+            card.classList.remove(...types);
+            card.classList.add(`type-${type}`);
+            const selectStyles = Object.keys(TYPE_COLORS).map(t => `select-${t}`);
+            select.classList.remove(...selectStyles);
+            select.classList.add(`select-${type}`);
+            updateStats();
+        }
+
+        function getTotals() {
+            const activities = document.querySelectorAll('.activity-group');
+            const classSize = parseInt(document.getElementById('global-class-size').value) || 1;
+            const typeTime = { acquisition: 0, collaboration: 0, discussion: 0, investigation: 0, practice: 0, production: 0 };
+            const contextCounts = { 
+                trainer: { present: 0, absent: 0 }, 
+                place: { situ: 0, online: 0 }, 
+                time: { sync: 0, async: 0 } 
+            };
+            const socialAllocation = { individual: 0, smallGroup: 0, wholeClass: 0 };
+            const timelineData = [];
+            const detailedTimeline = [];
+            const typeTimelinePoints = [];
+            let totalSecs = 0;
+            let currentTimelineSecs = 0;
+
+            activities.forEach((act, idx) => {
+                const title = act.querySelector('.activity-title').value || `${translations[currentLang].md_untitled_activity} ${idx+1}`;
+                let actSecs = 0;
+                const activitySteps = [];
+                const steps = act.querySelectorAll('.step-card');
+                
+                steps.forEach(step => {
+                    const dur = Math.max(0, parseFloat(step.querySelector('.duration-input').value) || 0); // Prevent negative
+                    const unit = parseFloat(step.querySelector('.duration-unit').value) || 60;
+                    const secs = dur * unit;
+                    const type = step.querySelector('.learning-type-select').value;
+                    const startMin = currentTimelineSecs / 60;
+                    const endMin = (currentTimelineSecs + secs) / 60;
+                    typeTimelinePoints.push({ x: [startMin, endMin], y: translations[currentLang][`type_${type}`], type: type });
+                    
+                    const stepTitle = step.querySelector('.step-input-title').value || translations[currentLang].md_untitled_step;
+                    activitySteps.push({
+                        title: stepTitle,
+                        type: type,
+                        duration: secs,
+                        learningTypeLabel: translations[currentLang][`type_${type}`]
+                    });
+
+                    currentTimelineSecs += secs;
+                    const mode = step.querySelector('.step-group-mode').value;
+                    let stepGroupSize = mode === 'groups' ? (parseInt(step.querySelector('.step-group-size').value) || classSize) : classSize;
+                    typeTime[type] += secs;
+                    actSecs += secs;
+                    totalSecs += secs;
+                    if (stepGroupSize === 1) socialAllocation.individual += secs;
+                    else if (mode === 'class' || stepGroupSize >= classSize * 0.8) socialAllocation.wholeClass += secs;
+                    else socialAllocation.smallGroup += secs;
+                    contextCounts.trainer[step.querySelector('.trainer-select').value] += secs;
+                    contextCounts.place[step.querySelector('.place-select').value] += secs;
+                    contextCounts.time[step.querySelector('.time-select').value] += secs;
+                });
+                timelineData.push({ title, duration: Math.round(actSecs / 60) });
+                detailedTimeline.push({ title: title, duration: actSecs, steps: activitySteps });
+            });
+            return { totalSecs, typeTime, contextCounts, timelineData, socialAllocation, typeTimelinePoints, detailedTimeline };
+        }
+
+        function updateStats() {
+            const totals = getTotals();
+            let display = "0 mins";
+            if (totals.totalSecs >= 604800) display = `${(totals.totalSecs / 604800).toFixed(1)} ${translations[currentLang].unit_weeks}`;
+            else if (totals.totalSecs >= 86400) display = `${(totals.totalSecs / 86400).toFixed(1)} ${translations[currentLang].unit_days}`;
+            else if (totals.totalSecs >= 3600) {
+                const h = Math.floor(totals.totalSecs / 3600);
+                const m = Math.round((totals.totalSecs % 3600) / 60);
+                display = `${h}h ${m}m`;
+            } else if (totals.totalSecs > 0) display = `${Math.round(totals.totalSecs / 60)} ${translations[currentLang].unit_mins}`;
+            
+            document.getElementById('total-duration').innerText = display;
+
+            const barContainer = document.getElementById('modules-visual-bar');
+            const labelContainer = document.getElementById('modules-visual-labels');
+            const rulerContainer = document.getElementById('modules-visual-ruler');
+            
+            barContainer.innerHTML = '';
+            labelContainer.innerHTML = '';
+            rulerContainer.innerHTML = '';
+            
+            if (totals.totalSecs > 0) {
+                // Populate Bar
+                totals.detailedTimeline.forEach((activity) => {
+                    if (activity.duration > 0) {
+                        const actWidthPct = (activity.duration / totals.totalSecs) * 100;
+                        const actEl = document.createElement('div');
+                        actEl.className = 'flex h-full border-r border-white last:border-0 relative group';
+                        actEl.style.width = `${actWidthPct}%`;
+                        
+                        activity.steps.forEach(step => {
+                            if (step.duration > 0) {
+                                const stepWidthPct = (step.duration / activity.duration) * 100;
+                                const stepEl = document.createElement('div');
+                                stepEl.style.width = `${stepWidthPct}%`;
+                                stepEl.style.backgroundColor = TYPE_COLORS[step.type];
+                                stepEl.className = 'h-full hover:opacity-80 transition-opacity relative';
+                                const durationMins = Math.round(step.duration/60);
+                                stepEl.title = `${activity.title}\n• ${step.title} (${step.learningTypeLabel})\n• ${durationMins} ${translations[currentLang].unit_mins}`;
+                                actEl.appendChild(stepEl);
+                            }
+                        });
+                        barContainer.appendChild(actEl);
+
+                        const labelEl = document.createElement('div');
+                        labelEl.style.width = `${actWidthPct}%`;
+                        labelEl.className = 'px-1 truncate text-center border-r border-transparent last:border-0';
+                        if (actWidthPct > 5) {
+                            labelEl.innerText = activity.title;
+                            labelEl.title = activity.title;
+                        } else {
+                            labelEl.innerText = '.';
+                            labelEl.classList.add('text-transparent');
+                        }
+                        labelContainer.appendChild(labelEl);
+                    }
+                });
+
+                // Populate Ruler
+                const totalMins = totals.totalSecs / 60;
+                let interval = 0;
+                const roughStep = totalMins / 8;
+                const magnitudes = [1, 5, 10, 15, 30, 60, 120, 240, 480, 720, 1440, 2880, 10080];
+                interval = magnitudes.reduce((prev, curr) => Math.abs(curr - roughStep) < Math.abs(prev - roughStep) ? curr : prev);
+                if (totalMins / interval > 15) interval *= 2;
+
+                for (let t = 0; t <= totalMins; t += interval) {
+                    const leftPct = (t / totalMins) * 100;
+                    if (leftPct > 100.1) break; 
+                    const tick = document.createElement('div');
+                    tick.className = 'absolute top-0 w-px h-1.5 bg-slate-300';
+                    tick.style.left = `${leftPct}%`;
+                    rulerContainer.appendChild(tick);
+                    const label = document.createElement('div');
+                    label.className = 'absolute top-2 text-[9px] text-slate-400 font-mono transform -translate-x-1/2 whitespace-nowrap';
+                    label.style.left = `${leftPct}%`;
+                    let text = '';
+                    if (t === 0) text = '0';
+                    else {
+                        if (interval >= 1440) {
+                             const days = t / 1440;
+                             text = `${Number.isInteger(days) ? days : days.toFixed(1)}${currentLang==='fr'?'j':'d'}`;
+                        } else if (interval >= 60) {
+                            const h = Math.floor(t/60);
+                            const m = t % 60;
+                            text = m === 0 ? `${h}h` : `${h}h${m}`;
+                        } else {
+                            text = `${t}m`;
+                        }
+                    }
+                    if (leftPct > 95) { label.classList.remove('-translate-x-1/2'); label.classList.add('-translate-x-full'); }
+                    else if (leftPct < 5) { label.classList.remove('-translate-x-1/2'); }
+                    label.innerText = text;
+                    rulerContainer.appendChild(label);
+                }
+            }
+            if (!document.getElementById('view-analysis').classList.contains('hidden')) refreshCharts();
+        }
+
+        function createDonutChart(id, data, labels, valId) {
+            if (charts[id]) charts[id].destroy();
+            const total = data[0] + data[1];
+            const percent = total > 0 ? Math.round((data[0] / total) * 100) : 0;
+            document.getElementById(valId).innerText = percent + '%';
+            charts[id] = new Chart(document.getElementById('chart' + id.charAt(0).toUpperCase() + id.slice(1)), {
+                type: 'doughnut',
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#4f46e5', '#f1f5f9'], borderWidth: 0, hoverOffset: 0 }] },
+                options: { cutout: '75%', plugins: { legend: { display: false }, tooltip: { enabled: true } }, maintainAspectRatio: false }
+            });
+        }
+
+        function refreshCharts() {
+            const data = getTotals();
+            const t = translations[currentLang];
+            if (charts.types) charts.types.destroy();
+            charts.types = new Chart(document.getElementById('chartLearningTypes'), {
+                type: 'radar',
+                data: { labels: Object.keys(data.typeTime).map(key => t[`type_${key}`]), datasets: [{ label: t.chart_time_allocation, data: Object.values(data.typeTime), backgroundColor: 'rgba(79, 70, 229, 0.2)', borderColor: '#4f46e5', pointBackgroundColor: Object.values(TYPE_COLORS), borderWidth: 2 }] },
+                options: { scales: { r: { angleLines: { display: false }, suggestedMin: 0, ticks: { display: false } } }, plugins: { legend: { display: false } } }
+            });
+            createDonutChart('trainer', [data.contextCounts.trainer.present, data.contextCounts.trainer.absent], [t.chart_present, t.chart_not_present], 'valTrainer');
+            createDonutChart('location', [data.contextCounts.place.situ, data.contextCounts.place.online], [t.chart_f2f, t.chart_online], 'valLocation');
+            createDonutChart('time', [data.contextCounts.time.sync, data.contextCounts.time.async], [t.chart_sync, t.chart_async], 'valTime');
+            if (charts.social) charts.social.destroy();
+            charts.social = new Chart(document.getElementById('chartSocial'), {
+                type: 'bar',
+                data: { labels: [t.chart_social_individual, t.chart_social_small, t.chart_social_whole], datasets: [{ label: 'Minutes', data: [Math.round(data.socialAllocation.individual / 60), Math.round(data.socialAllocation.smallGroup / 60), Math.round(data.socialAllocation.wholeClass / 60)], backgroundColor: ['#cbd5e1', '#6366f1', '#1e293b'], borderRadius: 8 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            });
+            if (charts.timeline) charts.timeline.destroy();
+            charts.timeline = new Chart(document.getElementById('chartTimeline'), {
+                type: 'bar',
+                data: { labels: data.timelineData.map(d => d.title), datasets: [{ label: 'Minutes', data: data.timelineData.map(d => d.duration), backgroundColor: '#4f46e5', borderRadius: 6 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Mins' } } } }
+            });
+            if (charts.typeTimeline) charts.typeTimeline.destroy();
+            charts.typeTimeline = new Chart(document.getElementById('chartTypeTimeline'), {
+                type: 'bar',
+                data: { labels: ['acquisition', 'investigation', 'practice', 'discussion', 'collaboration', 'production'].map(k => t[`type_${k}`]), datasets: [{ label: 'Timeline', data: data.typeTimelinePoints, backgroundColor: data.typeTimelinePoints.map(p => TYPE_COLORS[p.type]), borderWidth: 0, barPercentage: 0.6 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { const d = context.raw; return `${d.y}: ${Math.round(d.x[0])}m - ${Math.round(d.x[1])}m`; } } } }, scales: { x: { position: 'bottom', title: { display: true, text: 'Time (minutes)' }, min: 0, grid: { color: '#f3f4f6' } }, y: { grid: { color: '#f3f4f6' } } } }
+            });
+        }
+
+        function exportMarkdown() {
+            const data = getTotals();
+            const t = translations[currentLang];
+            let md = `# ${t.md_title}\n\n`;
+            md += `## metadata\n`;
+            md += `- **${t.label_course_name}:** ${document.getElementById('param-name').value}\n`;
+            md += `- **${t.label_topic}:** ${document.getElementById('param-topic').value}\n`;
+            md += `- **${t.label_authors}:** ${document.getElementById('param-authors').value}\n`;
+            md += `- **${t.label_mode}:** ${document.getElementById('param-mode').selectedOptions[0]?.innerText || ''}\n`;
+            md += `- **${t.label_class_size}:** ${document.getElementById('global-class-size').value}\n`;
+            md += `- **${t.label_total_time}:** ${document.getElementById('total-duration').innerText}\n`;
+            md += `- **${t.label_learning_time}:** ${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`;
+            md += `- **${t.label_designed_time}:** ${document.getElementById('param-designed-val').value} ${document.getElementById('param-designed-unit').selectedOptions[0]?.innerText || ''}\n`;
+            md += `- **Design Language:** ${currentLang.toUpperCase()}\n`;
+            md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
+            
+            md += `## key_info\n`;
+            md += `### ${t.label_aims}\n${document.getElementById('param-aims').value}\n\n`;
+            md += `### ${t.label_outcomes}\n`;
+            document.querySelectorAll('#outcomes-list .outcome-text').forEach(el => md += `- ${el.innerText}\n`);
+            md += `\n### ${t.label_description}\n${document.getElementById('param-description').value}\n\n`;
+
+            md += `## pedagogical_structure\n\n`;
+            document.querySelectorAll('.activity-group').forEach((activity, aIdx) => {
+                const activityTitle = activity.querySelector('.activity-title').value || t.md_untitled_activity;
+                md += `### ACTIVITY ${aIdx + 1}: ${activityTitle.toUpperCase()}\n\n`;
+                activity.querySelectorAll('.step-card').forEach((step, sIdx) => {
+                    const stepTitle = step.querySelector('.step-input-title').value || t.md_untitled_step;
+                    const groupMode = step.querySelector('.step-group-mode').value;
+                    let groupInfo = groupMode === 'class' ? t.md_format_whole : `${t.md_format_groups} ${step.querySelector('.step-group-size').value}`;
+                    const tasks = step.querySelector('.step-input-tasks').value || "N/A";
+                    const notes = step.querySelector('.step-input-notes').value || "N/A";
+                    const typeKey = step.querySelector('.learning-type-select').value;
+                    const typeLabel = t[`type_${typeKey}`];
+                    const trainerText = step.querySelector('.trainer-select').selectedOptions[0].innerText;
+                    const placeText = step.querySelector('.place-select').selectedOptions[0].innerText;
+                    const timeText = step.querySelector('.time-select').selectedOptions[0].innerText;
+                    md += `#### STEP ${aIdx + 1}.${sIdx + 1}: ${stepTitle}\n`;
+                    md += `- **TYPE:** ${typeLabel}\n`;
+                    md += `- **DURATION:** ${step.querySelector('.duration-input').value} ${step.querySelector('.duration-unit').selectedOptions[0].innerText}\n`;
+                    md += `- **SOCIAL_ORG:** ${groupInfo}\n`;
+                    md += `- **MODALITY:** ${trainerText}, ${placeText}, ${timeText}\n`;
+                    md += `\n**LEARNER_TASKS:**\n${tasks}\n\n`;
+                    md += `**PEDAGOGICAL_NOTES:**\n${notes}\n\n`;
+                });
+                md += `\n---\n\n`;
+            });
+            const blob = new Blob([md], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'learning-design-profile.md';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        window.onload = () => { addActivity(); };
+    </script>
+</body>
+</html>
