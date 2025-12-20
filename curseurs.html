@@ -74,7 +74,7 @@
 </head>
 <body class="p-4 md:p-8">
 
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-4xl mx-auto">
         <!-- Header Section -->
         <header class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
             <div class="mb-2 md:mb-0">
@@ -87,6 +87,10 @@
                 <div class="flex flex-col gap-1">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Outils</span>
                     <div class="flex items-center bg-white border border-slate-200 rounded-xl p-1.5 gap-1 shadow-sm h-[52px]">
+                         <button onclick="showAboutModal()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-2" title="À propos">
+                            <span class="material-icons-round text-xl">info</span>
+                            <span class="text-sm font-semibold hidden md:inline">Infos</span>
+                        </button>
                         <button onclick="togglePanel('orderPanel')" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-2" title="Réorganiser">
                             <span class="material-icons-round text-xl">sort</span>
                             <span class="text-sm font-semibold hidden md:inline">Ordre</span>
@@ -101,8 +105,8 @@
         </header>
 
         <!-- Custom Reset Modal -->
-        <div id="resetModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden">
-            <div class="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 border border-slate-200">
+        <div id="resetModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden" onclick="if(event.target === this) hideResetModal()">
+            <div class="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 border border-slate-200 animate-[slideIn_0.2s_ease-out]">
                 <div class="flex items-center gap-4 mb-4">
                     <div class="bg-rose-100 p-3 rounded-full text-rose-600">
                         <span class="material-icons-round">refresh</span>
@@ -113,6 +117,38 @@
                 <div class="flex gap-3 justify-end">
                     <button onclick="hideResetModal()" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Annuler</button>
                     <button onclick="performReset()" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-md transition-colors">Réinitialiser</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Modal -->
+        <div id="aboutModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden" onclick="if(event.target === this) hideAboutModal()">
+            <div class="bg-white rounded-2xl p-6 shadow-2xl max-w-md w-full mx-4 border border-slate-200 relative animate-[slideIn_0.2s_ease-out]">
+                <button onclick="hideAboutModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors">
+                    <span class="material-icons-round">close</span>
+                </button>
+                
+                <h3 class="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
+                    <span class="material-icons-round text-indigo-500">info</span>
+                    À propos
+                </h3>
+                
+                <div class="space-y-4">
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Cet outil permet de visualiser et d'équilibrer les 6 dimensions structurelles de votre dispositif pédagogique.
+                    </p>
+                    <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                        <p class="text-xs text-indigo-800 leading-relaxed italic">
+                            Inspiré de : Docq et al. 2023. Enseigner à distance: 5 balises pour vous lancer. Presses universitaires de Louvain.
+                        </p>
+                    </div>
+                    <p class="text-xs text-slate-500 flex items-center gap-2">
+                        <span class="material-icons-round text-sm text-emerald-500">verified_user</span>
+                        Traitement local : toutes les données restent sur votre navigateur, rien n'est envoyé en ligne.
+                    </p>
+                    <div class="text-[10px] text-slate-400 border-t border-slate-100 pt-3 mt-4">
+                        F. Jourde & J. Dubois (2026) • CC BY-SA
+                    </div>
                 </div>
             </div>
         </div>
@@ -139,39 +175,11 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            
-            <!-- Main Content Area: Sliders -->
-            <div class="lg:col-span-2 space-y-4" id="slidersContainer">
-                <!-- Sliders dynamically injected here -->
-            </div>
-
-            <!-- Simple Info Sidebar -->
-            <div class="space-y-6 lg:sticky lg:top-8">
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <button onclick="togglePanel('aboutPanel')" class="w-full flex items-center justify-between p-6 hover:bg-slate-50 transition-colors text-left focus:outline-none group">
-                        <span class="text-xs font-bold text-indigo-500 uppercase tracking-widest group-hover:text-indigo-600">À propos</span>
-                        <span id="aboutIcon" class="material-icons-round text-slate-400 transform transition-transform duration-300">expand_more</span>
-                    </button>
-                    
-                    <div id="aboutPanel" class="panel-content px-6 pb-6">
-                        <p class="text-sm text-slate-600 leading-relaxed mb-4">
-                            Cet outil permet de visualiser et d'équilibrer les 6 dimensions structurelles de votre dispositif pédagogique.
-                        </p>
-                        <p class="text-xs text-slate-500 leading-relaxed mb-4 italic">
-                            Inspiré de : Docq et al. 2023. Enseigner à distance: 5 balises pour vous lancer. Presses universitaires de Louvain.
-                        </p>
-                        <p class="text-xs text-slate-500 leading-relaxed mb-4">
-                            <span class="material-icons-round text-sm align-middle mr-1">verified_user</span>
-                            Traitement local : toutes les données restent sur votre navigateur, rien n'est envoyé en ligne.
-                        </p>
-                        <p class="text-[10px] text-slate-400 border-t border-slate-100 pt-3">
-                            F. Jourde & J. Dubois (2026)<br>CC BY-SA
-                        </p>
-                    </div>
-                </div>
-            </div>
+        <!-- Main Content Area: Sliders -->
+        <div class="space-y-4" id="slidersContainer">
+            <!-- Sliders dynamically injected here -->
         </div>
+
     </div>
 
     <script>
@@ -203,15 +211,6 @@
                 panel.classList.add('open');
             } else {
                 panel.classList.remove('open');
-            }
-
-            // Handle Icon Rotation for About Panel
-            if (panelId === 'aboutPanel') {
-                const icon = document.getElementById('aboutIcon');
-                if (icon) {
-                    if (willOpen) icon.classList.add('rotate-180');
-                    else icon.classList.remove('rotate-180');
-                }
             }
         }
 
@@ -322,13 +321,11 @@
         }
 
         // --- Modal & Reset UI ---
-        function showResetModal() {
-            document.getElementById('resetModal').classList.remove('hidden');
-        }
-
-        function hideResetModal() {
-            document.getElementById('resetModal').classList.add('hidden');
-        }
+        function showResetModal() { document.getElementById('resetModal').classList.remove('hidden'); }
+        function hideResetModal() { document.getElementById('resetModal').classList.add('hidden'); }
+        
+        function showAboutModal() { document.getElementById('aboutModal').classList.remove('hidden'); }
+        function hideAboutModal() { document.getElementById('aboutModal').classList.add('hidden'); }
 
         function performReset() {
             dimensions.forEach(d => {
