@@ -74,29 +74,17 @@
             font-size: 0.9rem;
         }
 
-        /* Toggle Button Area */
-        .controls {
-            background: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 50px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            border: 1px solid var(--border);
-            position: sticky;
-            top: 10px;
-            z-index: 100;
-        }
+        /* Styles .controls supprimés car intégrés dans .actions */
 
         .switch-label {
             font-weight: 600;
             color: var(--text-main);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            height: 100%; /* Alignement vertical */
         }
 
         /* The Switch */
@@ -149,13 +137,45 @@
         .actions {
             margin-top: 1rem;
             display: flex;
-            gap: 8px;
+            gap: 12px;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: stretch;
+        }
+
+        .action-group {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            justify-content: space-between;
+        }
+
+        .action-group-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--secondary);
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
         }
 
         .btn {
-            padding: 6px 12px;
+            padding: 8px; /* Plus carré pour les icônes */
+            min-width: 36px;
             border-radius: 6px;
             border: none;
             cursor: pointer;
@@ -163,7 +183,13 @@
             transition: background 0.2s;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
+            position: relative; /* Pour le tooltip */
+        }
+
+        .btn .material-icons {
+            font-size: 20px;
         }
 
         .btn-outline {
@@ -182,6 +208,44 @@
         }
         .btn-reset:hover {
             background: #dc2626;
+        }
+
+        /* Styles pour les Tooltips (Pop-up explicative) */
+        .btn[data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e293b;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            pointer-events: none;
+            animation: fadeInTooltip 0.2s ease;
+        }
+
+        .btn[data-tooltip]:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 105%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+            z-index: 100;
+            pointer-events: none;
+            animation: fadeInTooltip 0.2s ease;
+        }
+
+        @keyframes fadeInTooltip {
+            from { opacity: 0; transform: translate(-50%, 5px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
         }
 
         /* Grid Layout */
@@ -301,6 +365,31 @@
             display: block;
         }
 
+        /* Suggestions Toggle */
+        .btn-toggle-suggestions {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            width: fit-content;
+        }
+        .btn-toggle-suggestions:hover {
+            text-decoration: underline;
+        }
+        .suggestions-panel {
+            animation: fadeIn 0.3s ease;
+            margin-bottom: 1rem;
+            padding-left: 0.5rem;
+            border-left: 2px solid var(--border);
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
@@ -383,36 +472,67 @@
         <div class="subtitle">Concevoir des formations adaptées à la réalité terrain.</div>
         
         <!-- Added data-html2canvas-ignore to hide during PDF generation -->
-        <div class="controls" data-html2canvas-ignore="true">
-            <label class="switch-label">
-                <span>Vue Standard</span>
-                <label class="switch">
-                    <input type="checkbox" id="contextToggle">
-                    <span class="slider"></span>
-                </label>
-                <span style="color: var(--guyane-color);">Contexte Guyane</span>
-            </label>
-        </div>
-
-        <!-- Added data-html2canvas-ignore to hide during PDF generation -->
         <div class="actions" data-html2canvas-ignore="true">
-            <button class="btn btn-outline" onclick="saveData()">
-                <span class="material-icons" style="font-size: 18px;">save</span> Sauvegarder
-            </button>
-            <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">
-                <span class="material-icons" style="font-size: 18px;">upload_file</span> Charger
-            </button>
-            <button class="btn btn-outline" onclick="exportPDF()">
-                <span class="material-icons" style="font-size: 18px;">picture_as_pdf</span> PDF
-            </button>
-            <button class="btn btn-outline" onclick="exportMarkdown()">
-                <span class="material-icons" style="font-size: 18px;">integration_instructions</span> Markdown
-            </button>
-            <button class="btn btn-outline" onclick="loadExample()">Charger l'exemple "Sarah"</button>
-            <button class="btn btn-outline" onclick="openInfoModal()">
-                <span class="material-icons" style="font-size: 18px;">info</span> Info
-            </button>
-            <button class="btn btn-reset" onclick="resetForm()">Réinitialiser</button>
+            
+            <!-- Bloc Contexte -->
+            <div class="action-group">
+                <span class="action-group-title">Contexte</span>
+                <div class="btn-row">
+                    <label class="switch-label">
+                        <span>Standard</span>
+                        <label class="switch">
+                            <input type="checkbox" id="contextToggle">
+                            <span class="slider"></span>
+                        </label>
+                        <span style="color: var(--guyane-color);">Guyane</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Bloc Gestion -->
+            <div class="action-group">
+                <span class="action-group-title">Gestion</span>
+                <div class="btn-row">
+                    <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()" data-tooltip="Charger une sauvegarde (.json)">
+                        <span class="material-icons">upload_file</span>
+                    </button>
+                    <button class="btn btn-reset" onclick="resetForm()" data-tooltip="Réinitialiser le canevas">
+                        <span class="material-icons">restart_alt</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bloc Export -->
+            <div class="action-group">
+                <span class="action-group-title">Export</span>
+                <div class="btn-row">
+                    <button class="btn btn-outline" onclick="saveData()" data-tooltip="Sauvegarder (JSON)">
+                        <span class="material-icons">save</span>
+                    </button>
+                    <button class="btn btn-outline" onclick="exportPDF()" data-tooltip="Exporter en PDF">
+                        <span class="material-icons">picture_as_pdf</span>
+                    </button>
+                    <button class="btn btn-outline" onclick="exportMarkdown()" data-tooltip="Exporter Profil (Markdown)">
+                        <span class="material-icons">integration_instructions</span>
+                    </button>
+                     <button class="btn btn-outline" onclick="exportFullMarkdown()" data-tooltip="Exporter Canevas Complet (Markdown)">
+                        <span class="material-icons">list_alt</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bloc Aide -->
+            <div class="action-group">
+                <span class="action-group-title">Aide</span>
+                <div class="btn-row">
+                    <button class="btn btn-outline" onclick="loadExample()" data-tooltip="Charger l'exemple 'Sarah'">
+                        <span class="material-icons">face</span>
+                    </button>
+                    <button class="btn btn-outline" onclick="openInfoModal()" data-tooltip="À propos">
+                        <span class="material-icons">info</span>
+                    </button>
+                </div>
+            </div>
             
             <!-- Hidden Input for loading files -->
             <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="loadData(this)">
@@ -448,11 +568,12 @@
                 
                 <div class="form-group">
                     <label>Statut</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-item"><input type="radio" name="status" value="Titulaire"> Titulaire</label>
-                        <label class="checkbox-item"><input type="radio" name="status" value="Contractuel"> Contractuel</label>
-                        <label class="checkbox-item"><input type="radio" name="status" value="Stagiaire"> Stagiaire (ESPE/INSPE)</label>
-                    </div>
+                    <select id="status">
+                        <option value="">Sélectionner...</option>
+                        <option value="Titulaire">Titulaire</option>
+                        <option value="Contractuel">Contractuel</option>
+                        <option value="Stagiaire">Stagiaire (ESPE/INSPE)</option>
+                    </select>
                 </div>
 
                 <!-- Context Guyane -->
@@ -481,24 +602,31 @@
             <div class="card">
                 <h2><span class="material-icons">place</span> Lieu & Classe</h2>
                 
+                <!-- Champ texte libre (Détails) en premier et plus large (textarea) -->
+                <div class="form-group">
+                    <label>Détails</label>
+                    <textarea id="contextDetails" placeholder="Détails"></textarea>
+                </div>
+
                 <!-- Base -->
                 <div class="form-group">
                     <label>Type d'établissement</label>
                     <input type="text" placeholder="Ex: École de quartier..." id="schoolType">
                 </div>
+
+                <!-- Toggle Suggestions -->
+                <button type="button" class="btn-toggle-suggestions" onclick="toggleSuggestions(this)">
+                    <span class="material-icons">add_circle_outline</span> Afficher les suggestions
+                </button>
                 
-                <div class="form-group">
-                    <label>Profil général de la classe</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-item"><input type="checkbox" id="heterogeneity"> Hétérogénéité scolaire</label>
-                        <label class="checkbox-item"><input type="checkbox" id="climate"> Gestion de classe difficile</label>
+                <div class="suggestions-panel" style="display: none;">
+                    <div class="form-group">
+                        <label>Profil général de la classe</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="checkbox" id="heterogeneity"> Hétérogénéité scolaire</label>
+                            <label class="checkbox-item"><input type="checkbox" id="climate"> Gestion de classe difficile</label>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Ajout champ texte libre -->
-                <div class="form-group">
-                    <label>Autre / Précisions</label>
-                    <input type="text" id="contextDetails" placeholder="Autre détail sur le contexte...">
                 </div>
 
                 <!-- Context Guyane -->
@@ -529,20 +657,27 @@
             <div class="card">
                 <h2><span class="material-icons">devices</span> Numérique</h2>
                 
-                <!-- Base -->
+                <!-- Champ texte libre (Détails) en premier et plus large -->
                 <div class="form-group">
-                    <label>Outils maîtrisés</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-item"><input type="checkbox" id="office"> Bureautique (Word/PPT)</label>
-                        <label class="checkbox-item"><input type="checkbox" id="institution"> Outils Institutionnels (ENT, Pronote)</label>
-                        <label class="checkbox-item"><input type="checkbox" id="smartphone"> Smartphone only</label>
-                    </div>
+                    <label>Détails</label>
+                    <textarea id="digitalDetails" placeholder="Détails"></textarea>
                 </div>
 
-                <!-- Ajout champ texte libre -->
-                <div class="form-group">
-                    <label>Autre / Précisions</label>
-                    <input type="text" id="digitalDetails" placeholder="Autre outil ou précision...">
+                <!-- Toggle Suggestions -->
+                <button type="button" class="btn-toggle-suggestions" onclick="toggleSuggestions(this)">
+                    <span class="material-icons">add_circle_outline</span> Afficher les suggestions
+                </button>
+
+                <!-- Base -->
+                <div class="suggestions-panel" style="display: none;">
+                    <div class="form-group">
+                        <label>Outils maîtrisés</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="checkbox" id="office"> Bureautique (Word/PPT)</label>
+                            <label class="checkbox-item"><input type="checkbox" id="institution"> Outils Institutionnels (ENT, Pronote)</label>
+                            <label class="checkbox-item"><input type="checkbox" id="smartphone"> Smartphone only</label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Context Guyane -->
@@ -559,20 +694,27 @@
             <div class="card">
                 <h2><span class="material-icons">psychology</span> Motivations</h2>
                 
-                <!-- Base -->
+                <!-- Champ texte libre (Détails) en premier et plus large -->
                 <div class="form-group">
-                    <label>Pourquoi se former ?</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-item"><input type="checkbox" id="classManagement"> Gestion de classe / Autorité</label>
-                        <label class="checkbox-item"><input type="checkbox" id="security"> Sécurisation Pro / Concours</label>
-                        <label class="checkbox-item"><input type="checkbox" id="time"> Gain de temps (Ressources prêtes)</label>
-                    </div>
+                    <label>Détails</label>
+                    <textarea id="motivationDetails" placeholder="Détails"></textarea>
                 </div>
 
-                <!-- Ajout champ texte libre -->
-                <div class="form-group">
-                    <label>Autre / Précisions</label>
-                    <input type="text" id="motivationDetails" placeholder="Autre motivation...">
+                <!-- Toggle Suggestions -->
+                <button type="button" class="btn-toggle-suggestions" onclick="toggleSuggestions(this)">
+                    <span class="material-icons">add_circle_outline</span> Afficher les suggestions
+                </button>
+
+                <!-- Base -->
+                <div class="suggestions-panel" style="display: none;">
+                    <div class="form-group">
+                        <label>Pourquoi se former ?</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="checkbox" id="classManagement"> Gestion de classe / Autorité</label>
+                            <label class="checkbox-item"><input type="checkbox" id="security"> Sécurisation Pro / Concours</label>
+                            <label class="checkbox-item"><input type="checkbox" id="time"> Gain de temps (Ressources prêtes)</label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Context Guyane -->
@@ -590,19 +732,26 @@
             <div class="card">
                 <h2><span class="material-icons">warning</span> Freins</h2>
                 
-                <!-- Base -->
+                <!-- Champ texte libre (Détails) en premier et plus large -->
                 <div class="form-group">
-                    <label>Obstacles à la formation</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-item"><input type="checkbox" id="workload"> Charge de travail</label>
-                        <label class="checkbox-item"><input type="checkbox" id="useless"> Sentiment d'inutilité (Théorie vs Pratique)</label>
-                    </div>
+                    <label>Détails</label>
+                    <textarea id="obstacleDetails" placeholder="Détails"></textarea>
                 </div>
 
-                <!-- Ajout champ texte libre -->
-                <div class="form-group">
-                    <label>Autre / Précisions</label>
-                    <input type="text" id="obstacleDetails" placeholder="Autre frein...">
+                <!-- Toggle Suggestions -->
+                <button type="button" class="btn-toggle-suggestions" onclick="toggleSuggestions(this)">
+                    <span class="material-icons">add_circle_outline</span> Afficher les suggestions
+                </button>
+
+                <!-- Base -->
+                <div class="suggestions-panel" style="display: none;">
+                    <div class="form-group">
+                        <label>Obstacles à la formation</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="checkbox" id="workload"> Charge de travail</label>
+                            <label class="checkbox-item"><input type="checkbox" id="useless"> Sentiment d'inutilité (Théorie vs Pratique)</label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Context Guyane -->
@@ -621,19 +770,26 @@
             <div class="card">
                 <h2><span class="material-icons">headphones</span> Format</h2>
                 
-                <!-- Base -->
+                <!-- Champ texte libre (Détails) en premier et plus large -->
                 <div class="form-group">
-                    <label>Formats préférés</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-item"><input type="checkbox" id="micro"> Micro-learning (5-10 min)</label>
-                        <label class="checkbox-item"><input type="checkbox" id="mobile"> Mobile Learning</label>
-                    </div>
+                    <label>Détails</label>
+                    <textarea id="formatDetails" placeholder="Détails"></textarea>
                 </div>
 
-                <!-- Ajout champ texte libre -->
-                <div class="form-group">
-                    <label>Autre / Précisions</label>
-                    <input type="text" id="formatDetails" placeholder="Autre format...">
+                <!-- Toggle Suggestions -->
+                <button type="button" class="btn-toggle-suggestions" onclick="toggleSuggestions(this)">
+                    <span class="material-icons">add_circle_outline</span> Afficher les suggestions
+                </button>
+
+                <!-- Base -->
+                <div class="suggestions-panel" style="display: none;">
+                    <div class="form-group">
+                        <label>Formats préférés</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="checkbox" id="micro"> Micro-learning (5-10 min)</label>
+                            <label class="checkbox-item"><input type="checkbox" id="mobile"> Mobile Learning</label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Context Guyane -->
@@ -689,6 +845,18 @@
                 body.classList.remove('show-context');
             }
         });
+
+        // Toggle Suggestions Logic
+        function toggleSuggestions(btn) {
+            const panel = btn.nextElementSibling;
+            if (panel.style.display === "none") {
+                panel.style.display = "block";
+                btn.innerHTML = '<span class="material-icons">remove_circle_outline</span> Masquer les suggestions';
+            } else {
+                panel.style.display = "none";
+                btn.innerHTML = '<span class="material-icons">add_circle_outline</span> Afficher les suggestions';
+            }
+        }
 
         // Save Functionality
         function saveData() {
@@ -880,6 +1048,7 @@
                 // Iterate children
                 Array.from(card.children).forEach(child => {
                     if (child.tagName === 'H2') return;
+                    if (child.tagName === 'BUTTON') return; // Skip toggle buttons
 
                     if (child.classList.contains('guyane-context')) {
                         if (isGuyane) {
@@ -891,6 +1060,11 @@
                                 sectionContent += `\n> **Contexte Guyane**\n${contextContent}`;
                             }
                         }
+                    } else if (child.classList.contains('suggestions-panel')) {
+                        // Handle wrapped content
+                        Array.from(child.children).forEach(innerChild => {
+                            sectionContent += processElement(innerChild);
+                        });
                     } else {
                         sectionContent += processElement(child);
                     }
@@ -912,6 +1086,115 @@
             URL.revokeObjectURL(url);
         }
 
+        // Full Canvas Export - Lists all options
+        function exportFullMarkdown() {
+            const name = document.getElementById('name').value || 'Persona';
+            let md = `# Canevas Persona Complet : ${name}\n`;
+            md += `> Contexte : Éducation nationale / Académie de Guyane\n`;
+            md += `> Date : ${new Date().toLocaleDateString()}\n\n`;
+
+            const isGuyane = document.getElementById('contextToggle').checked;
+
+            const processElementFull = (el) => {
+                let text = '';
+                
+                if (el.classList.contains('form-group')) {
+                    const labelEl = el.querySelector('label');
+                    const label = labelEl ? labelEl.textContent.replace(':','').trim() : 'Champ';
+                    
+                    // Text/Select/Textarea
+                    const simpleInput = el.querySelector('input[type="text"], select, textarea');
+                    if (simpleInput) {
+                        // Handle Select specifically to list options
+                        if (simpleInput.tagName === 'SELECT') {
+                            text += `- **${label}** :\n`;
+                            Array.from(simpleInput.options).forEach(opt => {
+                                if (opt.value) { // skip placeholder
+                                    const isSelected = opt.selected;
+                                    text += `  - [${isSelected ? 'x' : ' '}] ${opt.text}\n`;
+                                }
+                            });
+                        } else {
+                            // Text/Textarea
+                            const val = simpleInput.value.trim();
+                            text += `- **${label}** : ${val || '(vide)'}\n`;
+                        }
+                    }
+
+                    // Radio/Checkbox inside form-group
+                    const inputs = el.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+                    if (inputs.length > 0) {
+                        text += `- **${label}** :\n`;
+                        inputs.forEach(input => {
+                            const isChecked = input.checked;
+                            const itemLabel = input.parentElement.textContent.trim();
+                            text += `  - [${isChecked ? 'x' : ' '}] ${itemLabel}\n`;
+                        });
+                    }
+                } else if (el.classList.contains('checkbox-group')) {
+                    // Standalone checkbox group
+                    const inputs = el.querySelectorAll('input[type="checkbox"]');
+                    inputs.forEach(input => {
+                        const isChecked = input.checked;
+                        const itemLabel = input.parentElement.textContent.trim();
+                        text += `- [${isChecked ? 'x' : ' '}] ${itemLabel}\n`;
+                    });
+                }
+                return text;
+            };
+
+            document.querySelectorAll('.card').forEach(card => {
+                let title = "";
+                const h2 = card.querySelector('h2');
+                if (h2) {
+                    const clone = h2.cloneNode(true); 
+                    const icon = clone.querySelector('.material-icons');
+                    if(icon) icon.remove();
+                    title = clone.textContent.trim();
+                }
+
+                let sectionContent = '';
+
+                Array.from(card.children).forEach(child => {
+                    if (child.tagName === 'H2') return;
+                    if (child.tagName === 'BUTTON') return; // Skip toggle buttons
+
+                    if (child.classList.contains('guyane-context')) {
+                        if (isGuyane) {
+                            let contextContent = '';
+                            Array.from(child.children).forEach(ctxChild => {
+                                contextContent += processElementFull(ctxChild);
+                            });
+                            if (contextContent) {
+                                sectionContent += `\n> **Contexte Guyane**\n${contextContent}`;
+                            }
+                        }
+                    } else if (child.classList.contains('suggestions-panel')) {
+                        // Process suggestions regardless of visibility in full export
+                         Array.from(child.children).forEach(innerChild => {
+                            sectionContent += processElementFull(innerChild);
+                        });
+                    } else {
+                        sectionContent += processElementFull(child);
+                    }
+                });
+
+                if (sectionContent.trim()) {
+                    md += `## ${title}\n${sectionContent}\n`;
+                }
+            });
+
+            const blob = new Blob([md], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Persona_Complet_${name.replace(/\s+/g, '_')}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         // Load Example Logic (Sarah)
         function loadExample() {
             // Activer le mode Guyane pour voir les champs remplis
@@ -921,7 +1204,10 @@
             // Identité
             document.getElementById('name').value = "Sarah";
             document.getElementById('level').value = "Élémentaire"; // CP = Elem
-            document.querySelector('input[name="status"][value="Contractuel"]').checked = true;
+            
+            // Updated to Select
+            document.getElementById('status').value = "Contractuel";
+            
             document.querySelector('input[name="origin"][value="Local"]').checked = true; // Assumption based on context or "Recrutement local" logic
             
             // Contexte
