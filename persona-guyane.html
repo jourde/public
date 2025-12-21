@@ -625,6 +625,12 @@
                         <div class="checkbox-group">
                             <label class="checkbox-item"><input type="checkbox" id="heterogeneity"> Hétérogénéité scolaire</label>
                             <label class="checkbox-item"><input type="checkbox" id="climate"> Gestion de classe difficile</label>
+                            <!-- Nouveaux ajouts -->
+                            <label class="checkbox-item"><input type="checkbox" id="multilevel"> Classe à double ou triple niveau</label>
+                            <label class="checkbox-item"><input type="checkbox" id="overcrowded"> Classe surchargée / Faible effectif</label>
+                            <label class="checkbox-item"><input type="checkbox" id="inclusion"> Élèves à besoins particuliers (ULIS, EBEP)</label>
+                            <label class="checkbox-item"><input type="checkbox" id="social"> Précarité sociale des familles</label>
+                            <label class="checkbox-item"><input type="checkbox" id="turnover_students"> Fort turnover des élèves</label>
                         </div>
                     </div>
                 </div>
@@ -671,11 +677,18 @@
                 <!-- Base -->
                 <div class="suggestions-panel" style="display: none;">
                     <div class="form-group">
-                        <label>Outils maîtrisés</label>
+                        <label>Outils & Usages</label>
                         <div class="checkbox-group">
                             <label class="checkbox-item"><input type="checkbox" id="office"> Bureautique (Word/PPT)</label>
                             <label class="checkbox-item"><input type="checkbox" id="institution"> Outils Institutionnels (ENT, Pronote)</label>
                             <label class="checkbox-item"><input type="checkbox" id="smartphone"> Smartphone only</label>
+                            <!-- New items -->
+                            <label class="checkbox-item"><input type="checkbox" id="no_computer"> Pas d'ordi perso / Partage équipement</label>
+                            <label class="checkbox-item"><input type="checkbox" id="basic_training"> Besoin formation bases (fichiers, mails)</label>
+                            <label class="checkbox-item"><input type="checkbox" id="paper_only"> Privilégie le papier / Réticent numérique</label>
+                            <label class="checkbox-item"><input type="checkbox" id="social_watch"> Veille via réseaux sociaux (Insta/TikTok)</label>
+                            <label class="checkbox-item"><input type="checkbox" id="ai_curious"> Curieux/Utilisateur IA générative</label>
+                            <label class="checkbox-item"><input type="checkbox" id="cloud_academic"> Utilise le cloud académique (Nuage/Apps)</label>
                         </div>
                     </div>
                 </div>
@@ -713,6 +726,11 @@
                             <label class="checkbox-item"><input type="checkbox" id="classManagement"> Gestion de classe / Autorité</label>
                             <label class="checkbox-item"><input type="checkbox" id="security"> Sécurisation Pro / Concours</label>
                             <label class="checkbox-item"><input type="checkbox" id="time"> Gain de temps (Ressources prêtes)</label>
+                            <!-- Nouveaux ajouts -->
+                            <label class="checkbox-item"><input type="checkbox" id="innovation"> Tester de nouvelles approches (Ludification, etc.)</label>
+                            <label class="checkbox-item"><input type="checkbox" id="wellbeing"> Climat de classe / Bien-être</label>
+                            <label class="checkbox-item"><input type="checkbox" id="mutation"> Bonifier dossier mutation</label>
+                            <label class="checkbox-item"><input type="checkbox" id="project"> Monter un projet (Sortie, échange)</label>
                         </div>
                     </div>
                 </div>
@@ -750,6 +768,11 @@
                         <div class="checkbox-group">
                             <label class="checkbox-item"><input type="checkbox" id="workload"> Charge de travail</label>
                             <label class="checkbox-item"><input type="checkbox" id="useless"> Sentiment d'inutilité (Théorie vs Pratique)</label>
+                            <!-- Nouveaux ajouts -->
+                            <label class="checkbox-item"><input type="checkbox" id="training_gap"> Offre de formation inadaptée</label>
+                            <label class="checkbox-item"><input type="checkbox" id="logistics"> Transport / Logistique (Accès formation)</label>
+                            <label class="checkbox-item"><input type="checkbox" id="hierarchy"> Manque de soutien hiérarchique</label>
+                            <label class="checkbox-item"><input type="checkbox" id="language_barrier"> Barrière de la langue (Enseignant/Élèves)</label>
                         </div>
                     </div>
                 </div>
@@ -788,6 +811,11 @@
                         <div class="checkbox-group">
                             <label class="checkbox-item"><input type="checkbox" id="micro"> Micro-learning (5-10 min)</label>
                             <label class="checkbox-item"><input type="checkbox" id="mobile"> Mobile Learning</label>
+                            <!-- Nouveaux ajouts -->
+                            <label class="checkbox-item"><input type="checkbox" id="visio"> Visio-conférence (Synchrones)</label>
+                            <label class="checkbox-item"><input type="checkbox" id="hybrid"> Hybride (Présentiel + Distanciel)</label>
+                            <label class="checkbox-item"><input type="checkbox" id="tutoring"> Tutorat / Accompagnement individuel</label>
+                            <label class="checkbox-item"><input type="checkbox" id="resources"> Banque de ressources libre accès</label>
                         </div>
                     </div>
                 </div>
@@ -1203,17 +1231,25 @@
 
             // Identité
             document.getElementById('name').value = "Sarah";
-            document.getElementById('level').value = "Élémentaire";
-            document.getElementById('discipline').value = ""; 
+            document.getElementById('level').value = "Élémentaire"; // CP = Elem
+            
+            // Updated to Select
             document.getElementById('status').value = "Contractuel";
-            document.querySelector('input[name="origin"][value="Local"]').checked = true;
-            document.getElementById('seniority').value = "Arrivant";
-
+            
+            document.querySelector('input[name="origin"][value="Local"]').checked = true; // Assumption based on context or "Recrutement local" logic
+            
             // Contexte
             document.getElementById('contextDetails').value = "Classe de CP surchargée (28 élèves).";
             document.getElementById('schoolType').value = "École de Camopi (Oyapock)";
             document.getElementById('heterogeneity').checked = true;
             document.getElementById('climate').checked = false;
+            // Nouveaux champs context
+            document.getElementById('multilevel').checked = false;
+            document.getElementById('overcrowded').checked = true; // Classe surchargée
+            document.getElementById('inclusion').checked = false;
+            document.getElementById('social').checked = true; // Précarité sociale probable
+            document.getElementById('turnover_students').checked = false;
+
             document.getElementById('location').value = "Fleuve";
             document.getElementById('allophone').checked = true;
             document.getElementById('absenteeism').checked = true;
@@ -1225,6 +1261,14 @@
             document.getElementById('office').checked = true;
             document.getElementById('institution').checked = false;
             document.getElementById('smartphone').checked = true;
+            // New items numeric
+            document.getElementById('no_computer').checked = false;
+            document.getElementById('basic_training').checked = false;
+            document.getElementById('paper_only').checked = false;
+            document.getElementById('social_watch').checked = true; // Probable pour une jeune contractuelle
+            document.getElementById('ai_curious').checked = false;
+            document.getElementById('cloud_academic').checked = false;
+
             document.getElementById('systemD').checked = true;
             document.getElementById('fracture').checked = false;
 
@@ -1233,6 +1277,13 @@
             document.getElementById('classManagement').checked = false;
             document.getElementById('security').checked = true;
             document.getElementById('time').checked = true;
+            
+            // Initialisation nouveaux champs motivation
+            document.getElementById('innovation').checked = true; // Cohérent avec "méthodes ludiques"
+            document.getElementById('wellbeing').checked = false;
+            document.getElementById('mutation').checked = false;
+            document.getElementById('project').checked = false;
+
             document.getElementById('fls').checked = true;
             document.getElementById('culture').checked = true;
             document.getElementById('isolation').checked = true;
@@ -1241,6 +1292,13 @@
             document.getElementById('obstacleDetails').value = "Peu de temps personnel le soir (prépare tout à la main).";
             document.getElementById('workload').checked = true;
             document.getElementById('useless').checked = false;
+            
+            // Initialisation nouveaux champs freins
+            document.getElementById('training_gap').checked = true; // Offre souvent inadaptée au contexte Wayampi
+            document.getElementById('logistics').checked = true; // Transport compliqué depuis Camopi
+            document.getElementById('hierarchy').checked = false;
+            document.getElementById('language_barrier').checked = true; // Sarah ne parle pas la langue des élèves
+
             document.getElementById('internet').checked = true;
             document.getElementById('fatigue').checked = true;
             document.getElementById('turnover').checked = true;
@@ -1250,6 +1308,13 @@
             document.getElementById('formatDetails').value = "A besoin de fichiers audio légers à écouter en pirogue.";
             document.getElementById('micro').checked = true;
             document.getElementById('mobile').checked = true;
+            
+            // Initialisation nouveaux champs format
+            document.getElementById('visio').checked = false; // Pas de débit
+            document.getElementById('hybrid').checked = false;
+            document.getElementById('tutoring').checked = false;
+            document.getElementById('resources').checked = true; // Besoin de fiches outils
+
             document.getElementById('offline').checked = true;
             document.getElementById('whatsapp').checked = true;
             document.getElementById('peer').checked = true;
@@ -1262,6 +1327,14 @@
             document.getElementById('personaForm').reset();
             toggle.checked = false;
             body.classList.remove('show-context');
+            
+            // Fermer toutes les suggestions
+            document.querySelectorAll('.suggestions-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+            document.querySelectorAll('.btn-toggle-suggestions').forEach(btn => {
+                btn.innerHTML = '<span class="material-icons">add_circle_outline</span> Afficher les suggestions';
+            });
         }
 
         // Modal Logic
