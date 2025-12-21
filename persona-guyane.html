@@ -1203,32 +1203,59 @@
 
             // Identité
             document.getElementById('name').value = "Sarah";
-            document.getElementById('level').value = "Élémentaire"; // CP = Elem
-            
-            // Updated to Select
+            document.getElementById('level').value = "Élémentaire";
+            document.getElementById('discipline').value = ""; 
             document.getElementById('status').value = "Contractuel";
-            
-            document.querySelector('input[name="origin"][value="Local"]').checked = true; // Assumption based on context or "Recrutement local" logic
-            
+            document.querySelector('input[name="origin"][value="Local"]').checked = true;
+            document.getElementById('seniority').value = "Arrivant";
+
             // Contexte
+            document.getElementById('contextDetails').value = "Classe de CP surchargée (28 élèves).";
             document.getElementById('schoolType').value = "École de Camopi (Oyapock)";
+            document.getElementById('heterogeneity').checked = true;
+            document.getElementById('climate').checked = false;
             document.getElementById('location').value = "Fleuve";
             document.getElementById('allophone').checked = true;
-            document.getElementById('power').checked = true; // Implies weak tech context
-            
+            document.getElementById('absenteeism').checked = true;
+            document.getElementById('heat').checked = true;
+            document.getElementById('power').checked = true;
+
+            // Numérique
+            document.getElementById('digitalDetails').value = "Utilise son forfait perso pour télécharger des ressources quand le réseau passe.";
+            document.getElementById('office').checked = true;
+            document.getElementById('institution').checked = false;
+            document.getElementById('smartphone').checked = true;
+            document.getElementById('systemD').checked = true;
+            document.getElementById('fracture').checked = false;
+
             // Motivations
-            document.getElementById('fls').checked = true; // "Méthodes lecture classiques ne fonctionnent pas"
+            document.getElementById('motivationDetails').value = "Cherche des méthodes ludiques pour l'apprentissage de la lecture.";
             document.getElementById('classManagement').checked = false;
+            document.getElementById('security').checked = true;
+            document.getElementById('time').checked = true;
+            document.getElementById('fls').checked = true;
+            document.getElementById('culture').checked = true;
+            document.getElementById('isolation').checked = true;
 
             // Freins
-            document.getElementById('internet').checked = true; // "Internet satellite lent"
+            document.getElementById('obstacleDetails').value = "Peu de temps personnel le soir (prépare tout à la main).";
+            document.getElementById('workload').checked = true;
+            document.getElementById('useless').checked = false;
+            document.getElementById('internet').checked = true;
+            document.getElementById('fatigue').checked = true;
+            document.getElementById('turnover').checked = true;
+            document.getElementById('jetlag').checked = false;
 
             // Format
+            document.getElementById('formatDetails').value = "A besoin de fichiers audio légers à écouter en pirogue.";
+            document.getElementById('micro').checked = true;
             document.getElementById('mobile').checked = true;
-            document.getElementById('offline').checked = true; // "PDF légers, podcasts téléchargeables"
+            document.getElementById('offline').checked = true;
+            document.getElementById('whatsapp').checked = true;
+            document.getElementById('peer').checked = true;
 
             // Scénario
-            document.getElementById('scenario').value = "Sarah, 24 ans. Enseigne le CP à Camopi. Ses élèves parlent Wayampi ou Teko. Elle est désespérée par les méthodes inadaptées. Internet est trop lent pour le streaming. Elle a besoin de fiches PDF légères et d'audio pour se former au FLS.";
+            document.getElementById('scenario').value = "Sarah, 24 ans. Enseigne le CP à Camopi. Ses élèves parlent Wayampi ou Teko, très peu le français. Elle est désespérée car les méthodes de lecture classiques ne fonctionnent pas. Internet par satellite est très lent et coupe souvent. Elle ne peut pas regarder de vidéos en streaming. Elle a besoin de fiches-outils illustrées (PDF légers) et de podcasts audio téléchargeables pour se former au FLS.";
         }
 
         function resetForm() {
