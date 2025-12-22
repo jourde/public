@@ -362,7 +362,7 @@
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col justify-center">
                 <div class="flex justify-between items-center w-full mb-3">
                     <div class="flex items-center gap-3">
-                        <span class="text-slate-500 text-xs font-bold uppercase tracking-wider" data-i18n="label_total_time">Total Calculated Time and Distribution of Learning Types</span>
+                        <span class="text-slate-500 text-xs font-bold uppercase tracking-wider" data-i18n="label_total_time">Timeline</span>
                         <div class="bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-1 shadow-sm">
                             <span id="total-duration" class="text-sm font-bold text-indigo-700">0 mins</span>
                         </div>
@@ -734,7 +734,7 @@
                 btn_export: "Export for GenAI",
                 title_export_term: "Export translation table (EN/FR)",
                 info_export_genai: "The export format is the learning design in Markdown for easy processing by a generative AI chatbot.",
-                label_total_time: "Total Calculated Time and Distribution of Learning Types",
+                label_total_time: "Timeline",
                 status_calculating: "Auto-calculating...",
                 label_class_size: "Cohort Size",
                 empty_title: "No activities designed yet",
@@ -893,7 +893,7 @@
                 btn_export: "Exporter pour GenAI",
                 title_export_term: "Exporter le tableau de traduction (EN/FR)",
                 info_export_genai: "Le format d'exportation est le design pédagogique au format Markdown pour un traitement facilité par un chatbot d'IA générative.",
-                label_total_time: "Durée Totale Calculée et Répartition des Types d'Apprentissage",
+                label_total_time: "Chronologie",
                 status_calculating: "Calcul auto...",
                 label_class_size: "Taille de la cohorte",
                 empty_title: "Aucune activité conçue",
@@ -1955,45 +1955,36 @@
                     if (activity.duration > 0) {
                         const actWidthPct = (activity.duration / totals.totalSecs) * 100;
                         const actEl = document.createElement('div');
-                        // CHANGED: Thicker dark border to distinguish Activities/Modules
-                        actEl.className = 'flex h-full border-r-2 border-slate-700 last:border-0 relative group box-border';
+                        // Simplified timeline: just the activity block
+                        actEl.className = 'h-full border-r border-white last:border-0 relative group box-border bg-indigo-300 hover:bg-indigo-400 transition-colors';
                         actEl.style.width = `${actWidthPct}%`;
                         
-                        activity.steps.forEach(step => {
-                            if (step.duration > 0) {
-                                const stepWidthPct = (step.duration / activity.duration) * 100;
-                                const stepEl = document.createElement('div');
-                                stepEl.style.width = `${stepWidthPct}%`;
-                                stepEl.style.backgroundColor = TYPE_COLORS[step.type];
-                                // CHANGED: Added subtle white separator between steps
-                                stepEl.className = 'h-full hover:opacity-80 transition-opacity relative border-r border-white/50 last:border-0';
-                                const durationMins = Math.round(step.duration/60);
-                                stepEl.title = `${activity.title}\n• ${step.title} (${step.learningTypeLabel})\n• ${durationMins} ${translations[currentLang].unit_mins}`;
-                                actEl.appendChild(stepEl);
-                            }
-                        });
+                        // Tooltip for the Activity
+                        const durationMins = Math.round(activity.duration / 60);
+                        actEl.title = `${activity.title} (${durationMins} ${translations[currentLang].unit_mins})`;
+
+                        // Insert block duration text
+                        const labelEl = document.createElement('div');
+                        labelEl.className = 'absolute inset-0 flex items-center justify-center text-[10px] font-bold text-indigo-900 pointer-events-none select-none truncate px-1 opacity-75 group-hover:opacity-100';
+                        
+                        let durationText = `${durationMins}m`;
+                        if (durationMins >= 60) {
+                             const h = Math.floor(durationMins / 60);
+                             const m = durationMins % 60;
+                             durationText = m === 0 ? `${h}h` : `${h}h${m}`;
+                        }
+                        labelEl.innerText = durationText;
+                        
+                        // Only add label if the block is wide enough to reasonably contain text
+                        if (actWidthPct > 3) {
+                            actEl.appendChild(labelEl);
+                        }
+
                         barContainer.appendChild(actEl);
 
-                        const labelEl = document.createElement('div');
-                        labelEl.style.width = `${actWidthPct}%`;
-                        labelEl.className = 'px-1 truncate text-center border-r border-transparent last:border-0';
-                        if (actWidthPct > 5) {
-                            labelEl.innerText = activity.title;
-                            labelEl.title = activity.title;
-                        } else {
-                            labelEl.innerText = '.';
-                            labelEl.classList.add('text-transparent');
-                        }
-                        labelContainer.appendChild(labelEl);
-                    }
-                });
-
-                // Populate Ruler
-                const totalMins = totals.totalSecs / 60;
-                let interval = 0;
-                const roughStep = totalMins / 8;
-                const magnitudes = [1, 5, 10, 15, 30, 60, 120, 240, 480, 720, 1440, 2880, 10080];
-                interval = magnitudes.reduce((prev, curr) => Math.abs(curr - roughStep) < Math.abs(prev - roughStep) ? curr : prev);
+                        const labelContainerEl = document.createElement('div');
+                        labelContainerEl.style.width = `${actWidthPct}%`;
+                        labelContainerEl.className = 'px-1 truncate text-center border-r border-transparent last:border-0';
                 if (totalMins / interval > 15) interval *= 2;
 
                 for (let t = 0; t <= totalMins; t += interval) {
