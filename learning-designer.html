@@ -268,8 +268,8 @@
                 <div class="p-5 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- 1. Name -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_course_name">Course Name</label>
-                        <input type="text" id="param-name" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Enter course name..." data-i18n-placeholder="ph_course_name">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_course_name">Training Name</label>
+                        <input type="text" id="param-name" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Enter training name..." data-i18n-placeholder="ph_course_name">
                     </div>
                     
                     <!-- 2. Topic -->
@@ -321,7 +321,7 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_designed_time">Designed Time (Planned)</label>
                          <div class="flex gap-2 items-center">
-                            <input type="number" id="param-designed-val" placeholder="0" min="0" class="w-2/3 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <input type="number" id="param-designed-val" placeholder="0" min="0" class="w-2/3 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-100 text-slate-500" readonly>
                             <span id="param-designed-unit-display" class="w-1/3 text-sm text-slate-600 font-bold px-1">mins</span>
                         </div>
                     </div>
@@ -370,7 +370,7 @@
 
         <!-- Global Stats Display -->
         <div class="mb-4 no-print flex flex-col md:flex-row gap-4">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col justify-center">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col justify-center overflow-hidden">
                 <div class="flex justify-between items-center w-full mb-3">
                     <div class="flex items-center gap-3">
                         <span class="text-slate-500 text-xs font-bold uppercase tracking-wider" data-i18n="label_total_time">Timeline</span>
@@ -382,11 +382,16 @@
                         <span class="text-slate-400 text-xs italic" id="stats-update-info" data-i18n="status_calculating">Auto-calculating...</span>
                     </div>
                 </div>
-                <div class="w-full flex flex-col gap-1">
-                    <div id="modules-visual-bar" class="w-full h-8 flex rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
-                    <div id="modules-visual-labels" class="w-full flex text-[10px] text-slate-500 font-medium"></div>
-                    <div id="modules-visual-ruler" class="w-full h-5 relative mt-1 select-none pointer-events-none"></div>
+                
+                <!-- Scrollable Wrapper for Timeline -->
+                <div class="overflow-x-auto pb-2">
+                    <div class="flex flex-col gap-1 min-w-[2000px]">
+                        <div id="modules-visual-bar" class="w-full h-8 flex rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                        <div id="modules-visual-labels" class="w-full flex text-[10px] text-slate-500 font-medium"></div>
+                        <div id="modules-visual-ruler" class="w-full h-5 relative mt-1 select-none pointer-events-none"></div>
+                    </div>
                 </div>
+
             </div>
         </div>
         
@@ -860,8 +865,8 @@
                 help_export_title: "4. Save & Export",
                 help_export_text: "<strong>Save/Load:</strong> Keep your work in a .json file.<br><strong>Export:</strong> Generate files in Markdown (GenAI), PDF, or Rich Text formats.",
                 panel_key_parameters: "Parameters",
-                label_course_name: "Course Name",
-                ph_course_name: "Enter course name...",
+                label_course_name: "Training Name",
+                ph_course_name: "Enter training name...",
                 label_topic: "Topic",
                 ph_topic: "Enter topic...",
                 label_authors: "Author(s)",
