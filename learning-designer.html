@@ -398,10 +398,23 @@
                 </div>
                 
                 <!-- Fluid Timeline Container -->
-                <div class="w-full flex flex-col gap-1">
-                    <div id="modules-visual-bar" class="w-full h-8 flex rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
-                    <div id="modules-visual-labels" class="w-full flex text-[10px] text-slate-500 font-medium"></div>
-                    <div id="modules-visual-ruler" class="w-full h-5 relative mt-1 select-none pointer-events-none"></div>
+                <div class="w-full flex flex-col gap-4 mt-2">
+                    
+                    <!-- Track 1: Activities -->
+                    <div class="flex flex-col gap-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Structure (Activities)</span>
+                        <div id="timeline-activities" class="w-full h-8 flex rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                        <div id="timeline-activities-labels" class="w-full flex text-[10px] text-slate-500 font-medium"></div>
+                    </div>
+
+                    <!-- Track 2: Learning Types -->
+                    <div class="flex flex-col gap-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pedagogy (Learning Types)</span>
+                        <div id="timeline-steps" class="w-full h-8 flex rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                    </div>
+
+                    <!-- Shared Ruler -->
+                    <div id="timeline-ruler" class="w-full h-5 relative mt-0 select-none pointer-events-none"></div>
                 </div>
 
             </div>
@@ -1998,29 +2011,36 @@
             
             designedInput.value = designedVal;
 
-            const barContainer = document.getElementById('modules-visual-bar');
-            const labelContainer = document.getElementById('modules-visual-labels');
-            const rulerContainer = document.getElementById('modules-visual-ruler');
+            // DOM Elements for the two timelines
+            const containerActivities = document.getElementById('timeline-activities');
+            const labelsActivities = document.getElementById('timeline-activities-labels');
+            const containerSteps = document.getElementById('timeline-steps');
+            const containerRuler = document.getElementById('timeline-ruler');
             
-            barContainer.innerHTML = '';
-            labelContainer.innerHTML = '';
-            rulerContainer.innerHTML = '';
+            // Clear all
+            containerActivities.innerHTML = '';
+            labelsActivities.innerHTML = '';
+            containerSteps.innerHTML = '';
+            containerRuler.innerHTML = '';
             
             if (totals.totalSecs > 0) {
-                // Populate Bar
-                totals.detailedTimeline.forEach((activity) => {
+                
+                // --- TRACK 1: ACTIVITIES / MODULES ---
+                totals.detailedTimeline.forEach((activity, index) => {
                     if (activity.duration > 0) {
                         const actWidthPct = (activity.duration / totals.totalSecs) * 100;
                         const actEl = document.createElement('div');
-                        // Simplified timeline: just the activity block with centering for inner text
-                        actEl.className = 'h-full border-r border-white last:border-0 relative group box-border bg-indigo-300 hover:bg-indigo-400 transition-colors flex items-center justify-center';
+                        
+                        // Alternating colors (Slate)
+                        const bgClass = index % 2 === 0 ? 'bg-slate-400' : 'bg-slate-500';
+
+                        actEl.className = `h-full border-r border-white last:border-0 relative group box-border ${bgClass} hover:bg-indigo-500 transition-colors flex items-center justify-center`;
                         actEl.style.width = `${actWidthPct}%`;
                         
-                        // Tooltip for the Activity
                         const durationMins = Math.round(activity.duration / 60);
                         actEl.title = `${activity.title} (${durationMins} ${translations[currentLang].unit_mins})`;
 
-                        // Prepare duration string
+                        // Duration text logic
                         let durationStr = `${durationMins}m`;
                         if (durationMins >= 60) {
                              const h = Math.floor(durationMins / 60);
@@ -2028,33 +2048,57 @@
                              durationStr = m === 0 ? `${h}h` : `${h}h${m}`;
                         }
 
-                        // Inner Block Label (Duration)
+                        // Inner Label (Activity Number + Duration)
                         const innerLabel = document.createElement('div');
-                        innerLabel.className = 'text-[10px] font-bold text-indigo-900 pointer-events-none select-none truncate px-1 opacity-50 group-hover:opacity-100 transition-opacity';
-                        innerLabel.innerText = durationStr;
-                        if (actWidthPct > 4) { // Only show if block is wide enough
+                        innerLabel.className = 'text-[12px] font-bold text-white pointer-events-none select-none truncate px-1 opacity-90 group-hover:opacity-100 transition-opacity';
+                        innerLabel.innerText = `(${index + 1}) ${durationStr}`;
+                        if (actWidthPct > 4) { 
                             actEl.appendChild(innerLabel);
                         }
 
-                        barContainer.appendChild(actEl);
+                        containerActivities.appendChild(actEl);
 
-                        // Bottom Label (Title + Duration)
+                        // Bottom Label for Activity Track
                         const labelEl = document.createElement('div');
                         labelEl.style.width = `${actWidthPct}%`;
                         labelEl.className = 'px-1 truncate text-center border-r border-transparent last:border-0';
                         
                         if (actWidthPct > 5) {
-                            labelEl.innerText = `${activity.title} (${durationStr})`;
-                            labelEl.title = `${activity.title} (${durationStr})`;
+                            labelEl.innerText = `${activity.title}`;
+                            labelEl.title = `${activity.title}`;
                         } else {
                             labelEl.innerText = '.';
                             labelEl.classList.add('text-transparent');
                         }
-                        labelContainer.appendChild(labelEl);
+                        labelsActivities.appendChild(labelEl);
                     }
                 });
 
-                // Populate Ruler
+                // --- TRACK 2: LEARNING TYPES (STEPS) ---
+                totals.detailedTimeline.forEach((activity) => {
+                    // We iterate through activities, then steps, to maintain order
+                    if (activity.duration > 0) {
+                        activity.steps.forEach(step => {
+                            if (step.duration > 0) {
+                                const stepWidthPct = (step.duration / totals.totalSecs) * 100;
+                                const stepEl = document.createElement('div');
+                                
+                                // Color based on pedagogical type
+                                stepEl.style.backgroundColor = TYPE_COLORS[step.type];
+                                stepEl.style.width = `${stepWidthPct}%`;
+                                stepEl.className = 'h-full border-r border-white/20 last:border-0 hover:brightness-90 transition-all relative group';
+                                
+                                // Tooltip
+                                const sDur = Math.round(step.duration / 60);
+                                stepEl.title = `${step.title}: ${sDur}m (${step.learningTypeLabel})`;
+
+                                containerSteps.appendChild(stepEl);
+                            }
+                        });
+                    }
+                });
+
+                // --- RULER ---
                 const totalMins = totals.totalSecs / 60;
                 let interval = 0;
                 const roughStep = totalMins / 8;
@@ -2068,10 +2112,12 @@
                     const tick = document.createElement('div');
                     tick.className = 'absolute top-0 w-px h-1.5 bg-slate-300';
                     tick.style.left = `${leftPct}%`;
-                    rulerContainer.appendChild(tick);
+                    containerRuler.appendChild(tick);
+                    
                     const label = document.createElement('div');
                     label.className = 'absolute top-2 text-[9px] text-slate-400 font-mono transform -translate-x-1/2 whitespace-nowrap';
                     label.style.left = `${leftPct}%`;
+                    
                     let text = '';
                     if (t === 0) text = '0';
                     else {
@@ -2086,10 +2132,12 @@
                             text = `${t}m`;
                         }
                     }
+                    
                     if (leftPct > 95) { label.classList.remove('-translate-x-1/2'); label.classList.add('-translate-x-full'); }
                     else if (leftPct < 5) { label.classList.remove('-translate-x-1/2'); }
+                    
                     label.innerText = text;
-                    rulerContainer.appendChild(label);
+                    containerRuler.appendChild(label);
                 }
             }
 
