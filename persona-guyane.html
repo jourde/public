@@ -501,19 +501,19 @@
             <div class="action-group">
                 <span class="action-group-title">Gestion</span>
                 <div class="btn-row">
-                    <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()" data-tooltip="Charger une sauvegarde (.json)">
-                        <span class="material-icons">upload_file</span>
-                    </button>
                     <button class="btn btn-reset" onclick="resetForm()" data-tooltip="Réinitialiser le canevas">
                         <span class="material-icons">restart_alt</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Bloc Export -->
+            <!-- Bloc Import & Export -->
             <div class="action-group">
-                <span class="action-group-title">Export</span>
+                <span class="action-group-title">IMPORT & EXPORT</span>
                 <div class="btn-row">
+                    <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()" data-tooltip="Charger une sauvegarde (.json)">
+                        <span class="material-icons">upload_file</span>
+                    </button>
                     <button class="btn btn-outline" onclick="saveData()" data-tooltip="Sauvegarder (JSON)">
                         <span class="material-icons">save</span>
                     </button>
