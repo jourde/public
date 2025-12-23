@@ -11,5 +11,5 @@
 ### Persona
   - https://jourde.github.io/artefacts/persona-guyane.html
 ### Learning Designer
-  - https://jourde.github.io/artefacts/learning-designer.gemini.html
-  - https://jourde.github.io/artefacts/learning-designer.chatgpt.html
+  - https://jourde.github.io/artefacts/learning-designer-gemini.html
+  - https://jourde.github.io/artefacts/learning-designer-chatgpt.html
