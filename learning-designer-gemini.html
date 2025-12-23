@@ -41,7 +41,8 @@
 
         /* Hide Learning Types Toggle Logic */
         body.hide-types .learning-type-container,
-        body.hide-types .timeline-track-pedagogy {
+        body.hide-types .timeline-track-pedagogy,
+        body.hide-types .activity-type-bar {
             display: none !important;
         }
 
@@ -2332,113 +2333,6 @@
             const a = document.createElement('a');
             a.href = url;
             a.download = 'learning-design-profile.html';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function exportRTF() {
-           const escapeRTF = (text) => {
-                if (!text) return "";
-                let s = text.replace(/\\/g, '\\\\').replace(/\{/g, '\\{').replace(/\}/g, '\\}');
-                s = s.replace(/\n/g, '\\par ');
-                return s.replace(/[^\x00-\x7F]/g, c => `\\u${c.charCodeAt(0)}?`);
-            };
-
-            const t = translations[currentLang];
-            let rtf = `{\\rtf1\\ansi\\deff0\\nouicompat{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI;}{\\f1\\fnil\\fcharset0 Segoe UI;}}
-{\\colortbl ;\\red79\\green70\\blue229;\\red107\\green114\\blue128;}
-\\viewkind4\\uc1 
-\\pard\\sa200\\sl276\\slmult1\\f0\\fs32\\b ${escapeRTF(t.rtf_title)}\\par
-\\pard\\sa200\\sl276\\slmult1\\fs24\\b0\\par
-`;
-            rtf += `\\b\\fs28 ${escapeRTF("Metadata")}\\b0\\fs24\\par\n`;
-            const meta = [
-                [t.label_course_name, document.getElementById('param-name').value],
-                [t.label_topic, document.getElementById('param-topic').value],
-                [t.label_authors, document.getElementById('param-authors').value],
-                [t.label_mode, document.getElementById('param-mode').selectedOptions[0]?.innerText || ''],
-                [t.label_class_size, document.getElementById('global-class-size').value],
-                [t.label_total_time, document.getElementById('total-duration').innerText],
-                [t.label_learning_time, `${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}`]
-            ];
-            meta.forEach(item => {
-                rtf += `\\b ${escapeRTF(item[0])}:\\b0  ${escapeRTF(item[1])}\\par\n`;
-            });
-            rtf += `\\par\n`;
-            rtf += `\\b\\fs28 ${escapeRTF("Key Info")}\\b0\\fs24\\par\n`;
-            rtf += `\\b ${escapeRTF(t.label_aims)}\\b0\\par\n`;
-            rtf += `${escapeRTF(document.getElementById('param-aims').value)}\\par\\par\n`;
-            rtf += `\\b ${escapeRTF(t.label_outcomes)}\\b0\\par\n`;
-            document.querySelectorAll('#outcomes-list li').forEach(li => {
-                const text = li.querySelector('.outcome-text').innerText;
-                const level = li.querySelector('.outcome-bloom-level').value;
-                const sub = li.querySelector('.outcome-bloom-sub').value;
-                let bloomText = "";
-                if(level) {
-                    bloomText += `[${t[`bloom_${level}`] || level.toUpperCase()}`;
-                    if(sub) bloomText += ` - ${t[`bloom_sub_${sub}`] || sub}`;
-                    bloomText += "] ";
-                }
-                rtf += `\\u8226?  ${escapeRTF(bloomText + text)}\\par\n`;
-            });
-            rtf += `\\par\n`;
-            rtf += `\\b ${escapeRTF(t.label_description)}\\b0\\par\n`;
-            rtf += `${escapeRTF(document.getElementById('param-description').value)}\\par\\par\n`;
-            rtf += `\\b\\fs28 ${escapeRTF("Pedagogical Structure")}\\b0\\fs24\\par\n`;
-            document.querySelectorAll('.activity-group').forEach((activity, aIdx) => {
-                const activityTitle = activity.querySelector('.activity-title').value || t.md_untitled_activity;
-                const activityDesc = activity.querySelector('.activity-description').value;
-                let actPrefix = t.md_untitled_activity;
-                if(currentLang === 'en') actPrefix = actPrefix.replace('Untitled ', '');
-                else if(currentLang === 'fr') actPrefix = actPrefix.replace(' sans titre', '');
-                
-                // --- Terminology Fix for Export: Activity -> Module ---
-                // Since "Activity" is now called "Module" in UI, we should update the export label if desired.
-                // The prompt requested renaming "Activity/Module" -> "Module" and "Step" -> "Activity".
-                // I will update the export labels accordingly.
-                // NOTE: 'actPrefix' comes from t.md_untitled_activity which is "Untitled Module".
-                // But the hardcoded text "ACTIVITY" or "STEP" in previous code needs update.
-                
-                // Let's assume standard "Module X" structure for the top level.
-                
-                rtf += `\\par\\pard\\sa200\\sl276\\slmult1\\b\\f1\\fs26 ${escapeRTF("MODULE " + (aIdx + 1) + ": " + activityTitle)}\\b0\\f0\\fs24\\par\n`;
-                
-                if (activityDesc) {
-                    rtf += `\\i ${escapeRTF(activityDesc)}\\i0\\par\\par\n`;
-                }
-                activity.querySelectorAll('.step-card').forEach((step, sIdx) => {
-                    const stepTitle = step.querySelector('.step-input-title').value || t.md_untitled_step;
-                    const typeKey = step.querySelector('.learning-type-select').value;
-                    const typeLabel = t[`type_${typeKey}`];
-                    const duration = `${step.querySelector('.duration-input').value} ${step.querySelector('.duration-unit').selectedOptions[0].innerText}`;
-                    const groupMode = step.querySelector('.step-group-mode').value;
-                    let groupInfo = groupMode === 'class' ? t.md_format_whole : `${t.md_format_groups} ${step.querySelector('.step-group-size').value}`;
-                    const trainerText = step.querySelector('.trainer-select').selectedOptions[0].innerText;
-                    const placeText = step.querySelector('.place-select').selectedOptions[0].innerText;
-                    const timeText = step.querySelector('.time-select').selectedOptions[0].innerText;
-                    const tasks = step.querySelector('.step-input-tasks').value || "";
-                    const notes = step.querySelector('.step-input-notes').value || "";
-                    
-                    // --- Terminology Fix for Export: Step -> Activity ---
-                    rtf += `\\pard\\li720\\sa200\\sl276\\slmult1\\b ACTIVITY ${sIdx + 1}. ${escapeRTF(stepTitle)} (${escapeRTF(typeLabel)})\\b0\\par\n`;
-                    
-                    rtf += `\\pard\\li720\\sa100\\sl276\\slmult1\\cf2\\fs22 Duration: ${escapeRTF(duration)} | Group: ${escapeRTF(groupInfo)} | Mode: ${escapeRTF(trainerText)}, ${escapeRTF(placeText)}, ${escapeRTF(timeText)}\\cf0\\fs24\\par\n`;
-                    if (tasks) {
-                        rtf += `\\pard\\li720\\sa200\\sl276\\slmult1 ${escapeRTF(tasks)}\\par\n`;
-                    }
-                    if (notes) {
-                        rtf += `\\pard\\li720\\sa200\\sl276\\slmult1\\i Note: ${escapeRTF(notes)}\\i0\\par\n`;
-                    }
-                    rtf += `\\par\n`;
-                });
-                rtf += `\\pard\\sa200\\sl276\\slmult1 --------------------------------------------------\\par\n`;
-            });
-            rtf += `}`;
-            const blob = new Blob([rtf], { type: 'application/rtf' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'learning-design-profile.rtf';
             a.click();
             URL.revokeObjectURL(url);
         }
