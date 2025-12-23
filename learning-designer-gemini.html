@@ -558,9 +558,30 @@
                         </div>
                     </div>
                 </div>
+                
                 <div class="flex items-center gap-1 no-print">
-                    <!-- Moved Duration Here -->
-                    <span class="activity-total-time text-xs font-bold text-slate-400 font-mono mr-2">0m</span>
+                    
+                    <!-- NEW: Dual Time Inputs -->
+                    <div class="flex items-center gap-3 mr-2">
+                         <!-- Target Time Input -->
+                        <div class="flex flex-col items-end">
+                            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none mb-0.5" data-i18n="label_target">Cible</span>
+                            <div class="flex items-center gap-1">
+                                <input type="number" class="activity-target-time w-12 px-1 py-0.5 text-xs text-right border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-[22px]" placeholder="0">
+                                <span class="text-[9px] text-slate-400 font-bold">m</span>
+                            </div>
+                        </div>
+
+                        <!-- Designed Time Display -->
+                        <div class="flex flex-col items-end">
+                            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none mb-0.5" data-i18n="label_designed">Conçu</span>
+                             <div class="bg-indigo-50 border border-indigo-100 rounded px-2 py-0.5 h-[22px] flex items-center min-w-[3rem] justify-end">
+                                <span class="activity-total-time text-xs font-bold text-indigo-700 font-mono">0m</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="h-8 w-px bg-slate-100 mx-1"></div>
 
                     <button onclick="toggleDescription(this)" class="text-slate-400 hover:text-indigo-500 p-1 transition-colors" title="Afficher/Masquer la description" data-i18n-title="title_toggle_description">
                         <span class="material-icons-round text-lg">description</span>
@@ -935,7 +956,9 @@
                 legend_place: "Solid: In Situ • Stripes: Online",
                 legend_time: "Solid: Sync • Stripes: Async",
                 title_toggle_types: "Show/Hide Learning Type Dropdown",
-                btn_toggle_types: "Learning types"
+                btn_toggle_types: "Learning types",
+                label_target: "Target",
+                label_designed: "Designed"
             },
             fr: {
                 app_title: "Concepteur Pédagogique",
@@ -1104,6 +1127,8 @@
                 legend_time: "Plein : Synchrone • Rayé : Asynchrone",
                 title_toggle_types: "Afficher/Masquer le menu Type d'Apprentissage",
                 btn_toggle_types: "Types d'appr.",
+                label_target: "Cible",
+                label_designed: "Conçu",
                 // Additional Bloom Translations
                 bloom_sub_cite: "Citer",
                 bloom_sub_define: "Définir",
@@ -1563,7 +1588,7 @@
             });
 
             const project = {
-                version: "1.6",
+                version: "1.7",
                 language: currentLang,
                 keyParams: {
                     name: document.getElementById('param-name').value,
@@ -1586,6 +1611,7 @@
                 const actData = {
                     title: actEl.querySelector('.activity-title').value,
                     description: actEl.querySelector('.activity-description').value,
+                    targetTime: actEl.querySelector('.activity-target-time').value,
                     steps: []
                 };
                 actEl.querySelectorAll('.step-card').forEach(stepEl => {
@@ -1682,6 +1708,7 @@
             initSortableSteps(stepContainer);
             actEl.querySelector('.activity-title').value = data.title || "";
             actEl.querySelector('.activity-description').value = data.description || "";
+            actEl.querySelector('.activity-target-time').value = data.targetTime || "";
             data.steps.forEach(stepData => {
                 addStepToActivityFromData(actEl.querySelector('button'), stepData);
             });
@@ -1854,21 +1881,21 @@
             
             modal.classList.remove('hidden');
 
-            // Remove old listeners to avoid stacking (cloning the node is a simple way to clear listeners)
-            const newYes = yesBtn.cloneNode(true);
-            const newNo = noBtn.cloneNode(true);
-            yesBtn.parentNode.replaceChild(newYes, yesBtn);
-            noBtn.parentNode.replaceChild(newNo, noBtn);
-
-            newYes.addEventListener('click', () => {
-                btn.closest('.activity-group').remove();
-                updateEmptyState();
+            // --- KEY FIX: Use .onclick property instead of addEventListener to prevent stacking ---
+            
+            yesBtn.onclick = function() {
+                // Ensure we are deleting the activity group
+                const activityGroup = btn.closest('.activity-group');
+                if(activityGroup) {
+                    activityGroup.remove();
+                    updateEmptyState();
+                }
                 modal.classList.add('hidden');
-            });
+            };
 
-            newNo.addEventListener('click', () => {
+            noBtn.onclick = function() {
                 modal.classList.add('hidden');
-            });
+            };
         }
 
         function deleteStep(btn) {
