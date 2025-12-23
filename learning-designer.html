@@ -156,6 +156,10 @@
             margin-bottom: 2px;
         }
 
+        .compact-label-lg {
+            font-size: 0.75rem;
+        }
+
         @media print {
             .no-print { display: none; }
             body { background: white; padding: 0; }
@@ -340,6 +344,7 @@
                                 <option value="hours" data-i18n="unit_hours">Heures</option>
                                 <option value="days" data-i18n="unit_days">Jours</option>
                                 <option value="weeks" data-i18n="unit_weeks">Semaines</option>
+                                <option value="months" data-i18n="unit_months">Mois</option>
                             </select>
                         </div>
                     </div>
@@ -429,25 +434,31 @@
                 
                 <!-- Fluid Timeline Container - Folded by default -->
                 <div id="timeline-panel" class="panel-content w-full flex flex-col gap-1.5 mt-1" style="display: none;">
-                    
-                    <!-- Track 1: Activities -->
+                    <!-- Track 0: Planned Structure (Target Durations) -->
                     <div class="flex flex-col gap-0.5">
-                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_structure">Structure</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_structure_planned">Modules prévus</span>
+                        <div id="timeline-activities-planned" class="w-full h-4 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                        <div id="timeline-activities-planned-labels" class="w-full flex text-[10px] text-slate-500 font-medium leading-none"></div>
+                    </div>
+
+                    <!-- Track 1: Designed Structure -->
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_structure">Modules conçus</span>
                         <div id="timeline-activities" class="w-full h-4 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
-                        <div id="timeline-activities-labels" class="w-full flex text-[9px] text-slate-500 font-medium leading-none"></div>
+                        <div id="timeline-activities-labels" class="w-full flex text-[10px] text-slate-500 font-medium leading-none"></div>
                     </div>
 
                     <!-- Track 2: Learning Types -->
                     <div class="flex flex-col gap-0.5 timeline-track-pedagogy">
-                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_pedagogy">Types d'apprentissage</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_pedagogy">Types d'apprentissage</span>
                         <div id="timeline-steps" class="w-full h-4 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                     </div>
 
                     <!-- Track 3: Grouping -->
                     <div class="flex flex-col gap-0.5">
                         <div class="flex items-baseline gap-2">
-                            <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_grouping">Regroupement</span>
-                            <span class="text-[7px] text-slate-400 font-normal" data-i18n="legend_grouping">Plein : Classe • Rayé : Groupes</span>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_grouping">Regroupement</span>
+                            <span class="text-[10px] text-slate-400 font-normal" data-i18n="legend_grouping">Plein : Classe • Rayé : Groupes</span>
                         </div>
                         <div id="timeline-grouping" class="w-full h-2 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                     </div>
@@ -455,8 +466,8 @@
                     <!-- Track 4: Trainer -->
                     <div class="flex flex-col gap-0.5">
                         <div class="flex items-baseline gap-2">
-                            <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_trainer">Formateur</span>
-                            <span class="text-[7px] text-slate-400 font-normal" data-i18n="legend_trainer">Plein : Présent • Rayé : Absent</span>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_trainer">Formateur</span>
+                            <span class="text-[10px] text-slate-400 font-normal" data-i18n="legend_trainer">Plein : Présent • Rayé : Absent</span>
                         </div>
                         <div id="timeline-trainer" class="w-full h-2 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                     </div>
@@ -464,8 +475,8 @@
                     <!-- Track 5: Place -->
                     <div class="flex flex-col gap-0.5">
                         <div class="flex items-baseline gap-2">
-                            <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_place">Lieu</span>
-                            <span class="text-[7px] text-slate-400 font-normal" data-i18n="legend_place">Plein : Présentiel • Rayé : En ligne</span>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_place">Lieu</span>
+                            <span class="text-[10px] text-slate-400 font-normal" data-i18n="legend_place">Plein : Présentiel • Rayé : En ligne</span>
                         </div>
                         <div id="timeline-place" class="w-full h-2 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                     </div>
@@ -473,8 +484,8 @@
                     <!-- Track 6: Time -->
                     <div class="flex flex-col gap-0.5">
                         <div class="flex items-baseline gap-2">
-                            <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_time">Temps</span>
-                            <span class="text-[7px] text-slate-400 font-normal" data-i18n="legend_time">Plein : Synchrone • Rayé : Asynchrone</span>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_time">Temps</span>
+                            <span class="text-[10px] text-slate-400 font-normal" data-i18n="legend_time">Plein : Synchrone • Rayé : Asynchrone</span>
                         </div>
                         <div id="timeline-time" class="w-full h-2 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                     </div>
@@ -567,8 +578,14 @@
                         <div class="flex flex-col items-end">
                             <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none mb-0.5" data-i18n="label_target">Cible</span>
                             <div class="flex items-center gap-1">
-                                <input type="number" class="activity-target-time w-12 px-1 py-0.5 text-xs text-right border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-[22px]" placeholder="0">
-                                <span class="text-[9px] text-slate-400 font-bold">m</span>
+                                <input type="number" min="0" oninput="updateStats()" class="activity-target-time w-12 px-1 py-0.5 text-xs text-right border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-[22px]" placeholder="0">
+                                <select onchange="updateStats()" class="activity-target-unit w-20 px-0 py-0.5 text-[10px] border border-slate-200 rounded bg-slate-50 focus:ring-1 focus:ring-indigo-500 outline-none h-[22px]">
+                                    <option value="60" data-i18n="unit_mins">Mins</option>
+                                    <option value="3600" data-i18n="unit_hours">Heures</option>
+                                    <option value="86400" data-i18n="unit_days">Jours</option>
+                                    <option value="604800" data-i18n="unit_weeks">Semaines</option>
+                                    <option value="2592000" data-i18n="unit_months">Mois</option>
+                                </select>
                             </div>
                         </div>
 
@@ -631,8 +648,8 @@
 
                 <!-- Moved Duration Fields Here (Compact) -->
                 <div class="flex items-center gap-1">
-                    <input type="number" oninput="updateStats()" placeholder="0" min="0" class="duration-input w-14 px-1 py-0.5 text-[10px] font-bold border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-[22px] text-right text-slate-600">
-                    <select onchange="updateStats()" class="duration-unit w-14 px-0 py-0.5 text-[10px] border border-slate-200 rounded bg-slate-50 focus:ring-1 focus:ring-indigo-500 outline-none h-[22px]">
+                    <input type="number" oninput="updateStats()" placeholder="0" min="0" class="duration-input w-16 px-1 py-0.5 text-[10px] font-bold border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-[22px] text-right text-slate-600">
+                    <select onchange="updateStats()" class="duration-unit w-24 px-0 py-0.5 text-[10px] border border-slate-200 rounded bg-slate-50 focus:ring-1 focus:ring-indigo-500 outline-none h-[22px]">
                         <option value="60" data-i18n="unit_mins">Mins</option>
                         <option value="3600" data-i18n="unit_hours">Heures</option>
                         <option value="86400" data-i18n="unit_days">Jours</option>
@@ -672,7 +689,7 @@
                     <div class="lg:w-1/3 space-y-2">
                         
                         <div>
-                            <label class="compact-label flex items-center gap-1">
+                            <label class="compact-label compact-label-lg flex items-center gap-1">
                                 <span class="material-icons-round text-[10px] text-slate-400">groups</span>
                                 <span data-i18n="label_grouping">Regroupement</span>
                             </label>
@@ -696,7 +713,7 @@
 
                         <div class="space-y-1 pt-1 border-t border-slate-100">
                             <div class="flex items-center gap-1">
-                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5">
+                                <span class="text-[10px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5">
                                     <span class="material-icons-round text-[10px]">face</span>
                                     <span data-i18n="label_trainer">Formateur</span>
                                 </span>
@@ -706,7 +723,7 @@
                                 </select>
                             </div>
                             <div class="flex items-center gap-1">
-                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5">
+                                <span class="text-[10px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5">
                                     <span class="material-icons-round text-[10px]">place</span>
                                     <span data-i18n="label_place">Lieu</span>
                                 </span>
@@ -716,7 +733,7 @@
                                 </select>
                             </div>
                             <div class="flex items-center gap-1">
-                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5">
+                                <span class="text-[10px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5">
                                     <span class="material-icons-round text-[10px]">event</span>
                                     <span data-i18n="label_time">Temps</span>
                                 </span>
@@ -895,7 +912,8 @@
                 label_total_time: "Timeline",
                 status_calculating: "Auto-calculating...",
                 label_class_size: "Cohort Size",
-                label_timeline_structure: "Structure",
+                label_timeline_structure: "Designed modules",
+                label_timeline_structure_planned: "Planned modules",
                 label_timeline_pedagogy: "Learning Types",
                 empty_title: "No modules designed yet",
                 empty_subtitle: "Start by creating your first Module container.",
@@ -937,6 +955,7 @@
                 unit_hours: "Hours",
                 unit_days: "Days",
                 unit_weeks: "Weeks",
+                unit_months: "Months",
                 md_title: "# Learning Experience Design Profile",
                 md_class_size: "Cohort Size",
                 md_total_duration: "Total Estimated Duration",
@@ -1047,7 +1066,8 @@
                 label_total_time: "Chronologie",
                 status_calculating: "Calcul auto...",
                 label_class_size: "Taille de la cohorte",
-                label_timeline_structure: "Structure",
+                label_timeline_structure: "Modules conçus",
+                label_timeline_structure_planned: "Modules prévus",
                 label_timeline_pedagogy: "Types d'apprentissage",
                 empty_title: "Aucun module conçu",
                 empty_subtitle: "Commencez par créer votre premier module.",
@@ -1089,6 +1109,7 @@
                 unit_hours: "Heures",
                 unit_days: "Jours",
                 unit_weeks: "Semaines",
+                unit_months: "Mois",
                 md_title: "# Profil de Design d'Expérience d'Apprentissage",
                 md_class_size: "Taille de la cohorte",
                 md_total_duration: "Durée totale estimée",
@@ -1651,7 +1672,7 @@
             });
 
             const project = {
-                version: "1.7",
+                version: "1.8",
                 language: currentLang,
                 keyParams: {
                     name: document.getElementById('param-name').value,
@@ -1675,6 +1696,7 @@
                     title: actEl.querySelector('.activity-title').value,
                     description: actEl.querySelector('.activity-description').value,
                     targetTime: actEl.querySelector('.activity-target-time').value,
+                    targetUnit: actEl.querySelector('.activity-target-unit')?.value || "60",
                     steps: []
                 };
                 actEl.querySelectorAll('.step-card').forEach(stepEl => {
@@ -1772,6 +1794,8 @@
             actEl.querySelector('.activity-title').value = data.title || "";
             actEl.querySelector('.activity-description').value = data.description || "";
             actEl.querySelector('.activity-target-time').value = data.targetTime || "";
+            const tgtUnitSel = actEl.querySelector('.activity-target-unit');
+            if (tgtUnitSel) tgtUnitSel.value = data.targetUnit || "60";
             data.steps.forEach(stepData => {
                 addStepToActivityFromData(actEl.querySelector('button'), stepData);
             });
@@ -2068,6 +2092,7 @@
             if (learningUnit === 'hours') divisor = 3600;
             if (learningUnit === 'days') divisor = 86400;
             if (learningUnit === 'weeks') divisor = 604800;
+            if (learningUnit === 'months') divisor = 2592000; // 30 days
             
             let designedVal = totals.totalSecs / divisor;
             if (learningUnit === 'mins') designedVal = Math.round(designedVal);
@@ -2076,6 +2101,8 @@
             designedInput.value = designedVal;
 
             // DOM Elements for the two timelines
+            const containerActivitiesPlanned = document.getElementById('timeline-activities-planned');
+            const labelsActivitiesPlanned = document.getElementById('timeline-activities-planned-labels');
             const containerActivities = document.getElementById('timeline-activities');
             const labelsActivities = document.getElementById('timeline-activities-labels');
             const containerSteps = document.getElementById('timeline-steps');
@@ -2086,6 +2113,8 @@
             const containerRuler = document.getElementById('timeline-ruler');
             
             // Clear all
+            if (containerActivitiesPlanned) containerActivitiesPlanned.innerHTML = '';
+            if (labelsActivitiesPlanned) labelsActivitiesPlanned.innerHTML = '';
             containerActivities.innerHTML = '';
             labelsActivities.innerHTML = '';
             containerSteps.innerHTML = '';
@@ -2094,13 +2123,97 @@
             containerPlace.innerHTML = '';
             containerTime.innerHTML = '';
             containerRuler.innerHTML = '';
-            
-            if (totals.totalSecs > 0) {
+
+            // Compute planned structure (target durations) per module
+            const activityGroups = document.querySelectorAll('.activity-group');
+            const plannedTimeline = [];
+            let plannedTotalSecs = 0;
+
+            activityGroups.forEach((act, idx) => {
+                const title = act.querySelector('.activity-title')?.value || `${translations[currentLang].md_untitled_activity} ${idx + 1}`;
+                const targetValRaw = parseFloat(act.querySelector('.activity-target-time')?.value);
+                const targetVal = Math.max(0, isNaN(targetValRaw) ? 0 : targetValRaw);
+                const targetUnitSecs = parseFloat(act.querySelector('.activity-target-unit')?.value) || 60;
+                const targetSecs = targetVal * targetUnitSecs;
+
+                const designedSecs = (totals.detailedTimeline[idx] && totals.detailedTimeline[idx].duration) ? totals.detailedTimeline[idx].duration : 0;
+
+                // If target not set, fall back to designed duration so the planned track remains interpretable.
+                const secs = targetSecs > 0 ? targetSecs : designedSecs;
+                const isEstimated = targetSecs <= 0 && designedSecs > 0;
+
+                plannedTimeline.push({ title, secs, targetSecs, isEstimated });
+                plannedTotalSecs += secs;
+            });
+
+            const baseTotalSecs = Math.max(totals.totalSecs, plannedTotalSecs);
+
+            if (baseTotalSecs > 0) {
                 
+                // --- TRACK 0: PLANNED STRUCTURE (TARGET DURATIONS) ---
+                if (containerActivitiesPlanned && labelsActivitiesPlanned) {
+                    plannedTimeline.forEach((activity, index) => {
+                        if (activity.secs > 0) {
+                            const actWidthPct = (activity.secs / baseTotalSecs) * 100;
+                            const actEl = document.createElement('div');
+
+                            const bgClass = index % 2 === 0 ? 'bg-slate-200' : 'bg-slate-300';
+                            const patternClass = activity.isEstimated ? 'pattern-dots' : 'pattern-grid-dark';
+
+                            actEl.className = `h-full border-r border-white last:border-0 relative group box-border ${bgClass} ${patternClass} hover:bg-slate-400 transition-colors flex items-center justify-center cursor-pointer`;
+                            actEl.style.width = `${actWidthPct}%`;
+
+                            const durationMins = Math.round(activity.secs / 60);
+
+                            let tooltipText;
+                            if (activity.targetSecs > 0) {
+                                tooltipText = `<strong>${activity.title}</strong><br><span class="text-slate-300">${durationMins} ${translations[currentLang].unit_mins}</span>`;
+                            } else if (activity.isEstimated) {
+                                tooltipText = `<strong>${activity.title}</strong><br><span class="text-slate-300">${durationMins} ${translations[currentLang].unit_mins}</span><br><span class="opacity-80">${currentLang==='fr' ? 'Cible non renseignée' : 'Target not set'}</span>`;
+                            } else {
+                                tooltipText = `<strong>${activity.title}</strong><br><span class="opacity-80">${currentLang==='fr' ? 'Durée cible à définir' : 'Set a target duration'}</span>`;
+                            }
+
+                            actEl.onmouseenter = (e) => showTooltip(e, tooltipText);
+                            actEl.onmousemove = (e) => updateTooltipPos(e);
+                            actEl.onmouseleave = () => hideTooltip();
+
+                            let durationStr = `${durationMins}m`;
+                            if (durationMins >= 60) {
+                                const h = Math.floor(durationMins / 60);
+                                const m = durationMins % 60;
+                                durationStr = m === 0 ? `${h}h` : `${h}h${m}`;
+                            }
+
+                            const innerLabel = document.createElement('div');
+                            innerLabel.className = 'text-[10px] font-bold text-slate-700 pointer-events-none select-none truncate px-1 opacity-90 group-hover:opacity-100 transition-opacity';
+                            innerLabel.innerText = durationStr;
+                            if (actWidthPct > 4) {
+                                actEl.appendChild(innerLabel);
+                            }
+
+                            containerActivitiesPlanned.appendChild(actEl);
+
+                            const labelEl = document.createElement('div');
+                            labelEl.style.width = `${actWidthPct}%`;
+                            labelEl.className = 'px-1 truncate text-center border-r border-transparent last:border-0';
+
+                            if (actWidthPct > 5) {
+                                labelEl.innerText = `${activity.title}`;
+                                labelEl.title = activity.title;
+                            } else {
+                                labelEl.innerText = '.';
+                                labelEl.classList.add('text-transparent');
+                            }
+                            labelsActivitiesPlanned.appendChild(labelEl);
+                        }
+                    });
+                }
+
                 // --- TRACK 1: ACTIVITIES / MODULES ---
                 totals.detailedTimeline.forEach((activity, index) => {
                     if (activity.duration > 0) {
-                        const actWidthPct = (activity.duration / totals.totalSecs) * 100;
+                        const actWidthPct = (activity.duration / baseTotalSecs) * 100;
                         const actEl = document.createElement('div');
                         
                         // Alternating colors (Slate)
@@ -2129,8 +2242,8 @@
 
                         // Inner Label (Activity Number + Duration)
                         const innerLabel = document.createElement('div');
-                        innerLabel.className = 'text-[9px] font-bold text-white pointer-events-none select-none truncate px-1 opacity-90 group-hover:opacity-100 transition-opacity';
-                        innerLabel.innerText = `(${index + 1}) ${durationStr}`;
+                        innerLabel.className = 'text-[10px] font-bold text-white pointer-events-none select-none truncate px-1 opacity-90 group-hover:opacity-100 transition-opacity';
+                        innerLabel.innerText = durationStr;
                         if (actWidthPct > 4) { 
                             actEl.appendChild(innerLabel);
                         }
@@ -2160,7 +2273,7 @@
                     if (activity.duration > 0) {
                         activity.steps.forEach(step => {
                             if (step.duration > 0) {
-                                const stepWidthPct = (step.duration / totals.totalSecs) * 100;
+                                const stepWidthPct = (step.duration / baseTotalSecs) * 100;
                                 const stepEl = document.createElement('div');
                                 
                                 // Color based on pedagogical type
@@ -2226,7 +2339,7 @@
                 });
 
                 // --- RULER ---
-                const totalMins = totals.totalSecs / 60;
+                const totalMins = baseTotalSecs / 60;
                 let interval = 0;
                 const roughStep = totalMins / 8;
                 const magnitudes = [1, 5, 10, 15, 30, 60, 120, 240, 480, 720, 1440, 2880, 10080];
@@ -2242,7 +2355,7 @@
                     containerRuler.appendChild(tick);
                     
                     const label = document.createElement('div');
-                    label.className = 'absolute top-2 text-[8px] text-slate-400 font-mono transform -translate-x-1/2 whitespace-nowrap';
+                    label.className = 'absolute top-2 text-[9px] text-slate-400 font-mono transform -translate-x-1/2 whitespace-nowrap';
                     label.style.left = `${leftPct}%`;
                     
                     let text = '';
@@ -2269,7 +2382,6 @@
             }
 
             // Update Individual Activity Timeline Bars
-            const activityGroups = document.querySelectorAll('.activity-group');
             totals.detailedTimeline.forEach((actData, index) => {
                 if (index < activityGroups.length) {
                     const group = activityGroups[index];
