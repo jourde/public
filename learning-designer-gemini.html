@@ -590,11 +590,11 @@
                         <span class="material-icons-round text-lg rotate-icon">expand_more</span>
                     </button>
                     <!-- Duplicate Button (RENAMED) -->
-                    <button onclick="cloneModule(this)" class="text-slate-400 hover:text-indigo-500 p-1 transition-colors" title="Dupliquer ce module" data-i18n-title="title_duplicate_activity">
+                    <button type="button" data-action="duplicate-module" class="text-slate-400 hover:text-indigo-500 p-1 transition-colors" title="Dupliquer ce module" data-i18n-title="title_duplicate_activity">
                         <span class="material-icons-round text-lg">content_copy</span>
                     </button>
                     <!-- Delete Button (RENAMED) -->
-                    <button onclick="trashModule(this)" class="text-slate-400 hover:text-red-500 p-1 transition-colors" title="Supprimer ce module" data-i18n-title="title_delete_activity">
+                    <button type="button" data-action="delete-module" class="text-slate-400 hover:text-red-500 p-1 transition-colors" title="Supprimer ce module" data-i18n-title="title_delete_activity">
                         <span class="material-icons-round text-lg">delete_outline</span>
                     </button>
                 </div>
@@ -656,11 +656,11 @@
                         <span class="material-icons-round text-base rotate-icon">expand_more</span>
                     </button>
                     <!-- Duplicate Step (RENAMED) -->
-                    <button onclick="cloneStep(this)" class="text-slate-300 hover:text-indigo-500 p-0.5" title="Dupliquer cette activité" data-i18n-title="title_duplicate_step">
+                    <button type="button" data-action="duplicate-step" class="text-slate-300 hover:text-indigo-500 p-0.5" title="Dupliquer cette activité" data-i18n-title="title_duplicate_step">
                         <span class="material-icons-round text-base">content_copy</span>
                     </button>
                     <!-- Delete Step (RENAMED) -->
-                    <button onclick="trashStep(this)" class="text-slate-300 hover:text-red-400 p-0.5" title="Supprimer cette activité" data-i18n-title="title_delete_step">
+                    <button type="button" data-action="delete-step" class="text-slate-300 hover:text-red-400 p-0.5" title="Supprimer cette activité" data-i18n-title="title_delete_step">
                         <span class="material-icons-round text-base">delete_outline</span>
                     </button>
                 </div>
@@ -745,17 +745,6 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="absolute top-1 right-1 flex flex-col gap-0.5 no-print opacity-0 group-hover:opacity-100 transition-opacity">
-                    <!-- Duplicate Step (RENAMED) -->
-                    <button onclick="cloneStep(this)" class="text-slate-300 hover:text-indigo-500 p-0.5" title="Dupliquer cette activité" data-i18n-title="title_duplicate_step">
-                        <span class="material-icons-round text-base">content_copy</span>
-                    </button>
-                    <!-- Delete Step (RENAMED) -->
-                    <button onclick="trashStep(this)" class="text-slate-300 hover:text-red-400 p-0.5" title="Supprimer cette activité" data-i18n-title="title_delete_step">
-                        <span class="material-icons-round text-base">delete_outline</span>
-                    </button>
-                </div>
             </div>
         </div>
     </template>
@@ -768,6 +757,78 @@
         const tooltipEl = document.getElementById('global-tooltip');
 
         let currentLang = 'fr';
+
+        // --- Global confirm modal plumbing (single binding; prevents handler stacking) ---
+        let __confirmAction = null;
+        (function initConfirmModalOnce() {
+            const modal = document.getElementById('custom-confirm-modal');
+            const yesBtn = document.getElementById('custom-confirm-yes');
+            const noBtn = document.getElementById('custom-confirm-no');
+
+            if (!modal || !yesBtn || !noBtn) return;
+
+            // Prevent multiple bindings if this script is ever evaluated twice.
+            if (modal.dataset.bound === '1') return;
+            modal.dataset.bound = '1';
+
+            const close = () => {
+                __confirmAction = null;
+                modal.classList.add('hidden');
+            };
+
+            yesBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                    if (typeof __confirmAction === 'function') __confirmAction();
+                } finally {
+                    close();
+                }
+            });
+
+            noBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                close();
+            });
+
+            // Click outside the dialog closes it
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) close();
+            });
+        })();
+
+
+        // --- Action button dispatcher (prevents cloned inline onclick mix-ups) ---
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+
+            const action = btn.dataset.action;
+            if (!action) return;
+
+            // Always prevent bubbling into other UI handlers.
+            e.preventDefault();
+            e.stopPropagation();
+
+            switch (action) {
+                case 'duplicate-module':
+                    cloneModule(btn);
+                    break;
+                case 'delete-module':
+                    trashModule(e, btn);
+                    break;
+                case 'duplicate-step':
+                    cloneStep(btn);
+                    break;
+                case 'delete-step':
+                    trashStep(btn);
+                    break;
+                default:
+                    break;
+            }
+        });
+
 
         // Tooltip Helpers
         function showTooltip(e, text) {
@@ -1534,7 +1595,7 @@
 
             const btn = document.createElement('button');
             btn.onclick = function() { this.closest('li').remove(); checkOutcomesEmpty(); };
-            btn.className = "text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100";
+            btn.className = "text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto";
             btn.innerHTML = '<span class="material-icons-round text-sm">close</span>';
 
             const contentContainer = document.createElement('div');
@@ -1859,7 +1920,7 @@
             
             // Explicitly rebind buttons in the clone to be safe - CRITICAL FIX
             // Remove any manual rebind logic that depends on titles and let inline handlers work
-            // The cloneNode(true) copies the onclick="cloneModule(this)" correctly.
+            // The cloneNode(true) copies the type="button" data-action="duplicate-module" correctly.
             
             const stepContainer = clone.querySelector('.activity-steps-container');
             initSortableSteps(stepContainer);
@@ -1879,36 +1940,40 @@
         }
 
         // RENAMED AND FIXED MODAL LOGIC
-        function trashModule(btn) {
+        // Signature supports both: trashModule(this) and trashModule(event, this)
+        function trashModule(evtOrBtn, maybeBtn) {
+            const evt = (evtOrBtn && typeof evtOrBtn === 'object' && 'preventDefault' in evtOrBtn) ? evtOrBtn : null;
+            const btn = evt ? maybeBtn : evtOrBtn;
+
+            if (!btn) return;
+            if (evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+            }
+
+            const activityGroup = btn.closest('.activity-group');
+            if (!activityGroup) return;
+
             const modal = document.getElementById('custom-confirm-modal');
-            const yesBtn = document.getElementById('custom-confirm-yes');
-            const noBtn = document.getElementById('custom-confirm-no');
             const msg = document.getElementById('custom-confirm-msg');
 
-            // --- CRITICAL FIX: Clone buttons to strip ANY existing event listeners ---
-            // This prevents old listeners (including potential duplication logic) from firing
-            const newYes = yesBtn.cloneNode(true);
-            const newNo = noBtn.cloneNode(true);
-            yesBtn.parentNode.replaceChild(newYes, yesBtn);
-            noBtn.parentNode.replaceChild(newNo, noBtn);
-            
-            msg.innerText = translations[currentLang].confirm_delete_activity;
+            // Fallback: if modal is missing for any reason, delete directly.
+            if (!modal || !msg) {
+                activityGroup.remove();
+                updateEmptyState();
+                return;
+            }
+
+            msg.innerText = translations[currentLang].confirm_delete_activity || 'Delete this module?';
+
+            // Set the *single* pending confirm action. This prevents stacked handlers (which can cause duplication).
+            __confirmAction = () => {
+                activityGroup.remove();
+                updateEmptyState();
+            };
+
             modal.classList.remove('hidden');
-
-            newYes.onclick = function() {
-                const activityGroup = btn.closest('.activity-group');
-                if(activityGroup) {
-                    activityGroup.remove();
-                    updateEmptyState();
-                }
-                modal.classList.add('hidden');
-            };
-
-            newNo.onclick = function() {
-                modal.classList.add('hidden');
-            };
         }
-
         // RENAMED TO AVOID CONFLICTS
         function trashStep(btn) {
             btn.closest('.step-card').remove();
