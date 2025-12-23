@@ -2062,6 +2062,39 @@
             return { totalSecs, detailedTimeline };
         }
 
+        // Timeline label formatter (compact): m / h / j(d) / sem(w) / mo
+        function formatTimelineDuration(secs) {
+            const mins = Math.round((secs || 0) / 60);
+            if (!mins || mins <= 0) return '0m';
+
+            const MINS_PER_HOUR = 60;
+            const MINS_PER_DAY = 1440;
+            const MINS_PER_WEEK = 10080;     // 7 * 1440
+            const MINS_PER_MONTH = 43200;    // 30 * 1440 (convention)
+
+            const fmt = (val) => Number.isInteger(val) ? String(val) : String(parseFloat(val.toFixed(1)));
+
+            if (mins >= MINS_PER_MONTH) {
+                const mo = mins / MINS_PER_MONTH;
+                return `${fmt(mo)}mo`;
+            }
+            if (mins >= MINS_PER_WEEK) {
+                const w = mins / MINS_PER_WEEK;
+                return currentLang === 'fr' ? `${fmt(w)}sem` : `${fmt(w)}w`;
+            }
+            if (mins >= MINS_PER_DAY) {
+                const d = mins / MINS_PER_DAY;
+                return currentLang === 'fr' ? `${fmt(d)}j` : `${fmt(d)}d`;
+            }
+            if (mins >= MINS_PER_HOUR) {
+                const h = Math.floor(mins / 60);
+                const m = mins % 60;
+                return m === 0 ? `${h}h` : `${h}h${m}`;
+            }
+            return `${mins}m`;
+        }
+
+
         function updateStats() {
             const totals = getTotals();
             let display = "0 mins";
@@ -2187,7 +2220,7 @@
 
                             const innerLabel = document.createElement('div');
                             innerLabel.className = 'text-[10px] font-bold text-slate-700 pointer-events-none select-none truncate px-1 opacity-90 group-hover:opacity-100 transition-opacity';
-                            innerLabel.innerText = durationStr;
+                            innerLabel.innerText = formatTimelineDuration(activity.secs);
                             if (actWidthPct > 4) {
                                 actEl.appendChild(innerLabel);
                             }
@@ -2243,7 +2276,7 @@
                         // Inner Label (Activity Number + Duration)
                         const innerLabel = document.createElement('div');
                         innerLabel.className = 'text-[10px] font-bold text-white pointer-events-none select-none truncate px-1 opacity-90 group-hover:opacity-100 transition-opacity';
-                        innerLabel.innerText = durationStr;
+                        innerLabel.innerText = formatTimelineDuration(activity.duration);
                         if (actWidthPct > 4) { 
                             actEl.appendChild(innerLabel);
                         }
