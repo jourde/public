@@ -398,13 +398,39 @@
                     
                     <!-- Track 1: Activities -->
                     <div class="flex flex-col gap-0.5">
+                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_structure">Structure</span>
                         <div id="timeline-activities" class="w-full h-4 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                         <div id="timeline-activities-labels" class="w-full flex text-[9px] text-slate-500 font-medium leading-none"></div>
                     </div>
 
                     <!-- Track 2: Learning Types -->
                     <div class="flex flex-col gap-0.5">
+                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_pedagogy">Pedagogy</span>
                         <div id="timeline-steps" class="w-full h-4 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                    </div>
+
+                    <!-- Track 3: Grouping -->
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_grouping">Grouping</span>
+                        <div id="timeline-grouping" class="w-full h-2 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                    </div>
+
+                    <!-- Track 4: Trainer -->
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_trainer">Trainer</span>
+                        <div id="timeline-trainer" class="w-full h-2 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                    </div>
+
+                    <!-- Track 5: Place -->
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_place">Place</span>
+                        <div id="timeline-place" class="w-full h-2 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                    </div>
+
+                    <!-- Track 6: Time -->
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_time">Time</span>
+                        <div id="timeline-time" class="w-full h-2 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                     </div>
 
                     <!-- Shared Ruler -->
@@ -737,8 +763,8 @@
                 label_total_time: "Timeline",
                 status_calculating: "Auto-calculating...",
                 label_class_size: "Cohort Size",
-                label_timeline_structure: "Structure (Activities)",
-                label_timeline_pedagogy: "Pedagogy (Learning Types)",
+                label_timeline_structure: "Structure",
+                label_timeline_pedagogy: "Pedagogy",
                 empty_title: "No activities designed yet",
                 empty_subtitle: "Start by creating your first Activity container.",
                 btn_create_activity: "Create Activity",
@@ -827,7 +853,7 @@
                 label_minutes: "m",
                 label_description: "General Description",
                 ph_description: "Detailed description...",
-                label_mode: "Mode of delivery",
+                label_mode: "Modalité",
                 opt_mode_placeholder: "Select a mode…",
                 opt_mode_online: "Wholly online",
                 opt_mode_blended: "Blended",
@@ -880,8 +906,8 @@
                 label_total_time: "Chronologie",
                 status_calculating: "Calcul auto...",
                 label_class_size: "Taille de la cohorte",
-                label_timeline_structure: "Structure (Activités)",
-                label_timeline_pedagogy: "Pédagogie (Types d'apprentissage)",
+                label_timeline_structure: "Structure",
+                label_timeline_pedagogy: "Pédagogie",
                 empty_title: "Aucune activité conçue",
                 empty_subtitle: "Commencez par créer votre première activité.",
                 btn_create_activity: "Créer une Activité",
@@ -1159,15 +1185,6 @@
                 bloom_sub_synthesize: "Synthétiser",
                 bloom_sub_write: "Écrire"
             }
-        };
-
-        const TYPE_COLORS = {
-            acquisition: '#a1f5ed',
-            collaboration: '#ffd966',
-            discussion: '#7aaeea',
-            investigation: '#f8807f',
-            practice: '#bb98dc',
-            production: '#bdea75'
         };
 
         // Initialize Sortables
@@ -1844,7 +1861,11 @@
                         title: stepTitle,
                         type: type,
                         duration: secs,
-                        learningTypeLabel: translations[currentLang][`type_${type}`]
+                        learningTypeLabel: translations[currentLang][`type_${type}`],
+                        groupMode: step.querySelector('.step-group-mode').value,
+                        trainer: step.querySelector('.trainer-select').value,
+                        place: step.querySelector('.place-select').value,
+                        time: step.querySelector('.time-select').value
                     });
 
                     currentTimelineSecs += secs;
@@ -1907,12 +1928,20 @@
             const containerActivities = document.getElementById('timeline-activities');
             const labelsActivities = document.getElementById('timeline-activities-labels');
             const containerSteps = document.getElementById('timeline-steps');
+            const containerGrouping = document.getElementById('timeline-grouping');
+            const containerTrainer = document.getElementById('timeline-trainer');
+            const containerPlace = document.getElementById('timeline-place');
+            const containerTime = document.getElementById('timeline-time');
             const containerRuler = document.getElementById('timeline-ruler');
             
             // Clear all
             containerActivities.innerHTML = '';
             labelsActivities.innerHTML = '';
             containerSteps.innerHTML = '';
+            containerGrouping.innerHTML = '';
+            containerTrainer.innerHTML = '';
+            containerPlace.innerHTML = '';
+            containerTime.innerHTML = '';
             containerRuler.innerHTML = '';
             
             if (totals.totalSecs > 0) {
@@ -1998,6 +2027,40 @@
                                 stepEl.onmouseleave = () => hideTooltip();
 
                                 containerSteps.appendChild(stepEl);
+
+                                // Helper to create simple blocks
+                                const createBlock = (color, tooltip) => {
+                                    const el = document.createElement('div');
+                                    el.style.width = `${stepWidthPct}%`;
+                                    el.style.backgroundColor = color;
+                                    el.className = 'h-full border-r border-white/20 last:border-0 hover:brightness-90 transition-all relative group cursor-pointer';
+                                    el.onmouseenter = (e) => showTooltip(e, tooltip);
+                                    el.onmousemove = (e) => updateTooltipPos(e);
+                                    el.onmouseleave = () => hideTooltip();
+                                    return el;
+                                };
+
+                                const t = translations[currentLang];
+
+                                // Grouping
+                                const grpColor = step.groupMode === 'class' ? '#475569' : '#94a3b8'; // slate-600 : slate-400
+                                const grpLabel = step.groupMode === 'class' ? t.opt_whole_class : t.opt_groups;
+                                containerGrouping.appendChild(createBlock(grpColor, `<strong>${step.title}</strong><br>${grpLabel}`));
+
+                                // Trainer
+                                const trColor = step.trainer === 'present' ? '#34d399' : '#e2e8f0'; // emerald-400 : slate-200
+                                const trLabel = step.trainer === 'present' ? t.opt_present : t.opt_absent;
+                                containerTrainer.appendChild(createBlock(trColor, `<strong>${step.title}</strong><br>${t.label_trainer}: ${trLabel}`));
+
+                                // Place
+                                const plColor = step.place === 'situ' ? '#38bdf8' : '#a78bfa'; // sky-400 : violet-400
+                                const plLabel = step.place === 'situ' ? t.opt_insitu : t.opt_online;
+                                containerPlace.appendChild(createBlock(plColor, `<strong>${step.title}</strong><br>${t.label_place}: ${plLabel}`));
+
+                                // Time
+                                const tmColor = step.time === 'sync' ? '#fbbf24' : '#93c5fd'; // amber-400 : blue-300
+                                const tmLabel = step.time === 'sync' ? t.opt_sync : t.opt_async;
+                                containerTime.appendChild(createBlock(tmColor, `<strong>${step.title}</strong><br>${t.label_time}: ${tmLabel}`));
                             }
                         });
                     }
