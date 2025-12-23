@@ -555,11 +555,13 @@
                         <!-- Activity-specific Timeline Bar -->
                         <div class="flex items-center gap-2 mt-0.5 pr-1">
                             <div class="activity-type-bar flex-1 h-1.5 bg-slate-100 border border-slate-200 rounded-full overflow-hidden flex"></div>
-                            <span class="activity-total-time text-[9px] font-bold text-slate-400 w-10 text-right font-mono">0m</span>
                         </div>
                     </div>
                 </div>
                 <div class="flex items-center gap-1 no-print">
+                    <!-- Moved Duration Here -->
+                    <span class="activity-total-time text-xs font-bold text-slate-400 font-mono mr-2">0m</span>
+
                     <button onclick="toggleDescription(this)" class="text-slate-400 hover:text-indigo-500 p-1 transition-colors" title="Afficher/Masquer la description" data-i18n-title="title_toggle_description">
                         <span class="material-icons-round text-lg">description</span>
                     </button>
