@@ -291,7 +291,6 @@
 <option data-i18n="opt_md" value="markdown">Markdown (IA)</option>
 <option data-i18n="opt_pdf" value="pdf">PDF (Imprimer)</option>
 <option data-i18n="opt_rtf" value="richtext">Texte Riche (HTML)</option>
-<option data-i18n="opt_real_rtf" value="rtf">Texte (.rtf)</option>
 </select>
 <span class="material-icons-round text-slate-400 pointer-events-none absolute right-1 text-sm">expand_more</span>
 </div>
@@ -704,7 +703,7 @@
 </div>
 <div class="space-y-1 pt-1 border-t border-slate-100">
 <div class="flex items-center gap-1">
-<span class="text-[10px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5">
+<span class="text-[10px] w-20 shrink-0 text-slate-400 font-bold uppercase flex items-center gap-0.5">
 <span class="material-icons-round text-[10px]">face</span>
 <span data-i18n="label_trainer">Formateur</span>
 </span>
@@ -714,7 +713,7 @@
 </select>
 </div>
 <div class="flex items-center gap-1">
-<span class="text-[10px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5">
+<span class="text-[10px] w-20 shrink-0 text-slate-400 font-bold uppercase flex items-center gap-0.5">
 <span class="material-icons-round text-[10px]">place</span>
 <span data-i18n="label_place">Lieu</span>
 </span>
@@ -724,7 +723,7 @@
 </select>
 </div>
 <div class="flex items-center gap-1">
-<span class="text-[10px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5">
+<span class="text-[10px] w-20 shrink-0 text-slate-400 font-bold uppercase flex items-center gap-0.5">
 <span class="material-icons-round text-[10px]">event</span>
 <span data-i18n="label_time">Temps</span>
 </span>
@@ -2341,13 +2340,23 @@ keyParams: {
                 window.print();
             } else if (value === 'richtext') {
                 exportRichText();
-            } else if (value === 'rtf') {
-                exportRTF();
             }
         }
         
         function exportRichText() {
              const t = translations[currentLang];
+            const totals = getTotals();
+            const totalDurationText = (() => {
+                let display = `0 ${t.unit_mins || 'min'}`;
+                if (totals.totalSecs >= 604800) display = `${(totals.totalSecs / 604800).toFixed(1)} ${t.unit_weeks || 'sem'}`;
+                else if (totals.totalSecs >= 86400) display = `${(totals.totalSecs / 86400).toFixed(1)} ${t.unit_days || 'j'}`;
+                else if (totals.totalSecs >= 3600) {
+                    const h = Math.floor(totals.totalSecs / 3600);
+                    const m = Math.round((totals.totalSecs % 3600) / 60);
+                    display = `${h}h ${m}m`;
+                } else if (totals.totalSecs > 0) display = `${Math.round(totals.totalSecs / 60)} ${t.unit_mins || 'min'}`;
+                return String(display).trim();
+            })();
             let html = `
             <!DOCTYPE html>
             <html lang="${currentLang}">
@@ -2386,7 +2395,7 @@ keyParams: {
                 <div class="meta-item"><span class="meta-label">${t.label_authors}:</span> ${document.getElementById('param-authors').value}</div>
                 <div class="meta-item"><span class="meta-label">${t.label_mode}:</span> ${document.getElementById('param-mode').selectedOptions[0]?.innerText || ''}</div>
                 <div class="meta-item"><span class="meta-label">${t.label_class_size}:</span> ${document.getElementById('global-class-size').value}</div>
-                <div class="meta-item"><span class="meta-label">${t.label_total_time}:</span> ${document.getElementById('total-duration').innerText}</div>
+                <div class="meta-item"><span class="meta-label">${t.label_total_time}:</span> ${totalDurationText}</div>
                 <div class="meta-item"><span class="meta-label">${t.label_learning_time}:</span> ${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}</div>
                 
                 <h2>Informations clés</h2>
@@ -2397,7 +2406,7 @@ keyParams: {
                 <ul>`;
                 
             document.querySelectorAll('#outcomes-list li').forEach(li => {
-                const text = li.querySelector('.outcome-text').innerText;
+                const text = li.querySelector('.outcome-text')?.innerText || '';
                 const level = li.querySelector('.outcome-bloom-level').value;
                 const sub = li.querySelector('.outcome-bloom-sub').value;
                 let bloomText = "";
@@ -2469,6 +2478,17 @@ html += `<div class="activity-block">
         function exportMarkdown() {
             const data = getTotals();
             const t = translations[currentLang];
+            const totalDurationText = (() => {
+                let display = `0 ${t.unit_mins || 'min'}`;
+                if (data.totalSecs >= 604800) display = `${(data.totalSecs / 604800).toFixed(1)} ${t.unit_weeks || 'sem'}`;
+                else if (data.totalSecs >= 86400) display = `${(data.totalSecs / 86400).toFixed(1)} ${t.unit_days || 'j'}`;
+                else if (data.totalSecs >= 3600) {
+                    const h = Math.floor(data.totalSecs / 3600);
+                    const m = Math.round((data.totalSecs % 3600) / 60);
+                    display = `${h}h ${m}m`;
+                } else if (data.totalSecs > 0) display = `${Math.round(data.totalSecs / 60)} ${t.unit_mins || 'min'}`;
+                return String(display).trim();
+            })();
             let md = `# ${t.md_title}\n\n`;
             md += `## metadonnees\n`;
             md += `- **${t.label_course_name}:** ${document.getElementById('param-name').value}\n`;
@@ -2476,7 +2496,7 @@ html += `<div class="activity-block">
             md += `- **${t.label_authors}:** ${document.getElementById('param-authors').value}\n`;
             md += `- **${t.label_mode}:** ${document.getElementById('param-mode').selectedOptions[0]?.innerText || ''}\n`;
             md += `- **${t.label_class_size}:** ${document.getElementById('global-class-size').value}\n`;
-            md += `- **${t.label_total_time}:** ${document.getElementById('total-duration').innerText}\n`;
+            md += `- **${t.label_total_time}:** ${totalDurationText}\n`;
             md += `- **${t.label_learning_time}:** ${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`;
             md += `- **${t.label_designed_time}:** ${document.getElementById('param-designed-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`; // Use learning unit text directly
 md += `- **Horodatage d'export :** ${new Date().toISOString()}\n\n`;
@@ -2485,7 +2505,7 @@ md += `- **Horodatage d'export :** ${new Date().toISOString()}\n\n`;
             md += `### ${t.label_aims}\n${document.getElementById('param-aims').value}\n\n`;
             md += `### ${t.label_outcomes}\n`;
             document.querySelectorAll('#outcomes-list li').forEach(li => {
-                const text = li.querySelector('.outcome-text').innerText;
+                const text = li.querySelector('.outcome-text')?.innerText || '';
                 const level = li.querySelector('.outcome-bloom-level').value;
                 const sub = li.querySelector('.outcome-bloom-sub').value;
                 
@@ -2540,7 +2560,7 @@ md += `- **Horodatage d'export :** ${new Date().toISOString()}\n\n`;
             URL.revokeObjectURL(url);
         }
 
-        
+
 
         // Palette: standard vs high-contrast (hc)
         function isHighContrastEnabled() {
