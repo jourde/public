@@ -14,8 +14,10 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
-            font-size: 0.875rem; /* Base font size reduced */
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-size: 0.95rem;
+            line-height: 1.45;
         }
 
         /* Timeline Visual Cues (Patterns) */
@@ -96,7 +98,7 @@
             vertical-align: middle;
             align-items: center;
             justify-content: center;
-            font-size: 1.1rem; /* Smaller icons */
+            font-size: 1.25rem;
         }
 
         /* Foldable Panel Transition */
@@ -145,19 +147,29 @@
         
         /* Compact specific overrides */
         input, select, textarea {
-            font-size: 0.8rem !important;
+            font-size: 0.9rem;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        :focus-visible {
+            outline: 2px solid rgba(99, 102, 241, 0.55);
+            outline-offset: 2px;
         }
         
         .compact-label {
-            font-size: 0.65rem;
+            font-size: 0.72rem;
             text-transform: uppercase;
             font-weight: 700;
-            color: #94a3b8;
-            margin-bottom: 2px;
+            color: #64748b;
+            letter-spacing: 0.04em;
+            margin-bottom: 4px;
         }
 
         .compact-label-lg {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
         }
 
         @media print {
@@ -171,16 +183,90 @@
             #help-panel { display: none; }
             .step-body.collapsed, .activity-body.collapsed { max-height: none !important; opacity: 1 !important; display: block !important; }
         }
-    </style>
+    
+
+        /* Readability tweaks */
+        .activity-group { scroll-margin-top: 80px; }
+        .step-card { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); }
+        .step-card:hover { box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08); }
+        .activity-title { letter-spacing: -0.01em; }
+        .activity-container { border-left-color: #cbd5e1; }
+
+
+        /* Density + High Contrast (enabled by default) */
+        body.dense {
+            font-size: 0.92rem;
+            line-height: 1.4;
+        }
+        body.dense header { margin-bottom: 0.5rem !important; }
+        body.dense .activity-group { padding: 0.5rem !important; }
+        body.dense .activity-group > .flex { margin-bottom: 0.5rem !important; gap: 0.5rem !important; }
+        body.dense .step-card > .flex.items-center { padding: 6px 8px !important; gap: 0.5rem !important; }
+        body.dense .step-body.panel-content { padding: 0.5rem !important; padding-top: 0.35rem !important; }
+        body.dense .activity-description { padding: 0.35rem 0.5rem !important; font-size: 0.85rem !important; }
+        body.dense .activity-steps-container { padding-top: 0.25rem; }
+        body.dense input, body.dense select, body.dense textarea { font-size: 0.88rem; }
+        body.dense .compact-label { font-size: 0.68rem; margin-bottom: 2px; }
+        body.dense .compact-label-lg { font-size: 0.74rem; }
+        body.dense #timeline-panel { gap: 0.5rem !important; }
+        body.dense #timeline-panel .timeline-track-pedagogy,
+        body.dense #timeline-panel .flex.flex-col.gap-0\.5 { gap: 0.35rem !important; }
+
+        
+        /* Keep timelines legible even in dense mode */
+        body.dense #timeline-panel [data-i18n^="label_timeline_"] { font-size: 0.82rem !important; }
+        body.dense #timeline-panel [data-i18n^="label_"][data-i18n$="grouping"],
+        body.dense #timeline-panel [data-i18n="label_trainer"],
+        body.dense #timeline-panel [data-i18n="label_place"],
+        body.dense #timeline-panel [data-i18n="label_time"] { font-size: 0.95rem !important; }
+        body.dense #timeline-panel [data-i18n^="legend_"] { font-size: 0.82rem !important; }
+        body.dense #timeline-panel #timeline-activities-planned-labels,
+        body.dense #timeline-panel #timeline-activities-labels { font-size: 0.85rem !important; }
+        body.dense #timeline-ruler { font-size: 0.82rem !important; }
+
+        body.hc {
+            background-color: #ffffff;
+            color: #0f172a;
+        }
+        body.hc .text-slate-300 { color: #475569 !important; }
+        body.hc .text-slate-400 { color: #334155 !important; }
+        body.hc .text-slate-500 { color: #334155 !important; }
+        body.hc .text-slate-600 { color: #1f2937 !important; }
+        body.hc .text-slate-700 { color: #0f172a !important; }
+        body.hc .bg-slate-50 { background-color: #f8fafc !important; }
+        body.hc .bg-slate-100 { background-color: #f1f5f9 !important; }
+        body.hc .border-slate-100 { border-color: #cbd5e1 !important; }
+        body.hc .border-slate-200 { border-color: #94a3b8 !important; }
+        body.hc .border-slate-300 { border-color: #64748b !important; }
+        body.hc .activity-container { border-left-color: #475569 !important; }
+        body.hc .activity-type-bar { background-color: #e2e8f0 !important; border-color: #94a3b8 !important; }
+        body.hc #timeline-activities-planned,
+        body.hc #timeline-activities,
+        body.hc #timeline-steps,
+        body.hc #timeline-grouping,
+        body.hc #timeline-trainer,
+        body.hc #timeline-place,
+        body.hc #timeline-time {
+            border-color: #94a3b8 !important;
+            background-color: #e2e8f0 !important;
+        }
+        body.hc #timeline-ruler { color: #0f172a !important; }
+        body.hc #custom-confirm-modal { background-color: rgba(15, 23, 42, 0.75) !important; }
+        body.hc #global-tooltip { background-color: #0f172a !important; border-color: #0f172a !important; }
+        body.hc :focus-visible {
+            outline-color: rgba(37, 99, 235, 0.8);
+        }
+
+</style>
 </head>
-<body class="p-2 md:p-4 hide-types">
+<body class="p-2 md:p-4 hide-types text-slate-900 dense hc">
 
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
         <header class="flex flex-col xl:flex-row xl:items-end justify-between mb-3 gap-3">
             <div class="mb-1 xl:mb-0">
-                <h1 class="text-xl font-bold text-slate-900 leading-tight" data-i18n="app_title">Concepteur Pédagogique</h1>
-                <p class="text-xs text-slate-500" data-i18n="app_subtitle">Design Pédagogique & Analytique</p>
+                <h1 class="text-2xl font-bold text-slate-900 leading-tight" data-i18n="app_title">Concepteur Pédagogique</h1>
+                <p class="text-sm text-slate-500" data-i18n="app_subtitle">Design Pédagogique & Analytique</p>
             </div>
             
             <div class="flex flex-wrap gap-3 no-print items-end">
@@ -231,15 +317,19 @@
                             <span class="text-xs font-bold" data-i18n="btn_toggle_types">Types d'appr.</span>
                         </button>
                         <div class="w-px h-5 bg-slate-200"></div>
-                        <button onclick="toggleLanguage()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded transition-colors flex items-center gap-1" data-i18n-title="title_switch_language">
-                            <span class="material-icons-round text-base">language</span>
-                            <span id="lang-btn-text" class="text-xs font-bold">EN</span>
+<div class="w-px h-5 bg-slate-200"></div>
+                        <button id="contrast-toggle-btn" type="button" onclick="toggleHighContrast(event)"
+                                aria-pressed="true"
+                                class="text-slate-700 hover:text-indigo-700 hover:bg-slate-50 active:bg-slate-100 px-2 h-[28px] rounded-md transition flex items-center gap-1"
+                                title="Passer à la palette standard">
+                            <span class="material-icons-round text-base">invert_colors</span>
+                            <span id="contrast-btn-text" class="text-[11px] font-extrabold tracking-wide">HC</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Help Group (Isolated) -->
-                <div class="flex flex-col gap-0.5">
+                <div class="flex flex-col gap-0.5" style="visibility:hidden; pointer-events:none;" aria-hidden="true">
                     <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_help">Aide</span>
                     <div class="flex items-center bg-white border border-slate-200 rounded-md p-0.5 gap-1 shadow-sm h-[34px]">
                         <button onclick="togglePanel('help-panel')" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded transition-colors flex items-center justify-center" data-i18n-title="title_help">
@@ -253,38 +343,9 @@
 
         <!-- Foldable Help Panel -->
         <div id="help-panel" class="mb-3 bg-blue-50 rounded-lg shadow-sm border border-blue-100 overflow-hidden panel-content no-print">
-            <div class="p-3 text-slate-700">
-                <div class="flex justify-between items-start mb-2">
-                    <h2 class="text-sm font-bold text-indigo-800 flex items-center gap-1">
-                        <span class="material-icons-round text-base">info</span>
-                        <span data-i18n="help_title">Comment utiliser le Concepteur Pédagogique</span>
-                    </h2>
-                    <button onclick="togglePanel('help-panel')" class="text-slate-400 hover:text-slate-600"><span class="material-icons-round text-sm">close</span></button>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
-                    <div>
-                        <h3 class="font-bold text-indigo-700 mb-1 uppercase text-[10px] tracking-wider" data-i18n="help_structure_title">1. Structure du Design</h3>
-                        <p class="mb-1" data-i18n="help_structure_text">Construisez votre cours en ajoutant des <strong>Modules</strong> et des <strong>Activités</strong>. Réorganisez les éléments à l'aide des poignées <span class="inline-block align-middle"><span class="material-icons-round text-base text-slate-400">drag_indicator</span></span>.</p>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-indigo-700 mb-1 uppercase text-[10px] tracking-wider" data-i18n="help_types_title">2. Types d'Apprentissage</h3>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#a1f5ed]"></span> <span data-i18n="type_acquisition">Acquisition</span></span>
-                            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#ffd966]"></span> <span data-i18n="type_collaboration">Collaboration</span></span>
-                            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#7aaeea]"></span> <span data-i18n="type_discussion">Discussion</span></span>
-                            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#f8807f]"></span> <span data-i18n="type_investigation">Enquête</span></span>
-                            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#bb98dc]"></span> <span data-i18n="type_practice">Entraînement</span></span>
-                            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#bdea75]"></span> <span data-i18n="type_production">Production</span></span>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-indigo-700 mb-1 uppercase text-[10px] tracking-wider" data-i18n="help_export_title">3. Enregistrer & Exporter</h3>
-                        <p class="mb-1" data-i18n="help_export_text"><strong>Enregistrer/Charger :</strong> Conservez votre travail dans un fichier .json.<br><strong>Exporter :</strong> Générez des fichiers aux formats Markdown (IA), PDF ou Texte Riche.</p>
-                    </div>
-                </div>
-            </div>
         </div>
+
+
 
         <!-- Foldable Key Parameters Panel -->
         <div class="mb-3 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
@@ -295,26 +356,8 @@
                 </div>
                 <span id="key-params-panel-icon" class="material-icons-round text-slate-400 rotate-icon text-sm">expand_more</span>
             </button>
-            <div id="key-params-panel" class="panel-content">
-                <div class="p-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <!-- 1. Name -->
-                    <div>
-                        <label class="compact-label block" data-i18n="label_course_name">Nom de la formation</label>
-                        <input type="text" id="param-name" class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none" placeholder="Entrez le nom de la formation..." data-i18n-placeholder="ph_course_name">
-                    </div>
-                    
-                    <!-- 2. Topic -->
-                    <div>
-                        <label class="compact-label block" data-i18n="label_topic">Sujet</label>
-                        <input type="text" id="param-topic" class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none" placeholder="Entrez le sujet..." data-i18n-placeholder="ph_topic">
-                    </div>
-
-                    <!-- 3. Author(s) -->
-                    <div>
-                        <label class="compact-label block" data-i18n="label_authors">Auteur(s)</label>
-                        <input type="text" id="param-authors" class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none" placeholder="Entrez le nom de l'auteur..." data-i18n-placeholder="ph_authors">
-                    </div>
-
+                        <!-- Champs toujours visibles -->
+            <div class="p-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     <!-- 4. Mode of Delivery -->
                     <div>
                         <label class="compact-label block" data-i18n="label_mode">Modalité</label>
@@ -336,26 +379,51 @@
 
                     <!-- 6. Learning Time -->
                     <div>
-                        <label class="compact-label block" data-i18n="label_learning_time">Temps d'Apprentissage (Cible)</label>
-                        <div class="flex gap-1">
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <div class="flex-1">
+                                <label class="compact-label block" data-i18n="label_learning_time">Temps d'Apprentissage (Cible)</label>
+                                <div class="flex gap-1">
                             <input type="number" id="param-learning-val" oninput="updateStats()" placeholder="0" min="0" class="w-2/3 px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none">
                             <select id="param-learning-unit" onchange="updateStats()" class="w-1/3 px-1 py-1 text-xs border border-slate-200 rounded bg-slate-50 focus:ring-1 focus:ring-indigo-500 outline-none">
-                                <option value="mins" data-i18n="unit_mins">Mins</option>
+                                <option value="mins" data-i18n="unit_mins">min</option>
                                 <option value="hours" data-i18n="unit_hours">Heures</option>
                                 <option value="days" data-i18n="unit_days">Jours</option>
                                 <option value="weeks" data-i18n="unit_weeks">Semaines</option>
                                 <option value="months" data-i18n="unit_months">Mois</option>
                             </select>
                         </div>
+                            </div>
+                            <div class="flex-1">
+                                <label class="compact-label block" data-i18n="label_designed_time">Temps Conçu (Planifié)</label>
+                                <div class="flex gap-1 items-center">
+                                    <input type="number" id="param-designed-val" placeholder="0" min="0" class="w-2/3 px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none bg-slate-100 text-slate-500" readonly>
+                                    <span id="param-designed-unit-display" class="w-1/3 text-xs text-slate-600 font-bold px-1">mins</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- 7. Designed Time -->
+            </div>
+
+            <!-- Champs supplémentaires (pliés par défaut) -->
+            <div id="key-params-panel" class="panel-content" style="display: none;">
+                <div class="p-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <!-- 1. Name -->
                     <div>
-                        <label class="compact-label block" data-i18n="label_designed_time">Temps Conçu (Planifié)</label>
-                         <div class="flex gap-1 items-center">
-                            <input type="number" id="param-designed-val" placeholder="0" min="0" class="w-2/3 px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none bg-slate-100 text-slate-500" readonly>
-                            <span id="param-designed-unit-display" class="w-1/3 text-xs text-slate-600 font-bold px-1">mins</span>
-                        </div>
+                        <label class="compact-label block" data-i18n="label_course_name">Nom de la formation</label>
+                        <input type="text" id="param-name" class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none" placeholder="Entrez le nom de la formation..." data-i18n-placeholder="ph_course_name">
+                    </div>
+                    
+                    <!-- 2. Topic -->
+                    <div>
+                        <label class="compact-label block" data-i18n="label_topic">Sujet</label>
+                        <input type="text" id="param-topic" class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none" placeholder="Entrez le sujet..." data-i18n-placeholder="ph_topic">
+                    </div>
+
+                    <!-- 3. Author(s) -->
+                    <div>
+                        <label class="compact-label block" data-i18n="label_authors">Auteur(s)</label>
+                        <input type="text" id="param-authors" class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none" placeholder="Entrez le nom de l'auteur..." data-i18n-placeholder="ph_authors">
                     </div>
 
                     <!-- 8. Aims -->
@@ -395,103 +463,83 @@
                     <div class="md:col-span-2 lg:col-span-3">
                         <label class="compact-label block" data-i18n="label_description">Description générale</label>
                         <textarea id="param-description" rows="1" class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-y" placeholder="Description détaillée..." data-i18n-placeholder="ph_description"></textarea>
-                    </div>
-                </div>
+                    </div>                </div>
             </div>
         </div>
 
         <!-- Global Stats Display -->
         <div class="mb-3 no-print flex flex-col md:flex-row gap-2">
             <div class="bg-white p-3 rounded-lg shadow-sm border border-slate-200 flex-1 flex flex-col justify-center">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full mb-2 gap-3">
-                    <div class="flex flex-wrap items-center gap-3">
-                        <!-- Target Time -->
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-slate-500 text-[10px] font-bold uppercase tracking-wider" data-i18n="label_learning_time">Cible</span>
-                            <div class="bg-slate-50 border border-slate-200 rounded px-2 py-0.5 shadow-sm">
-                                <span id="header-target-time" class="text-xs font-bold text-slate-600">0 Mins</span>
-                            </div>
-                        </div>
-                        
-                        <div class="hidden sm:block w-px h-4 bg-slate-200"></div>
-
-                        <!-- Designed Time -->
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-slate-500 text-[10px] font-bold uppercase tracking-wider" data-i18n="label_designed_time">Planifié</span>
-                            <div class="bg-indigo-50 border border-indigo-100 rounded px-2 py-0.5 shadow-sm">
-                                <span id="total-duration" class="text-xs font-bold text-indigo-700">0 mins</span>
-                            </div>
-                        </div>
+                <button onclick="togglePanel('timeline-panel')" class="w-full px-3 py-2 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print h-[32px]" data-i18n-title="title_toggle_panel">
+                    <div class="flex items-center gap-1.5">
+                        <span class="material-icons-round text-slate-500 text-sm">insights</span>
+                        <span class="font-bold text-slate-700 uppercase text-xs tracking-wide" data-i18n="panel_timelines_title">Visualisations des séquences</span>
                     </div>
-
-                    <div class="text-right flex items-center gap-2">
-                        <span class="text-slate-400 text-[10px] italic" id="stats-update-info" data-i18n="status_calculating">Calcul auto...</span>
-                        <button onclick="togglePanel('timeline-panel')" class="bg-slate-100 hover:bg-indigo-100 text-slate-600 hover:text-indigo-600 p-1 rounded transition-colors" data-i18n-title="title_toggle_panel">
-                            <span id="timeline-panel-icon" class="material-icons-round text-base rotate-icon">expand_more</span>
-                        </button>
-                    </div>
+                    <span id="timeline-panel-icon" class="material-icons-round text-slate-400 rotate-icon text-sm">expand_more</span>
+                </button>
+                <div class="flex justify-end mt-2">
+                    <span class="text-slate-400 text-[10px] italic" id="stats-update-info" data-i18n="status_calculating">Calcul auto...</span>
                 </div>
-                
-                <!-- Fluid Timeline Container - Folded by default -->
+
                 <div id="timeline-panel" class="panel-content w-full flex flex-col gap-1.5 mt-1" style="display: none;">
                     <!-- Track 0: Planned Structure (Target Durations) -->
                     <div class="flex flex-col gap-0.5">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_structure_planned">Modules prévus</span>
-                        <div id="timeline-activities-planned" class="w-full h-4 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
-                        <div id="timeline-activities-planned-labels" class="w-full flex text-[10px] text-slate-500 font-medium leading-none"></div>
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_structure_planned">Modules prévus</span>
+                        <div id="timeline-activities-planned" class="w-full h-5 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                        <div id="timeline-activities-planned-labels" class="w-full flex text-xs text-slate-600 font-medium leading-none"></div>
                     </div>
 
                     <!-- Track 1: Designed Structure -->
                     <div class="flex flex-col gap-0.5">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_structure">Modules conçus</span>
-                        <div id="timeline-activities" class="w-full h-4 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
-                        <div id="timeline-activities-labels" class="w-full flex text-[10px] text-slate-500 font-medium leading-none"></div>
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_structure">Modules conçus</span>
+                        <div id="timeline-activities" class="w-full h-5 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                        <div id="timeline-activities-labels" class="w-full flex text-xs text-slate-600 font-medium leading-none"></div>
                     </div>
 
                     <!-- Track 2: Learning Types -->
                     <div class="flex flex-col gap-0.5 timeline-track-pedagogy">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_pedagogy">Types d'apprentissage</span>
-                        <div id="timeline-steps" class="w-full h-4 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_pedagogy">Types d'apprentissage</span>
+                        <div id="timeline-steps" class="w-full h-5 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                     </div>
 
                     <!-- Track 3: Grouping -->
                     <div class="flex flex-col gap-0.5">
                         <div class="flex items-baseline gap-2">
-                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_grouping">Regroupement</span>
-                            <span class="text-[10px] text-slate-400 font-normal" data-i18n="legend_grouping">Plein : Classe • Rayé : Groupes</span>
+                            <span class="text-sm font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_grouping">Regroupement</span>
+                            <span class="text-xs text-slate-500 font-normal" data-i18n="legend_grouping">Plein : Classe • Rayé : Groupes</span>
                         </div>
-                        <div id="timeline-grouping" class="w-full h-2 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                        <div id="timeline-grouping" class="w-full h-3 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                     </div>
 
                     <!-- Track 4: Trainer -->
                     <div class="flex flex-col gap-0.5">
                         <div class="flex items-baseline gap-2">
-                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_trainer">Formateur</span>
-                            <span class="text-[10px] text-slate-400 font-normal" data-i18n="legend_trainer">Plein : Présent • Rayé : Absent</span>
+                            <span class="text-sm font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_trainer">Formateur</span>
+                            <span class="text-xs text-slate-500 font-normal" data-i18n="legend_trainer">Plein : Présent • Rayé : Absent</span>
                         </div>
-                        <div id="timeline-trainer" class="w-full h-2 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                        <div id="timeline-trainer" class="w-full h-3 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                     </div>
 
                     <!-- Track 5: Place -->
                     <div class="flex flex-col gap-0.5">
                         <div class="flex items-baseline gap-2">
-                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_place">Lieu</span>
-                            <span class="text-[10px] text-slate-400 font-normal" data-i18n="legend_place">Plein : Présentiel • Rayé : En ligne</span>
+                            <span class="text-sm font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_place">Lieu</span>
+                            <span class="text-xs text-slate-500 font-normal" data-i18n="legend_place">Plein : Présentiel • Rayé : En ligne</span>
                         </div>
-                        <div id="timeline-place" class="w-full h-2 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                        <div id="timeline-place" class="w-full h-3 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                     </div>
 
                     <!-- Track 6: Time -->
                     <div class="flex flex-col gap-0.5">
                         <div class="flex items-baseline gap-2">
-                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-0.5" data-i18n="label_time">Temps</span>
-                            <span class="text-[10px] text-slate-400 font-normal" data-i18n="legend_time">Plein : Synchrone • Rayé : Asynchrone</span>
+                            <span class="text-sm font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_time">Temps</span>
+                            <span class="text-xs text-slate-500 font-normal" data-i18n="legend_time">Plein : Synchrone • Rayé : Asynchrone</span>
                         </div>
-                        <div id="timeline-time" class="w-full h-2 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                        <div id="timeline-time" class="w-full h-3 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                     </div>
 
                     <!-- Shared Ruler -->
-                    <div id="timeline-ruler" class="w-full h-4 relative mt-0 select-none pointer-events-none"></div>
+                    <div id="timeline-ruler" class="w-full h-5 relative mt-0 select-none pointer-events-none"></div>
                 </div>
 
             </div>
@@ -520,7 +568,7 @@
             </div>
 
             <!-- Empty State -->
-            <div id="empty-state" class="hidden text-center py-10 bg-white rounded-xl border-2 border-dashed border-slate-300">
+            <div id="empty-state" class="hidden text-center py-12 bg-white rounded-xl border-2 border-dashed border-slate-300">
                 <h3 class="mt-1 text-base font-medium text-slate-900" data-i18n="empty_title">Aucun module conçu</h3>
                 <p class="mt-0.5 text-xs text-slate-500" data-i18n="empty_subtitle">Commencez par créer votre premier module.</p>
                 <button onclick="addActivity()" class="mt-4 inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700" data-i18n-title="title_create_activity">
@@ -531,7 +579,7 @@
 
         <!-- Footer -->
         <footer class="mt-8 mb-4 text-center text-[10px] text-slate-400 no-print">
-            <p>François Jourde (2026) - CC BY SA, inspired by the <a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" class="underline hover:text-slate-500">Learning Designer</a> (UCL Knowledge Lab).</p>
+            <p>François Jourde (2026) - CC BY SA, inspiré par le <a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" class="underline hover:text-slate-500">Learning Designer</a> (UCL Knowledge Lab).</p>
             <p class="mt-1" data-i18n="footer_disclaimer">Ce site n'utilise pas de cookies de suivi ou de session. Aucune donnée personnelle n'est traitée en ligne.</p>
         </footer>
     </div>
@@ -553,15 +601,15 @@
 
     <!-- Templates -->
     <template id="activity-template">
-        <div class="activity-group relative">
-            <div class="flex flex-col sm:flex-row sm:items-start justify-between mb-2 px-1 gap-2">
+        <div class="activity-group relative bg-white rounded-xl shadow-sm border border-slate-200 p-3">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between mb-2 gap-2">
                 <div class="flex-1 flex items-center gap-2">
                     <div class="drag-handle-activity drag-handle text-slate-300 hover:text-slate-500 no-print flex items-center justify-center w-6 h-6 cursor-grab">
                         <span class="material-icons-round text-lg">drag_indicator</span>
                     </div>
                     <div class="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 activity-index shrink-0 text-xs">1</div>
                     <div class="flex-1 w-full">
-                        <input type="text" oninput="updateStats()" placeholder="Titre du module (ex: Module 1 : Introduction)" data-i18n-placeholder="ph_activity_title" class="activity-title text-base font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-0.5 transition-colors">
+                        <input type="text" oninput="updateStats()" placeholder="Titre du module (ex: Module 1 : Introduction)" data-i18n-placeholder="ph_activity_title" class="activity-title text-lg font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-0.5 transition-colors">
                         
                         <!-- Activity-specific Timeline Bar -->
                         <div class="flex items-center gap-2 mt-0.5 pr-1">
@@ -580,7 +628,7 @@
                             <div class="flex items-center gap-1">
                                 <input type="number" min="0" oninput="updateStats()" class="activity-target-time w-12 px-1 py-0.5 text-xs text-right border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-[22px]" placeholder="0">
                                 <select onchange="updateStats()" class="activity-target-unit w-20 px-0 py-0.5 text-[10px] border border-slate-200 rounded bg-slate-50 focus:ring-1 focus:ring-indigo-500 outline-none h-[22px]">
-                                    <option value="60" data-i18n="unit_mins">Mins</option>
+                                    <option value="60" data-i18n="unit_mins">min</option>
                                     <option value="3600" data-i18n="unit_hours">Heures</option>
                                     <option value="86400" data-i18n="unit_days">Jours</option>
                                     <option value="604800" data-i18n="unit_weeks">Semaines</option>
@@ -620,12 +668,12 @@
             <div class="activity-body panel-content open">
                 <div class="activity-description-panel panel-content">
                     <div class="mb-2 ml-8 pr-1">
-                        <textarea rows="1" placeholder="Description du module..." data-i18n-placeholder="ph_activity_desc" class="activity-description w-full px-2 py-1 text-xs text-slate-600 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-y bg-slate-50"></textarea>
+                        <textarea rows="1" placeholder="Description du module..." data-i18n-placeholder="ph_activity_desc" class="activity-description w-full px-3 py-2 text-sm text-slate-700 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-y bg-slate-50 leading-relaxed"></textarea>
                     </div>
                 </div>
                 <div class="activity-steps-container activity-container ml-4 pl-4 space-y-2 min-h-[20px]"></div>
                 <div class="mt-2 pt-1 flex justify-center no-print border-t border-slate-100">
-                    <button onclick="addStepToActivity(this)" class="text-xs font-semibold text-slate-400 hover:text-indigo-600 px-3 py-1 rounded transition-colors flex items-center gap-1 hover:bg-slate-50" data-i18n-title="title_add_step">
+                    <button onclick="addStepToActivity(this)" class="text-sm font-semibold text-slate-500 hover:text-indigo-700 px-3 py-1 rounded transition-colors flex items-center gap-1 hover:bg-slate-50" data-i18n-title="title_add_step">
                         <span class="material-icons-round text-sm">add</span>
                         <span data-i18n="btn_add_step">Ajouter Activité</span>
                     </button>
@@ -635,22 +683,22 @@
     </template>
 
     <template id="step-template">
-        <div class="step-card bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden relative group flex flex-col">
+        <div class="step-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative group flex flex-col">
             <!-- Header Row -->
-            <div class="flex items-center gap-2 p-1.5 border-b border-transparent hover:border-slate-100 transition-colors">
+            <div class="flex items-center gap-2 p-2 bg-slate-50 border-b border-slate-100 transition-colors">
                 <div class="drag-handle-step drag-handle flex items-center justify-center text-slate-300 hover:text-slate-500 cursor-grab">
                     <span class="material-icons-round text-base">drag_indicator</span>
                 </div>
                 
                 <div class="flex-1">
-                     <input type="text" placeholder="Titre de l'activité..." data-i18n-placeholder="ph_step_title" class="step-input-title w-full px-1 py-0.5 text-xs font-bold text-slate-700 border-none bg-transparent focus:ring-0 outline-none">
+                     <input type="text" placeholder="Titre de l'activité..." data-i18n-placeholder="ph_step_title" class="step-input-title w-full px-1 py-0.5 text-sm font-semibold text-slate-800 border-none bg-transparent focus:ring-0 outline-none">
                 </div>
 
                 <!-- Moved Duration Fields Here (Compact) -->
                 <div class="flex items-center gap-1">
-                    <input type="number" oninput="updateStats()" placeholder="0" min="0" class="duration-input w-16 px-1 py-0.5 text-[10px] font-bold border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-[22px] text-right text-slate-600">
-                    <select onchange="updateStats()" class="duration-unit w-24 px-0 py-0.5 text-[10px] border border-slate-200 rounded bg-slate-50 focus:ring-1 focus:ring-indigo-500 outline-none h-[22px]">
-                        <option value="60" data-i18n="unit_mins">Mins</option>
+                    <input type="number" oninput="updateStats()" placeholder="0" min="0" class="duration-input w-16 px-2 py-0.5 text-xs font-semibold border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-[22px] text-right text-slate-600">
+                    <select onchange="updateStats()" class="duration-unit w-24 px-2 py-0.5 text-xs border border-slate-200 rounded bg-slate-50 focus:ring-1 focus:ring-indigo-500 outline-none h-[22px]">
+                        <option value="60" data-i18n="unit_mins">min</option>
                         <option value="3600" data-i18n="unit_hours">Heures</option>
                         <option value="86400" data-i18n="unit_days">Jours</option>
                         <option value="604800" data-i18n="unit_weeks">Semaines</option>
@@ -658,7 +706,7 @@
                 </div>
 
                 <div class="w-24 learning-type-container">
-                     <select onchange="updateStepType(this)" class="learning-type-select w-full px-1 py-0.5 text-[10px] font-bold border rounded focus:ring-1 focus:ring-indigo-500 outline-none transition-all select-acquisition h-[22px]">
+                     <select onchange="updateStepType(this)" class="learning-type-select w-full px-2 py-0.5 text-xs font-semibold border rounded focus:ring-1 focus:ring-indigo-500 outline-none transition-all select-acquisition h-[22px]">
                         <option value="acquisition" data-i18n="type_acquisition">Acquisition</option>
                         <option value="collaboration" data-i18n="type_collaboration">Collaboration</option>
                         <option value="discussion" data-i18n="type_discussion">Discussion</option>
@@ -684,7 +732,7 @@
             </div>
 
             <!-- Body Row - Collapsed by default -->
-            <div class="step-body panel-content collapsed p-2 pt-0">
+            <div class="step-body panel-content collapsed p-3 pt-2">
                 <div class="flex flex-col lg:flex-row gap-3 mt-1">
                     <div class="lg:w-1/3 space-y-2">
                         
@@ -888,160 +936,6 @@
         };
 
         const translations = {
-            en: {
-                app_title: "Learning Designer",
-                app_subtitle: "Pedagogical Design & Analytics",
-                btn_new_activity: "New Module",
-                btn_export_md: "Export for AI/RAG",
-                btn_print: "Print / PDF",
-                btn_save: "Save",
-                btn_load: "Load",
-                grp_project: "Project",
-                grp_view: "View",
-                grp_actions: "Actions",
-                grp_help: "Help",
-                // Export Translations
-                btn_export_dropdown: "Export As...",
-                title_export_dropdown: "Choose export format",
-                opt_md: "Markdown (for GenAI)",
-                opt_pdf: "PDF (Print)",
-                opt_rtf: "Rich Text (HTML)",
-                opt_real_rtf: "Text (.rtf)",
-                title_export_term: "Export translation table (EN/FR)",
-                info_export_genai: "The export format is the learning design in Markdown for easy processing by a generative AI chatbot.",
-                label_total_time: "Timeline",
-                status_calculating: "Auto-calculating...",
-                label_class_size: "Cohort Size",
-                label_timeline_structure: "Designed modules",
-                label_timeline_structure_planned: "Planned modules",
-                label_timeline_pedagogy: "Learning Types",
-                empty_title: "No modules designed yet",
-                empty_subtitle: "Start by creating your first Module container.",
-                btn_create_activity: "Create Module",
-                btn_add_step: "Add Activity",
-                ph_activity_title: "Module Title (e.g. Module 1: Introduction)",
-                ph_activity_desc: "Module Description...",
-                label_step_title: "Activity Title",
-                ph_step_title: "Title for this activity...",
-                label_learning_type: "Learning Type",
-                label_duration: "Duration",
-                label_grouping: "Grouping",
-                opt_whole_class: "Whole Class",
-                opt_groups: "Groups",
-                ph_nb_groups: "Nb groups",
-                label_short_groups: "Grps",
-                ph_per_group: "Per group",
-                label_short_pers: "Pers",
-                label_trainer: "Trainer",
-                opt_present: "Present",
-                opt_absent: "Absent",
-                label_place: "Place",
-                opt_insitu: "In Situ",
-                opt_online: "Online",
-                label_time: "Time",
-                opt_sync: "Synchronous",
-                opt_async: "Asynchronous",
-                label_tasks: "What learners must do",
-                ph_tasks: "Describe the steps, instructions, and tasks...",
-                label_notes: "Notes",
-                ph_notes: "Trainer notes, resources, or links...",
-                type_acquisition: "Acquisition",
-                type_collaboration: "Collaboration",
-                type_discussion: "Discussion",
-                type_investigation: "Investigation",
-                type_practice: "Practice",
-                type_production: "Production",
-                unit_mins: "Mins",
-                unit_hours: "Hours",
-                unit_days: "Days",
-                unit_weeks: "Weeks",
-                unit_months: "Months",
-                md_title: "# Learning Experience Design Profile",
-                md_class_size: "Cohort Size",
-                md_total_duration: "Total Estimated Duration",
-                md_untitled_activity: "Untitled Module",
-                md_untitled_step: "Untitled Activity",
-                md_format_whole: "Whole Class",
-                md_format_groups: "Groups of",
-                md_tasks: "Student Tasks & Instructions",
-                md_notes: "Pedagogical Notes",
-                rtf_title: "Learning Experience Design Profile",
-                title_duplicate_activity: "Duplicate this module",
-                title_delete_activity: "Delete this module",
-                title_duplicate_step: "Duplicate this activity",
-                title_delete_step: "Delete this activity",
-                title_save_project: "Save current project to file",
-                title_load_project: "Load project from file",
-                title_switch_language: "Switch language / Changer la langue",
-                title_new_activity: "Add a new module",
-                title_toggle_panel: "Show/Hide parameters",
-                title_toggle_description: "Show/Hide description",
-                title_fold_all: "Fold/Unfold all modules",
-                btn_collapse_all: "Collapse All",
-                btn_expand_all: "Expand All",
-                title_add_outcome: "Add learning outcome",
-                title_remove_outcome: "Remove outcome",
-                title_add_step: "Add a new learning activity",
-                title_create_activity: "Create your first module",
-                title_help: "Help & Information",
-                help_title: "How to use Learning Designer",
-                help_structure_title: "1. Design Structure",
-                help_structure_text: "Build your course by adding <strong>Modules</strong> (topics) and filling them with <strong>Activities</strong> (specific tasks). Reorder items using the drag handles <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
-                help_types_title: "2. Learning Types",
-                help_types_intro: "Select a pedagogical type for each step:",
-                help_export_title: "3. Save & Export",
-                help_export_text: "<strong>Save/Load:</strong> Keep your work in a .json file.<br><strong>Export:</strong> Generate files in Markdown (GenAI), PDF, or Rich Text formats.",
-                panel_key_parameters: "Parameters",
-                label_course_name: "Training Name",
-                ph_course_name: "Enter training name...",
-                label_topic: "Topic",
-                ph_topic: "Enter topic...",
-                label_authors: "Author(s)",
-                ph_authors: "Enter author name(s)...",
-                label_learning_time: "Learning Time (Target)",
-                label_designed_time: "Designed Time (Planned)",
-                label_hours: "h",
-                label_minutes: "m",
-                label_description: "General Description",
-                ph_description: "Detailed description...",
-                label_mode: "Modalité",
-                opt_mode_placeholder: "Select a mode…",
-                opt_mode_online: "Wholly online",
-                opt_mode_blended: "Blended",
-                opt_mode_classroom: "Classroom-based",
-                opt_mode_location: "Location-based",
-                opt_mode_other: "Other",
-                label_aims: "Aims",
-                ph_aims: "Enter session aims...",
-                label_outcomes: "Learning Outcomes",
-                ph_add_outcome: "Add an outcome...",
-                text_no_outcomes: "No outcomes are set",
-                footer_disclaimer: "This site does not use tracking or session cookies. No personal data is processed online.",
-                footer_ai_disclaimer: "This application was created mainly using generative AI coding; the code may contain flaws.",
-                footer_github: "Code available at <a href=\"https://github.com/jourde/artefacts\" target=\"_blank\" class=\"underline hover:text-slate-500\">https://github.com/jourde/artefacts</a>",
-                bloom_placeholder: "Bloom...",
-                bloom_sub_placeholder: "Sous-cat...",
-                bloom_remember: "Remember",
-                bloom_understand: "Understand",
-                bloom_apply: "Apply",
-                bloom_analyze: "Analyze",
-                bloom_evaluate: "Evaluate",
-                bloom_create: "Create",
-                // Modal and Chart labels
-                modal_confirm_title: "Confirm Action",
-                confirm_delete_activity: "Delete this entire module?",
-                btn_cancel: "Cancel",
-                btn_delete: "Delete",
-                // Timeline Legends
-                legend_grouping: "Solid: Class • Stripes: Groups",
-                legend_trainer: "Solid: Present • Stripes: Absent",
-                legend_place: "Solid: In Situ • Stripes: Online",
-                legend_time: "Solid: Sync • Stripes: Async",
-                title_toggle_types: "Show/Hide Learning Type Dropdown",
-                btn_toggle_types: "Learning types",
-                label_target: "Target",
-                label_designed: "Designed"
-            },
             fr: {
                 app_title: "Concepteur Pédagogique",
                 app_subtitle: "Design Pédagogique & Analytique",
@@ -1061,7 +955,7 @@
                 opt_pdf: "PDF (Imprimer)",
                 opt_rtf: "Texte Riche (HTML)",
                 opt_real_rtf: "Texte (.rtf)",
-                title_export_term: "Exporter le tableau de traduction (EN/FR)",
+                title_export_term: "Exporter le tableau de traduction",
                 info_export_genai: "Le format d'exportation est le design pédagogique au format Markdown pour un traitement facilité par un chatbot d'IA générative.",
                 label_total_time: "Chronologie",
                 status_calculating: "Calcul auto...",
@@ -1105,7 +999,7 @@
                 type_investigation: "Enquête",
                 type_practice: "Entraînement",
                 type_production: "Production",
-                unit_mins: "Mins",
+                unit_mins: "min",
                 unit_hours: "Heures",
                 unit_days: "Jours",
                 unit_weeks: "Semaines",
@@ -1122,6 +1016,7 @@
                 rtf_title: "Profil de Design d'Expérience d'Apprentissage",
                 title_duplicate: "Dupliquer",
                 panel_key_parameters: "Paramètres",
+                panel_timelines_title: "Visualisations des séquences",
                 label_course_name: "Nom de la formation",
                 ph_course_name: "Entrez le nom de la formation...",
                 label_topic: "Sujet",
@@ -1153,8 +1048,7 @@
                 title_delete_step: "Supprimer cette activité",
                 title_save_project: "Enregistrer le projet dans un fichier",
                 title_load_project: "Charger un projet depuis un fichier",
-                title_switch_language: "Changer la langue / Switch language",
-                title_new_activity: "Ajouter un nouveau module",
+title_new_activity: "Ajouter un nouveau module",
                 title_toggle_panel: "Afficher/Masquer les paramètres",
                 title_toggle_description: "Afficher/Masquer la description",
                 title_add_outcome: "Ajouter un résultat d'apprentissage",
@@ -1673,8 +1567,7 @@
 
             const project = {
                 version: "1.8",
-                language: currentLang,
-                keyParams: {
+keyParams: {
                     name: document.getElementById('param-name').value,
                     topic: document.getElementById('param-topic').value,
                     authors: document.getElementById('param-authors').value,
@@ -1740,10 +1633,8 @@
                 try {
                     const project = JSON.parse(e.target.result);
                     root.innerHTML = '';
-                    currentLang = project.language || 'en';
-                    document.getElementById('lang-btn-text').innerText = currentLang === 'en' ? 'FR' : 'EN';
-                    
-                    // Restore Key Params
+                    currentLang = 'fr';
+// Restore Key Params
                     if (project.keyParams) {
                         document.getElementById('param-name').value = project.keyParams.name || "";
                         document.getElementById('param-topic').value = project.keyParams.topic || "";
@@ -1826,26 +1717,6 @@
         }
 
         // --- Core Application Logic ---
-
-        function toggleLanguage() {
-            currentLang = currentLang === 'en' ? 'fr' : 'en';
-            document.getElementById('lang-btn-text').innerText = currentLang === 'en' ? 'FR' : 'EN';
-            applyTranslations();
-            // Re-render bloom options in header to update language
-            renderBloomOptions(document.getElementById('new-bloom-level'), document.getElementById('new-bloom-level').value);
-            renderBloomSubOptions(document.getElementById('new-bloom-sub'), document.getElementById('new-bloom-level').value, document.getElementById('new-bloom-sub').value);
-            // Re-render bloom options in list
-            document.querySelectorAll('#outcomes-list li').forEach(li => {
-                const levelSelect = li.querySelector('.outcome-bloom-level');
-                const subSelect = li.querySelector('.outcome-bloom-sub');
-                const currentLevel = levelSelect.value;
-                const currentSub = subSelect.value;
-                renderBloomOptions(levelSelect, currentLevel);
-                renderBloomSubOptions(subSelect, currentLevel, currentSub);
-            });
-
-            updateStats();
-        }
 
         function applyTranslations() {
             document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -1988,7 +1859,7 @@
                 return;
             }
 
-            msg.innerText = translations[currentLang].confirm_delete_activity || 'Delete this module?';
+            msg.innerText = translations[currentLang].confirm_delete_activity || 'Supprimer ce module ?';
 
             // Set the *single* pending confirm action. This prevents stacked handlers (which can cause duplication).
             __confirmAction = () => {
@@ -2080,11 +1951,11 @@
             }
             if (mins >= MINS_PER_WEEK) {
                 const w = mins / MINS_PER_WEEK;
-                return currentLang === 'fr' ? `${fmt(w)}sem` : `${fmt(w)}w`;
+                return `${fmt(w)}sem`;
             }
             if (mins >= MINS_PER_DAY) {
                 const d = mins / MINS_PER_DAY;
-                return currentLang === 'fr' ? `${fmt(d)}j` : `${fmt(d)}d`;
+                return `${fmt(d)}j`;
             }
             if (mins >= MINS_PER_HOUR) {
                 const h = Math.floor(mins / 60);
@@ -2106,7 +1977,8 @@
                 display = `${h}h ${m}m`;
             } else if (totals.totalSecs > 0) display = `${Math.round(totals.totalSecs / 60)} ${translations[currentLang].unit_mins}`;
             
-            document.getElementById('total-duration').innerText = display;
+            const totalDurationEl = document.getElementById('total-duration');
+            if (totalDurationEl) totalDurationEl.innerText = display;
 
             // Updated logic for synced time units
             const learningUnitSelect = document.getElementById('param-learning-unit');
@@ -2118,7 +1990,8 @@
             
             // Update Header Target Time
             const targetVal = document.getElementById('param-learning-val').value || 0;
-            document.getElementById('header-target-time').innerText = `${targetVal} ${learningUnitText}`;
+            const headerTargetTimeEl = document.getElementById('header-target-time');
+            if (headerTargetTimeEl) headerTargetTimeEl.innerText = `${targetVal} ${learningUnitText}`;
 
             const designedInput = document.getElementById('param-designed-val');
             let divisor = 60;
@@ -2202,9 +2075,9 @@
                             if (activity.targetSecs > 0) {
                                 tooltipText = `<strong>${activity.title}</strong><br><span class="text-slate-300">${durationMins} ${translations[currentLang].unit_mins}</span>`;
                             } else if (activity.isEstimated) {
-                                tooltipText = `<strong>${activity.title}</strong><br><span class="text-slate-300">${durationMins} ${translations[currentLang].unit_mins}</span><br><span class="opacity-80">${currentLang==='fr' ? 'Cible non renseignée' : 'Target not set'}</span>`;
+                                tooltipText = `<strong>${activity.title}</strong><br><span class="text-slate-300">${durationMins} ${translations[currentLang].unit_mins}</span><br><span class="opacity-80">${'Cible non renseignée'}</span>`;
                             } else {
-                                tooltipText = `<strong>${activity.title}</strong><br><span class="opacity-80">${currentLang==='fr' ? 'Durée cible à définir' : 'Set a target duration'}</span>`;
+                                tooltipText = `<strong>${activity.title}</strong><br><span class="opacity-80">${'Durée cible à définir'}</span>`;
                             }
 
                             actEl.onmouseenter = (e) => showTooltip(e, tooltipText);
@@ -2275,7 +2148,7 @@
 
                         // Inner Label (Activity Number + Duration)
                         const innerLabel = document.createElement('div');
-                        innerLabel.className = 'text-[10px] font-bold text-white pointer-events-none select-none truncate px-1 opacity-90 group-hover:opacity-100 transition-opacity';
+                        innerLabel.className = 'text-xs font-semibold text-white pointer-events-none select-none truncate px-1 opacity-95 group-hover:opacity-100 transition-opacity';
                         innerLabel.innerText = formatTimelineDuration(activity.duration);
                         if (actWidthPct > 4) { 
                             actEl.appendChild(innerLabel);
@@ -2383,12 +2256,12 @@
                     const leftPct = (t / totalMins) * 100;
                     if (leftPct > 100.1) break; 
                     const tick = document.createElement('div');
-                    tick.className = 'absolute top-0 w-px h-1.5 bg-slate-300';
+                    tick.className = 'absolute top-0 w-px h-2 bg-slate-300';
                     tick.style.left = `${leftPct}%`;
                     containerRuler.appendChild(tick);
                     
                     const label = document.createElement('div');
-                    label.className = 'absolute top-2 text-[9px] text-slate-400 font-mono transform -translate-x-1/2 whitespace-nowrap';
+                    label.className = 'absolute top-2 text-[11px] text-slate-500 font-mono transform -translate-x-1/2 whitespace-nowrap';
                     label.style.left = `${leftPct}%`;
                     
                     let text = '';
@@ -2396,7 +2269,7 @@
                     else {
                         if (interval >= 1440) {
                              const days = t / 1440;
-                             text = `${Number.isInteger(days) ? days : days.toFixed(1)}${currentLang==='fr'?'j':'d'}`;
+                             text = `${Number.isInteger(days) ? days : days.toFixed(1)}${'j'}`;
                         } else if (interval >= 60) {
                             const h = Math.floor(t/60);
                             const m = t % 60;
@@ -2542,10 +2415,8 @@
                 
                 // Fix for Activity Label
                 let actPrefix = t.md_untitled_activity;
-                if(currentLang === 'en') actPrefix = actPrefix.replace('Untitled ', '');
-                else if(currentLang === 'fr') actPrefix = actPrefix.replace(' sans titre', '');
-
-                html += `<div class="activity-block">
+                actPrefix = actPrefix.replace(' sans titre', '');
+html += `<div class="activity-block">
                     <h3 style="color: #1e293b; font-size: 1.2em; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px;">${actPrefix} ${aIdx + 1}: ${activityTitle}</h3>
                     ${activityDesc ? `<p><em>${activityDesc}</em></p>` : ''}`;
 
@@ -2601,8 +2472,7 @@
             md += `- **${t.label_total_time}:** ${document.getElementById('total-duration').innerText}\n`;
             md += `- **${t.label_learning_time}:** ${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`;
             md += `- **${t.label_designed_time}:** ${document.getElementById('param-designed-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`; // Use learning unit text directly
-            md += `- **Design Language:** ${currentLang.toUpperCase()}\n`;
-            md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
+md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
             
             md += `## key_info\n`;
             md += `### ${t.label_aims}\n${document.getElementById('param-aims').value}\n\n`;
@@ -2663,7 +2533,54 @@
             URL.revokeObjectURL(url);
         }
 
-        window.onload = () => { applyTranslations(); addActivity(); renderBloomOptions(document.getElementById('new-bloom-level')); };
+        
+
+        // Palette: standard vs high-contrast (hc)
+        function isHighContrastEnabled() {
+            return document.body.classList.contains('hc');
+        }
+
+        function setHighContrastEnabled(enabled) {
+            document.body.classList.toggle('hc', !!enabled);
+            try {
+                localStorage.setItem('ld_palette', enabled ? 'hc' : 'standard');
+            } catch (e) {
+                // ignore storage errors (private mode, etc.)
+            }
+            updateContrastToggleUI();
+            // Timelines and tags use computed colours; re-render ensures consistent contrast if CSS affects them.
+            updateStats();
+        }
+
+        function updateContrastToggleUI() {
+            const btn = document.getElementById('contrast-toggle-btn');
+            const txt = document.getElementById('contrast-btn-text');
+            if (!btn || !txt) return;
+            const enabled = isHighContrastEnabled();
+            btn.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+            btn.title = enabled ? "Passer à la palette standard" : "Passer au haut contraste";
+            txt.textContent = enabled ? "HC" : "STD";
+        }
+
+        function toggleHighContrast(evt) {
+            if (evt) { evt.preventDefault(); evt.stopPropagation(); }
+            setHighContrastEnabled(!isHighContrastEnabled());
+        }
+window.onload = () => {
+            applyTranslations();
+            addActivity();
+            renderBloomOptions(document.getElementById('new-bloom-level'));
+
+            // Apply saved palette preference (defaults to current HTML body class)
+            try {
+                const pref = localStorage.getItem('ld_palette');
+                if (pref === 'standard') document.body.classList.remove('hc');
+                if (pref === 'hc') document.body.classList.add('hc');
+            } catch (e) {
+                // ignore storage errors
+            }
+            updateContrastToggleUI();
+        };
     </script>
 </body>
 </html>
