@@ -258,6 +258,21 @@
             outline-color: rgba(37, 99, 235, 0.8);
         }
 
+
+
+/* Timeline panel – UI polish */
+#timeline-panel .timeline-track { transition: box-shadow 0.15s ease; }
+#timeline-panel .timeline-track:hover { box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06); }
+body.dense #timeline-panel { padding: 0.5rem !important; }
+body.dense #timeline-panel #timeline-activities-planned,
+body.dense #timeline-panel #timeline-activities,
+body.dense #timeline-panel #timeline-steps { height: 1.25rem !important; }
+body.dense #timeline-panel #timeline-grouping,
+body.dense #timeline-panel #timeline-trainer,
+body.dense #timeline-panel #timeline-place,
+body.dense #timeline-panel #timeline-time { height: 0.95rem !important; }
+body.dense #timeline-panel #timeline-ruler { height: 1.35rem !important; }
+
 </style>
 </head>
 <body class="p-2 md:p-4 hide-types text-slate-900 dense hc">
@@ -456,59 +471,87 @@
 <div class="flex justify-end mt-2">
 <span class="text-slate-400 text-[10px] italic" data-i18n="status_calculating" id="stats-update-info">Calcul auto...</span>
 </div>
-<div class="panel-content w-full flex flex-col gap-1.5 mt-1" id="timeline-panel" style="display: none;">
+<div class="panel-content w-full flex flex-col gap-2 mt-2 p-2 rounded-xl border border-slate-200 bg-slate-50" id="timeline-panel" style="display: none;">
 <!-- Track 0: Planned Structure (Target Durations) -->
-<div class="flex flex-col gap-0.5">
-<span class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_structure_planned">Modules prévus</span>
-<div class="w-full h-5 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-activities-planned"></div>
-<div class="w-full flex text-xs text-slate-600 font-medium leading-none" id="timeline-activities-planned-labels"></div>
+<div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1">
+<div class="flex items-center justify-between gap-2 flex-wrap">
+<div class="flex items-center gap-1.5">
+<span class="material-icons-round text-slate-500 text-base" aria-hidden="true">view_agenda</span>
+<span class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="label_timeline_structure_planned">Modules prévus</span>
+</div>
+</div>
+<div class="w-full h-6 flex rounded-lg overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-activities-planned"></div>
+<div class="w-full flex text-xs text-slate-600 font-medium leading-none mt-1" id="timeline-activities-planned-labels"></div>
 </div>
 <!-- Track 1: Designed Structure -->
-<div class="flex flex-col gap-0.5">
-<span class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_structure">Modules conçus</span>
-<div class="w-full h-5 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-activities"></div>
-<div class="w-full flex text-xs text-slate-600 font-medium leading-none" id="timeline-activities-labels"></div>
+<div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1">
+<div class="flex items-center justify-between gap-2 flex-wrap">
+<div class="flex items-center gap-1.5">
+<span class="material-icons-round text-slate-500 text-base" aria-hidden="true">account_tree</span>
+<span class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="label_timeline_structure">Modules conçus (un module doit avoir au moins une activité)</span>
+</div>
+</div>
+<div class="w-full h-6 flex rounded-lg overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-activities"></div>
+<div class="w-full flex text-xs text-slate-600 font-medium leading-none mt-1" id="timeline-activities-labels"></div>
 </div>
 <!-- Track 2: Learning Types -->
-<div class="flex flex-col gap-0.5 timeline-track-pedagogy">
-<span class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_timeline_pedagogy">Types d'apprentissage</span>
-<div class="w-full h-5 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-steps"></div>
+<div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1 timeline-track-pedagogy">
+<div class="flex items-center justify-between gap-2 flex-wrap">
+<div class="flex items-center gap-1.5">
+<span class="material-icons-round text-slate-500 text-base" aria-hidden="true">psychology</span>
+<span class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="label_timeline_pedagogy">Types d'apprentissage</span>
+</div>
+</div>
+<div class="w-full h-6 flex rounded-lg overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-steps"></div>
 </div>
 <!-- Track 3: Grouping -->
-<div class="flex flex-col gap-0.5">
-<div class="flex items-baseline gap-2">
-<span class="text-sm font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_grouping">Regroupement</span>
-<span class="text-xs text-slate-500 font-normal" data-i18n="legend_grouping">Plein : Classe • Rayé : Groupes</span>
+<div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1">
+<div class="flex items-center justify-between gap-2 flex-wrap">
+<div class="flex items-center gap-1.5">
+<span class="material-icons-round text-slate-500 text-base" aria-hidden="true">groups</span>
+<span class="text-sm font-bold text-slate-500 uppercase tracking-wider" data-i18n="label_grouping">Regroupement</span>
 </div>
-<div class="w-full h-3 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-grouping"></div>
+<span class="text-xs text-slate-600 font-medium bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5" data-i18n="legend_grouping">Plein : Classe • Rayé : Groupes</span>
+</div>
+<div class="w-full h-4 flex rounded-lg overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-grouping"></div>
 </div>
 <!-- Track 4: Trainer -->
-<div class="flex flex-col gap-0.5">
-<div class="flex items-baseline gap-2">
-<span class="text-sm font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_trainer">Formateur</span>
-<span class="text-xs text-slate-500 font-normal" data-i18n="legend_trainer">Plein : Présent • Rayé : Absent</span>
+<div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1">
+<div class="flex items-center justify-between gap-2 flex-wrap">
+<div class="flex items-center gap-1.5">
+<span class="material-icons-round text-slate-500 text-base" aria-hidden="true">face</span>
+<span class="text-sm font-bold text-slate-500 uppercase tracking-wider" data-i18n="label_trainer">Formateur</span>
 </div>
-<div class="w-full h-3 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-trainer"></div>
+<span class="text-xs text-slate-600 font-medium bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5" data-i18n="legend_trainer">Plein : Présent • Rayé : Absent</span>
+</div>
+<div class="w-full h-4 flex rounded-lg overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-trainer"></div>
 </div>
 <!-- Track 5: Place -->
-<div class="flex flex-col gap-0.5">
-<div class="flex items-baseline gap-2">
-<span class="text-sm font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_place">Lieu</span>
-<span class="text-xs text-slate-500 font-normal" data-i18n="legend_place">Plein : Présentiel • Rayé : En ligne</span>
+<div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1">
+<div class="flex items-center justify-between gap-2 flex-wrap">
+<div class="flex items-center gap-1.5">
+<span class="material-icons-round text-slate-500 text-base" aria-hidden="true">place</span>
+<span class="text-sm font-bold text-slate-500 uppercase tracking-wider" data-i18n="label_place">Lieu</span>
 </div>
-<div class="w-full h-3 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-place"></div>
+<span class="text-xs text-slate-600 font-medium bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5" data-i18n="legend_place">Plein : Présentiel • Rayé : En ligne</span>
+</div>
+<div class="w-full h-4 flex rounded-lg overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-place"></div>
 </div>
 <!-- Track 6: Time -->
-<div class="flex flex-col gap-0.5">
-<div class="flex items-baseline gap-2">
-<span class="text-sm font-bold text-slate-500 uppercase tracking-wider pl-0.5" data-i18n="label_time">Temps</span>
-<span class="text-xs text-slate-500 font-normal" data-i18n="legend_time">Plein : Synchrone • Rayé : Asynchrone</span>
+<div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1">
+<div class="flex items-center justify-between gap-2 flex-wrap">
+<div class="flex items-center gap-1.5">
+<span class="material-icons-round text-slate-500 text-base" aria-hidden="true">event</span>
+<span class="text-sm font-bold text-slate-500 uppercase tracking-wider" data-i18n="label_time">Temps</span>
 </div>
-<div class="w-full h-3 flex rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-time"></div>
+<span class="text-xs text-slate-600 font-medium bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5" data-i18n="legend_time">Plein : Synchrone • Rayé : Asynchrone</span>
+</div>
+<div class="w-full h-4 flex rounded-lg overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-time"></div>
 </div>
 <!-- Shared Ruler -->
-<div class="w-full h-5 relative mt-0 select-none pointer-events-none" id="timeline-ruler"></div>
+<div class="w-full h-6 relative mt-1 select-none pointer-events-none rounded-lg bg-white border border-slate-200" id="timeline-ruler"></div>
 </div>
+
 </div>
 </div>
 <!-- Main Actions Row -->
@@ -979,7 +1022,7 @@
                 label_total_time: "Chronologie",
                 status_calculating: "Calcul auto...",
                 label_class_size: "Taille de la cohorte",
-                label_timeline_structure: "Modules conçus",
+                label_timeline_structure: "Modules conçus (un module doit avoir au moins une activité)",
                 label_timeline_structure_planned: "Modules prévus",
                 label_timeline_pedagogy: "Types d'apprentissage",
                 empty_title: "Aucun module conçu",
@@ -2405,7 +2448,9 @@ keyParams: {
                     .type-investigation { border-color: #f8807f; } .bg-investigation { background-color: #e06e6d; color: #991b1b; }
                     .type-practice { border-color: #bb98dc; } .bg-practice { background-color: #a582c6; color: #6b21a8; }
                     .type-production { border-color: #bdea75; } .bg-production { background-color: #a6d15e; color: #3f6212; }
-                </style>
+                
+
+</style>
             </head>
             <body>
                 <h1>${t.rtf_title}</h1>
