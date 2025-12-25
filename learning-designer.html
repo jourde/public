@@ -217,7 +217,7 @@
         body.dense input, body.dense select, body.dense textarea { font-size: 0.88rem; }
         body.dense .compact-label { font-size: 0.68rem; margin-bottom: 2px; }
         body.dense .compact-label-lg { font-size: 0.74rem; }
-        body.dense #timeline-panel { gap: 0.5rem !important; }
+        body.dense #timeline-panel { gap: 0.75rem !important; }
         body.dense #timeline-panel .timeline-track-pedagogy,
         body.dense #timeline-panel .flex.flex-col.gap-0\.5 { gap: 0.35rem !important; }
 
@@ -269,6 +269,15 @@
 
 
 /* Timeline panel – UI polish */
+#timeline-panel { gap: 0.75rem; }
+
+#timeline-details { gap: 0.45rem; }
+body.dense #timeline-details { gap: 0.35rem !important; }
+
+/* Timeline details – tighter stacking (Regroupement / Formateur / Lieu / Temps) */
+#timeline-details .timeline-track { padding: 0.45rem !important; }
+body.dense #timeline-details .timeline-track { padding: 0.40rem !important; }
+
 #timeline-panel .timeline-duration-label { background: transparent !important; border: 0 !important; box-shadow: none !important; }
 
 #timeline-panel .timeline-track { transition: box-shadow 0.15s ease; }
@@ -656,6 +665,23 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        <div class="w-full h-6 flex rounded-lg overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-steps">
        </div>
       </div>
+
+      <!-- Sous-groupe par défaut masqué : Regroupement / Formateur / Lieu / Temps -->
+      <button class="w-full px-2 py-1.5 flex items-center justify-between bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors" onclick="toggleTimelineDetails()" type="button">
+       <div class="flex items-center gap-1.5">
+        <span aria-hidden="true" class="material-icons-round text-slate-500 text-base">
+         tune
+        </span>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+         Détails
+        </span>
+       </div>
+       <span class="material-icons-round text-slate-400 rotate-icon text-sm" id="timeline-details-icon">
+        expand_more
+       </span>
+      </button>
+      <div class="panel-content w-full flex flex-col gap-2" data-display="flex" id="timeline-details" style="display: none;">
+
       <!-- Track 3: Grouping -->
       <div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1">
        <div class="flex items-center justify-between gap-2 flex-wrap">
@@ -727,6 +753,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        </div>
        <div class="w-full h-4 flex rounded-lg overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-time">
        </div>
+      </div>
       </div>
       <!-- Shared Ruler -->
       <div class="w-full h-9 relative mt-1 select-none pointer-events-none rounded-lg bg-white" id="timeline-ruler">
@@ -1681,6 +1708,15 @@ function initSortableSteps(container) {
         }
 
         // --- Foldable Panel Logic ---
+
+        function getPanelDisplay(el) {
+            if (!el) return 'block';
+            if (el.dataset && el.dataset.display) return el.dataset.display;
+            if (el.classList.contains('flex')) return 'flex';
+            if (el.classList.contains('grid')) return 'grid';
+            return 'block';
+        }
+
         function togglePanel(panelId) {
             const content = document.getElementById(panelId);
             const icon = document.getElementById(panelId + '-icon');
@@ -1691,7 +1727,7 @@ function initSortableSteps(container) {
                     content.classList.remove('open');
                     setTimeout(() => content.style.display = 'none', 300); 
                 } else {
-                    content.style.display = 'block';
+                    content.style.display = getPanelDisplay(content);
                     setTimeout(() => content.classList.add('open'), 10);
                 }
                 return;
@@ -1702,10 +1738,29 @@ function initSortableSteps(container) {
                 icon.classList.remove('open');
                 setTimeout(() => content.style.display = 'none', 300); // Standardize closing logic
             } else {
-                content.style.display = 'block'; // Ensure visible for animation
+                content.style.display = getPanelDisplay(content); // Ensure visible for animation
                 setTimeout(() => {
                     content.classList.add('open');
                     icon.classList.add('open');
+                }, 10);
+            }
+        }
+
+
+        function toggleTimelineDetails() {
+            const content = document.getElementById('timeline-details');
+            const icon = document.getElementById('timeline-details-icon');
+            if (!content) return;
+
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                if (icon) icon.classList.remove('open');
+                setTimeout(() => content.style.display = 'none', 250);
+            } else {
+                content.style.display = getPanelDisplay(content);
+                setTimeout(() => {
+                    content.classList.add('open');
+                    if (icon) icon.classList.add('open');
                 }, 10);
             }
         }
