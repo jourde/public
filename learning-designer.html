@@ -938,9 +938,8 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        <textarea class="activity-description w-full px-3 py-2 text-sm text-slate-700 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-y bg-slate-50 leading-relaxed" data-i18n-placeholder="ph_activity_desc" placeholder="Description du module..." rows="1"></textarea>
       </div>
      </div>
-     <div class="activity-steps-container activity-container ml-4 pl-4 space-y-2 min-h-[20px]">
-     </div>
-     <div class="mt-2 pt-1 flex justify-center no-print border-t border-slate-100">
+     <div class="activity-moments-container ml-4 pl-4 space-y-3 min-h-[20px]"></div>
+     <div class="mt-2 pt-1 flex justify-center gap-2 no-print border-t border-slate-100">
       <button class="text-sm font-semibold text-slate-500 hover:text-indigo-700 px-3 py-1 rounded transition-colors flex items-center gap-1 hover:bg-slate-50" data-i18n-title="title_add_step" onclick="addStepToActivity(this)">
        <span class="material-icons-round text-sm">
         add
@@ -949,11 +948,36 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
         Ajouter Activité
        </span>
       </button>
+      <button class="text-sm font-semibold text-slate-500 hover:text-indigo-700 px-3 py-1 rounded transition-colors flex items-center gap-1 hover:bg-slate-50" type="button" title="Ajouter un moment" onclick="addMomentToActivity(this)">
+       <span class="material-icons-round text-sm">add</span>
+       <span>Ajouter moment</span>
+      </button>
      </div>
     </div>
    </div>
   </template>
-  <template id="step-template">
+  
+  <template id="moment-template">
+   <div class="moment-group bg-transparent rounded-lg border border-slate-200/60">
+    <div class="flex items-center justify-between px-3 py-2">
+     <div class="flex items-center gap-2 flex-1 min-w-0">
+      <div class="drag-handle-moment drag-handle text-slate-300 hover:text-slate-500 no-print flex items-center justify-center w-6 h-6 cursor-grab">
+       <span class="material-icons-round text-lg">drag_indicator</span>
+      </div>
+      <div class="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 moment-index shrink-0 text-xs">1</div>
+      <input class="moment-title flex-1 text-sm font-semibold text-slate-800 bg-transparent focus:outline-none focus:ring-0 border-0 p-0 m-0 min-w-0" type="text" placeholder="Nom du moment (ex : Accueil)"/>
+     </div>
+     <button class="no-print text-slate-400 hover:text-rose-600 transition-colors" type="button" title="Supprimer ce moment" onclick="deleteMoment(this)">
+      <span class="material-icons-round text-lg">delete_outline</span>
+     </button>
+    </div>
+    <div class="px-3 pb-3">
+     <div class="activity-steps-container activity-container space-y-2 min-h-[20px]"></div>
+    </div>
+   </div>
+  </template>
+
+<template id="step-template">
    <div class="step-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative group flex flex-col">
     <!-- Header Row -->
     <div class="flex items-center gap-2 p-2 bg-slate-50 border-b border-slate-100 transition-colors">
@@ -1167,6 +1191,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
    const root = document.getElementById('activities-root');
         const emptyState = document.getElementById('empty-state');
         const activityTemplate = document.getElementById('activity-template');
+        const momentTemplate = document.getElementById('moment-template');
         const stepTemplate = document.getElementById('step-template');
         const tooltipEl = document.getElementById('global-tooltip');
 
@@ -1728,6 +1753,63 @@ function initSortableSteps(container) {
             });
         }
 
+
+        function initSortableMoments(container) {
+            if (typeof Sortable === 'undefined' || !container) return;
+            new Sortable(container, {
+                animation: 150,
+                handle: '.drag-handle-moment',
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: () => { updateMomentIndexes(container.closest('.activity-group')); updateStats(); }
+            });
+        }
+
+        function ensureDefaultMoment(activityGroup) {
+            const momentsRoot = activityGroup.querySelector('.activity-moments-container');
+            if (!momentsRoot) return null;
+            const existing = momentsRoot.querySelector('.moment-group');
+            if (existing) return existing;
+            const clone = momentTemplate.content.cloneNode(true);
+            momentsRoot.appendChild(clone);
+            const moment = momentsRoot.lastElementChild;
+            initSortableSteps(moment.querySelector('.activity-steps-container'));
+            updateMomentIndexes(activityGroup);
+            return moment;
+        }
+
+        function updateMomentIndexes(activityGroup) {
+            if (!activityGroup) return;
+            const moments = activityGroup.querySelectorAll('.activity-moments-container .moment-group');
+            moments.forEach((m, i) => {
+                const badge = m.querySelector('.moment-index');
+                if (badge) badge.textContent = String(i + 1);
+            });
+        }
+
+        function addMomentToActivity(btn) {
+            const activityGroup = btn.closest('.activity-group');
+            const momentsRoot = activityGroup.querySelector('.activity-moments-container');
+            if (!momentsRoot) return;
+            const clone = momentTemplate.content.cloneNode(true);
+            momentsRoot.appendChild(clone);
+            const moment = momentsRoot.lastElementChild;
+            initSortableSteps(moment.querySelector('.activity-steps-container'));
+            updateMomentIndexes(activityGroup);
+            applyTranslations();
+            updateStats();
+        }
+
+        function deleteMoment(btn) {
+            const moment = btn.closest('.moment-group');
+            if (!moment) return;
+            const activityGroup = moment.closest('.activity-group');
+            moment.remove();
+            ensureDefaultMoment(activityGroup);
+            updateMomentIndexes(activityGroup);
+            updateStats();
+        }
+
         // --- Foldable Panel Logic ---
 
         function getPanelDisplay(el) {
@@ -2048,25 +2130,60 @@ keyParams: {
                     description: actEl.querySelector('.activity-description').value,
                     targetTime: actEl.querySelector('.activity-target-time').value,
                     targetUnit: actEl.querySelector('.activity-target-unit')?.value || "60",
+                    moments: [],
                     steps: []
                 };
-                actEl.querySelectorAll('.step-card').forEach(stepEl => {
-                    actData.steps.push({
-                        title: stepEl.querySelector('.step-input-title').value,
-                        type: stepEl.querySelector('.learning-type-select').value,
-                        duration: stepEl.querySelector('.duration-input').value,
-                        unit: stepEl.querySelector('.duration-unit').value,
-                        groupMode: stepEl.querySelector('.step-group-mode').value,
-                        groupCount: stepEl.querySelector('.step-group-count').value,
-                        groupSize: stepEl.querySelector('.step-group-size').value,
-                        trainer: stepEl.querySelector('.trainer-select').value,
-                        place: stepEl.querySelector('.place-select').value,
-                        time: stepEl.querySelector('.time-select').value,
-                        objective: stepEl.querySelector('.step-input-objective').value,
-                        tasks: stepEl.querySelector('.step-input-tasks').value,
-                        notes: stepEl.querySelector('.step-input-notes').value
+
+                const momentsRoot = actEl.querySelector('.activity-moments-container');
+                const momentEls = momentsRoot ? momentsRoot.querySelectorAll('.moment-group') : [];
+
+                if (momentEls && momentEls.length) {
+                    momentEls.forEach(momentEl => {
+                        const momentData = {
+                            title: momentEl.querySelector('.moment-title')?.value || "",
+                            steps: []
+                        };
+                        momentEl.querySelectorAll('.step-card').forEach(stepEl => {
+                            const stepObj = {
+                                title: stepEl.querySelector('.step-input-title').value,
+                                type: stepEl.querySelector('.learning-type-select').value,
+                                duration: stepEl.querySelector('.duration-input').value,
+                                unit: stepEl.querySelector('.duration-unit').value,
+                                groupMode: stepEl.querySelector('.step-group-mode').value,
+                                groupCount: stepEl.querySelector('.step-group-count').value,
+                                groupSize: stepEl.querySelector('.step-group-size').value,
+                                trainer: stepEl.querySelector('.trainer-select').value,
+                                place: stepEl.querySelector('.place-select').value,
+                                time: stepEl.querySelector('.time-select').value,
+                                objective: stepEl.querySelector('.step-input-objective').value,
+                                tasks: stepEl.querySelector('.step-input-tasks').value,
+                                notes: stepEl.querySelector('.step-input-notes').value
+                            };
+                            momentData.steps.push(stepObj);
+                            actData.steps.push({ ...stepObj });
+                        });
+                        actData.moments.push(momentData);
                     });
-                });
+                } else {
+                    actEl.querySelectorAll('.step-card').forEach(stepEl => {
+                        actData.steps.push({
+                            title: stepEl.querySelector('.step-input-title').value,
+                            type: stepEl.querySelector('.learning-type-select').value,
+                            duration: stepEl.querySelector('.duration-input').value,
+                            unit: stepEl.querySelector('.duration-unit').value,
+                            groupMode: stepEl.querySelector('.step-group-mode').value,
+                            groupCount: stepEl.querySelector('.step-group-count').value,
+                            groupSize: stepEl.querySelector('.step-group-size').value,
+                            trainer: stepEl.querySelector('.trainer-select').value,
+                            place: stepEl.querySelector('.place-select').value,
+                            time: stepEl.querySelector('.time-select').value,
+                            objective: stepEl.querySelector('.step-input-objective').value,
+                            tasks: stepEl.querySelector('.step-input-tasks').value,
+                            notes: stepEl.querySelector('.step-input-notes').value
+                        });
+                    });
+                }
+
                 project.activities.push(actData);
             });
 
@@ -2145,22 +2262,52 @@ keyParams: {
             const clone = activityTemplate.content.cloneNode(true);
             root.appendChild(clone);
             const actEl = root.lastElementChild;
-            const stepContainer = actEl.querySelector('.activity-steps-container');
-            initSortableSteps(stepContainer);
+
+            const momentsRoot = actEl.querySelector('.activity-moments-container');
+            initSortableMoments(momentsRoot);
+
             actEl.querySelector('.activity-title').value = data.title || "";
             actEl.querySelector('.activity-description').value = data.description || "";
             actEl.querySelector('.activity-target-time').value = data.targetTime || "";
             const tgtUnitSel = actEl.querySelector('.activity-target-unit');
             if (tgtUnitSel) tgtUnitSel.value = data.targetUnit || "60";
-            data.steps.forEach(stepData => {
-                addStepToActivityFromData(actEl.querySelector('button'), stepData);
-            });
+
+            // Clear any template content and rebuild moments/steps from data (backward compatible)
+            if (momentsRoot) momentsRoot.innerHTML = '';
+
+            if (data.moments && Array.isArray(data.moments) && data.moments.length) {
+                data.moments.forEach(momentData => {
+                    const mClone = momentTemplate.content.cloneNode(true);
+                    if (momentsRoot) momentsRoot.appendChild(mClone);
+                    const momentEl = momentsRoot ? momentsRoot.lastElementChild : null;
+                    if (momentEl) {
+                        const titleInput = momentEl.querySelector('.moment-title');
+                        if (titleInput) titleInput.value = momentData.title || "";
+                        const stepsContainer = momentEl.querySelector('.activity-steps-container');
+                        initSortableSteps(stepsContainer);
+                        (momentData.steps || []).forEach(stepData => {
+                            addStepToContainerFromData(stepsContainer, stepData);
+                        });
+                    }
+                });
+                ensureDefaultMoment(actEl);
+                updateMomentIndexes(actEl);
+            } else {
+                ensureDefaultMoment(actEl);
+                const moments = actEl.querySelectorAll('.activity-moments-container .moment-group');
+                const targetMoment = moments[moments.length - 1];
+                const container = targetMoment ? targetMoment.querySelector('.activity-steps-container') : actEl.querySelector('.activity-steps-container');
+                (data.steps || []).forEach(stepData => {
+                    addStepToContainerFromData(container, stepData);
+                });
+            }
+
+            applyTranslations();
             return actEl;
         }
 
-        function addStepToActivityFromData(btn, data) {
-            const activityGroup = btn.closest('.activity-group');
-            const container = activityGroup.querySelector('.activity-steps-container');
+        function addStepToContainerFromData(container, data) {
+            if (!container) return;
             const clone = stepTemplate.content.cloneNode(true);
             const stepEl = clone.querySelector('.step-card');
             stepEl.querySelector('.step-input-title').value = data.title || "";
@@ -2179,6 +2326,17 @@ keyParams: {
             if (data.groupMode === 'groups') stepEl.querySelector('.step-group-details').classList.remove('hidden');
             container.appendChild(clone);
             updateStepType(stepEl.querySelector('.learning-type-select'));
+        }
+
+        function addStepToActivityFromData(btn, data) {
+            const activityGroup = btn.closest('.activity-group');
+            ensureDefaultMoment(activityGroup);
+
+            const moments = activityGroup.querySelectorAll('.activity-moments-container .moment-group');
+            const targetMoment = moments[moments.length - 1];
+            const container = targetMoment ? targetMoment.querySelector('.activity-steps-container') : activityGroup.querySelector('.activity-steps-container');
+
+            addStepToContainerFromData(container, data);
             applyTranslations();
         }
 
@@ -2221,8 +2379,11 @@ keyParams: {
             const clone = activityTemplate.content.cloneNode(true);
             root.appendChild(clone);
             const lastActivity = root.lastElementChild;
-            const stepContainer = lastActivity.querySelector('.activity-steps-container');
-            initSortableSteps(stepContainer);
+
+            const momentsRoot = lastActivity.querySelector('.activity-moments-container');
+            initSortableMoments(momentsRoot);
+            ensureDefaultMoment(lastActivity);
+
             addStepToActivity(lastActivity.querySelector('button'));
             applyTranslations();
             updateEmptyState();
@@ -2230,7 +2391,13 @@ keyParams: {
 
         function addStepToActivity(btn) {
             const activityGroup = btn.closest('.activity-group');
-            const container = activityGroup.querySelector('.activity-steps-container');
+            ensureDefaultMoment(activityGroup);
+
+            const moments = activityGroup.querySelectorAll('.activity-moments-container .moment-group');
+            const targetMoment = moments[moments.length - 1];
+            const container = targetMoment ? targetMoment.querySelector('.activity-steps-container') : activityGroup.querySelector('.activity-steps-container');
+            if (!container) return;
+
             const clone = stepTemplate.content.cloneNode(true);
             const currentClassSize = document.getElementById('global-class-size').value;
             clone.querySelector('.step-group-size').value = currentClassSize;
@@ -2262,8 +2429,11 @@ keyParams: {
             // Remove any manual rebind logic that depends on titles and let inline handlers work
             // The cloneNode(true) copies the type="button" data-action="duplicate-module" correctly.
             
-            const stepContainer = clone.querySelector('.activity-steps-container');
-            initSortableSteps(stepContainer);
+            const momentsRoot = clone.querySelector('.activity-moments-container');
+            initSortableMoments(momentsRoot);
+            clone.querySelectorAll('.activity-steps-container').forEach((c) => initSortableSteps(c));
+            ensureDefaultMoment(clone);
+            updateMomentIndexes(clone);
             updateEmptyState();
             updateStats();
         }
